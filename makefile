@@ -4,10 +4,10 @@ CFLAGS = -Wall -I./ -I/home/ju456/raylib/src
 LDFLAGS = -L/home/ju456/raylib/src -lraylib -lm -lpthread -ldl -lX11
 
 # Files
-SRCS = main.c general.c graphic/window.c
+SRCS = main.c general.c graphic/window.c parking.c parson.c 
 OBJS = $(SRCS:.c=.o)
 
-HEADERS = general.h graphic/window.h
+HEADERS = general.h graphic/window.h parking.h parson.h
 EXEC = car
 
 # Build executable

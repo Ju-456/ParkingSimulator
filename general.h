@@ -2,10 +2,11 @@
 #define GENERAL_H
 
 #include <stdio.h>     
-#include <string.h>     
+#include <string.h>  
+#include <stdlib.h>    
 #include <limits.h>    
 #include <unistd.h>     
-#include "raylib.h"    
+#include "raylib.h"
 
 #define FILENAME_JSON "graph1.json"
 #define MAX_PLACES 100
@@ -15,6 +16,5 @@
 #endif
 
 void build_path(char *full_path, const char *base_path, const char *filename);
-int count_number_places(char full_path_json[]);
 
 #endif

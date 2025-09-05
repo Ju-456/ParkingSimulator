@@ -17,38 +17,3 @@ void build_path(char *full_path, const char *base_path, const char *filename) {
         fprintf(stderr, "Could not get current working directory\n");
     }
 }
-
-int count_number_places(char full_path_json[]) {
-    FILE *file = fopen(full_path_json, "r"); 
-    if (file == NULL) {
-        fprintf(stderr, "Erreur ouverture fichier JSON\n");
-        return 0;
-    }
-
-    int count = 0;
-    char c;
-    char token[MAX_PLACES];
-    int inNodesIds = 0; 
-
-    while ((c = fgetc(file)) != EOF) {
-        if (!inNodesIds) {
-            if (c == '[') {
-                inNodesIds = 1;
-            }
-            continue;
-        }
-
-        if (c == ']') {
-            break;
-        }
-
-        if (c == '"') {
-            ungetc(c, file); 
-            if (fscanf(file, " \"%[^\"]\"", token) == 1) {
-                count++;
-            }
-        }
-    }
-    fclose(file);
-    return count;
-}
