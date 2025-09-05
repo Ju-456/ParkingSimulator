@@ -1,4 +1,5 @@
 #include "general.h"
+#include "graphic/window.h"
 
 int main (){
 
@@ -7,5 +8,7 @@ int main (){
     build_path(full_path_json, "graph_json/", FILENAME_JSON);
     int num_parking_places = count_number_places(full_path_json);
     printf("num_parking_places = %d\n", num_parking_places);
+
+    init_window();
     
 }

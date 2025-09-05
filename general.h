@@ -14,8 +14,6 @@
 #define PATH_MAX 4096
 #endif
 
-extern Texture2D road_texture;
-
 void build_path(char *full_path, const char *base_path, const char *filename);
 int count_number_places(char full_path_json[]);
 
