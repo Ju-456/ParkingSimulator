@@ -84,10 +84,41 @@ int load_graph_from_json(const char *full_path_json, int num_parking_places, Par
         places[i].x = (float)json_object_get_number(node, "x");
         places[i].y = (float)json_object_get_number(node, "y");
 
-        printf("Place %s : x = %d, y = %d\n", places[i].id, places[i].x, places[i].y);
+        printf("Place %s : (x = %d, y = %d)\n", places[i].id, places[i].x, places[i].y);
     }
 
     json_value_free(root_val);
     return 1;
+}
+
+int init_direction_parking_places(int num_parking_places, Parking places[MAX_PLACES]) {
+    int xGroups[MAX_PLACES];  
+    int numGroups = 0;
+
+    for (int i = 0; i < num_parking_places; i++) {
+        int x = places[i].x;
+        int groupIndex = -1;
+
+        for (int k = 0; k < numGroups; k++) {
+            if (xGroups[k] == x) {
+                groupIndex = k;
+                break;
+            }
+        }
+
+        if (groupIndex == -1) { // if don't find => creation of new group
+            xGroups[numGroups] = x;
+            groupIndex = numGroups;
+            numGroups++;
+            printf("Xgroup%d = %d\n", groupIndex + 1, x);
+        }
+
+        places[i].direction = groupIndex % 2; //  // even group = 0, odd group = 1
+        printf("Place %s → direction = %d\n", places[i].id, places[i].direction);
+    }
+
+    printf("\n");
+    printf("There are %d different groups (diff columns)\n", numGroups);
+    return numGroups;
 }
 
