@@ -58,7 +58,7 @@ void read_id_from_json(const char *full_path_json, Parking places[], int num_par
     json_value_free(root_val);
 }
 
-void load_graph_from_json(const char *full_path_json, int num_parking_places, Parking places[]) {
+int load_graph_from_json(const char *full_path_json, int num_parking_places, Parking places[]) {
     char* strTmp = (char*)malloc(256*sizeof(char));
     strcpy(strTmp,full_path_json);
     //build_path(strTmp, "graph_json/", FILENAME_JSON);
@@ -70,7 +70,7 @@ void load_graph_from_json(const char *full_path_json, int num_parking_places, Pa
 
     if (root_val == NULL) {
         fprintf(stderr, "Error parsing JSON file: %s\n", full_path_json);
-        return;
+        return 0;
     }    
 
     JSON_Array *ids = json_object_get_array(root_obj, "nodesIds");
@@ -88,5 +88,6 @@ void load_graph_from_json(const char *full_path_json, int num_parking_places, Pa
     }
 
     json_value_free(root_val);
+    return 1;
 }
 

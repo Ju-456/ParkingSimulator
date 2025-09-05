@@ -10,7 +10,7 @@ int main (){
     int num_parking_places = count_number_places(full_path_json);
     printf("num_parking_places = %d\n", num_parking_places);
 
-    load_graph_from_json(full_path_json, num_parking_places, places);
-    //init_window();
-    
+    if (load_graph_from_json(full_path_json, num_parking_places, places)){
+        init_window(full_path_json, num_parking_places, places);
+    }
 }

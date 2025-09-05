@@ -12,6 +12,6 @@ typedef struct {
 
 int count_number_places(char full_path_json[]);
 void read_id_from_json(const char *full_path_json, Parking places[], int num_parking_places);
-void load_graph_from_json(const char *full_path_json, int num_parking_places, Parking places[]);
+int load_graph_from_json(const char *full_path_json, int num_parking_places, Parking places[]);
 
 #endif
