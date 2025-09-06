@@ -1,5 +1,20 @@
 #include "window.h"
 
+void full_screen_mode(int num_parking_places, Parking places[], Parking scaled_places[]) {
+    int screen_width = GetScreenWidth();
+    int screen_height = GetScreenHeight();
+
+    float scale = fminf((float)screen_width / SCREEN_WIDTH, (float)screen_height / SCREEN_HEIGHT);
+    float offsetX = (screen_width - SCREEN_WIDTH * scale) / 2.0f;
+    float offsetY = (screen_height - SCREEN_HEIGHT * scale) / 2.0f;
+
+    for (int i = 0; i < num_parking_places; i++) {
+        scaled_places[i] = places[i];
+        scaled_places[i].x = places[i].x * scale + offsetX;
+        scaled_places[i].y = places[i].y * scale + offsetY;
+    }
+}
+
 void draw_parking_places(int n, Parking places[]) {
     const float width = 180.0f;
     const float height = 95.0f;
@@ -21,24 +36,24 @@ void draw_parking_places(int n, Parking places[]) {
     }
 }
 
-
-void init_window(const char *full_path_json, int num_parking_places, Parking places[]) {
-    InitWindow(800, 600, "Parking Simulator");
+void init_window(const char *full_path_json, int num_parking_places, Parking places[], Parking scaled_places[]) {
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Parking Simulator");
     SetTargetFPS(60);
 
-    background = LoadTexture("Assets/background.png");
+    background1 = LoadTexture("Assets/background1.png");
     parkingPlace = LoadTexture("Assets/parkingPlace.png");
 
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
-        DrawTexture(background, 0, 0, WHITE);
-        draw_parking_places(num_parking_places, places);
+        DrawTexture(background1, 0, 0, WHITE);
+        full_screen_mode(num_parking_places, places, scaled_places);
+        draw_parking_places(num_parking_places, scaled_places);
 
         EndDrawing();
     }
 
-    UnloadTexture(background);
+    UnloadTexture(background1);
     CloseWindow();
 }
