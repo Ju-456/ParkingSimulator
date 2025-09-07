@@ -8,7 +8,7 @@
 #include "parking.h"
 #include "texture.h"
 
-Texture2D background1;
+Texture2D background;
 Texture2D parkingPlace;
 
 void full_screen_mode(int num_parking_places, Parking places[], Parking scaled_places[]);

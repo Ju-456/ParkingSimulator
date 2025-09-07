@@ -40,20 +40,20 @@ void init_window(const char *full_path_json, int num_parking_places, Parking pla
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Parking Simulator");
     SetTargetFPS(60);
 
-    background1 = LoadTexture("Assets/background1.png");
+    background = LoadTexture("Assets/background.png");
     parkingPlace = LoadTexture("Assets/parkingPlace.png");
 
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
-        DrawTexture(background1, 0, 0, WHITE);
+        DrawTexture(background, 0, 0, WHITE);
         full_screen_mode(num_parking_places, places, scaled_places);
         draw_parking_places(num_parking_places, scaled_places);
 
         EndDrawing();
     }
 
-    UnloadTexture(background1);
+    UnloadTexture(background);
     CloseWindow();
 }
