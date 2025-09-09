@@ -10,6 +10,13 @@
 Texture2D background;
 Texture2D parking_place;
 Texture2D pannel_menu;
+Texture2D pannel_menu;
+
+Texture2D entrance_barrier;
+Texture2D exit_barrier;
+Texture2D barrier_wall;
+//Texture2D entrance_pay_station;
+//Texture2D exit_ticket_dispenser;
 
 // window.c functions
 void full_screen_mode(int num_parking_places, Parking places[], Parking scaled_places[]);
