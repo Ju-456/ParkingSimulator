@@ -63,63 +63,43 @@
         "adjencyList": []
     },
     "I": {
-        "x": 150,
-        "y": 415,
+        "x": 455,
+        "y": 150,
         "adjencyList": []
     },
     "J": {
-        "x": 265,
-        "y": 415,
+        "x": 570,
+        "y": 150,
         "adjencyList": []
     },
     "K": {
         "x": 455,
-        "y": 150,
+        "y": 215,
         "adjencyList": []
     },
     "L": {
         "x": 570,
-        "y": 150,
+        "y": 215,
         "adjencyList": []
     },
     "M": {
         "x": 455,
-        "y": 215,
+        "y": 280,
         "adjencyList": []
     },
     "N": {
         "x": 570,
-        "y": 215,
+        "y": 280,
         "adjencyList": []
     },
     "O": {
         "x": 455,
-        "y": 280,
+        "y": 345,
         "adjencyList": []
     },
     "P": {
         "x": 570,
-        "y": 280,
-        "adjencyList": []
-    },
-    "Q": {
-        "x": 455,
         "y": 345,
-        "adjencyList": []
-    },
-    "R": {
-        "x": 570,
-        "y": 345,
-        "adjencyList": []
-    },
-    "S": {
-        "x": 455,
-        "y": 415,
-        "adjencyList": []
-    },
-    "T": {
-        "x": 570,
-        "y": 415,
         "adjencyList": []
     }
 }
