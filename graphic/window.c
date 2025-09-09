@@ -36,7 +36,7 @@ void draw_parking_places(int n, Parking places[]) {
     }
 }
 
-void init_window(const char *full_path_json, int num_parking_places, Parking places[], Parking scaled_places[]) {
+void init_window_parking(const char *full_path_json, int num_parking_places, Parking places[], Parking scaled_places[]) {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Parking Simulator");
     SetTargetFPS(60);
 

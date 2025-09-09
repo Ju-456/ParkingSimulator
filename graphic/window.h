@@ -13,6 +13,6 @@ Texture2D parkingPlace;
 
 void full_screen_mode(int num_parking_places, Parking places[], Parking scaled_places[]);
 void draw_parking_places(int n, Parking places[]);
-void init_window(const char *full_path_json, int num_parking_places, Parking places[], Parking scaled_places[]);
+void init_window_parking(const char *full_path_json, int num_parking_places, Parking places[], Parking scaled_places[]);
 
 #endif
