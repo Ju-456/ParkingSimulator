@@ -1,4 +1,4 @@
-#include "window.h"
+#include "window_menu.h"
 
 void full_screen_mode(int num_parking_places, Parking places[], Parking scaled_places[]) {
     int screen_width = GetScreenWidth();
@@ -28,12 +28,16 @@ void draw_parking_places(int n, Parking places[]) {
         Rectangle dest = (Rectangle){ places[i].x, places[i].y, w, h };
 
         if (places[i].direction == 0) { // positive direction
-            DrawTexturePro(parkingPlace, src, dest, (Vector2){0,0}, 0.0f, WHITE);
+            DrawTexturePro(parking_place, src, dest, (Vector2){0,0}, 0.0f, WHITE);
         } else { // negative direction => Renversed picture left/right
             Rectangle srcMir = (Rectangle){ width, 0, -width, height };
-            DrawTexturePro(parkingPlace, srcMir, dest, (Vector2){0,0}, 0.0f, WHITE);
+            DrawTexturePro(parking_place, srcMir, dest, (Vector2){0,0}, 0.0f, WHITE);
         }
     }
+}
+
+void pannel(){
+    DrawTexture(pannel_menu, 0, 560, WHITE);
 }
 
 void init_window_parking(const char *full_path_json, int num_parking_places, Parking places[], Parking scaled_places[]) {
@@ -41,19 +45,23 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
     SetTargetFPS(60);
 
     background = LoadTexture("Assets/background.png");
-    parkingPlace = LoadTexture("Assets/parkingPlace.png");
+    parking_place = LoadTexture("Assets/parking_place.png");
+    pannel_menu = LoadTexture("Assets/pannel_menu.png");
 
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(RAYWHITE);
-
         DrawTexture(background, 0, 0, WHITE);
+
+        pannel();
         full_screen_mode(num_parking_places, places, scaled_places);
         draw_parking_places(num_parking_places, scaled_places);
 
         EndDrawing();
     }
 
+    UnloadTexture(background);
+    UnloadTexture(parking_place);
     UnloadTexture(background);
     CloseWindow();
 }

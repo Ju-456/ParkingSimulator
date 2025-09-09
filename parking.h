@@ -2,7 +2,7 @@
 #define PARKING_H
 
 #include "parson.h"
-#include "texture.h"
+#include "raylib.h"
 #include "general.h"
 
 typedef struct {
