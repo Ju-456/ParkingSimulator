@@ -18,7 +18,7 @@ void full_screen_mode(int num_parking_places, Parking places[], Parking scaled_p
 void draw_parking_places(int n, Parking places[]) {
     const float width = 180.0f;
     const float height = 95.0f;
-    const float scale = 0.6f; // 60% of the real size
+    const float scale = 0.5f; // 50% of the real size
 
     for (int i = 0; i < n; i++) {
         float w = width * scale;
@@ -74,8 +74,6 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
     //entrance_pay_station = LoadTexture("Assets/entrance_pay_station.png");
     //exit_ticket_dispenser = LoadTexture("Assets/exit_ticket_dispenser.png");
 
-
-
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(RAYWHITE);
@@ -92,8 +90,10 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
     UnloadTexture(background);
     UnloadTexture(parking_place);
-    UnloadTexture(background);
+    UnloadTexture(pannel_menu);
     UnloadTexture(entrance_barrier);
     UnloadTexture(exit_barrier);
+    UnloadTexture(barrier_wall);
+    
     CloseWindow();
 }

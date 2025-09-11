@@ -10,7 +10,6 @@
 Texture2D background;
 Texture2D parking_place;
 Texture2D pannel_menu;
-Texture2D pannel_menu;
 
 Texture2D entrance_barrier;
 Texture2D exit_barrier;
