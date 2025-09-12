@@ -25,10 +25,7 @@ void full_screen_mode(int num_parking_places, Parking places[], Parking scaled_p
         scaled_places[i].y = places[i].y * scale + offsetY;
     }
 }
-bool is_valid_place(const Parking *p) {
-    //  (0,0) n'est jamais une coordonnée valide, on la filtre
-    return !(p->x == 0.0f && p->y == 0.0f);
-}
+
 
 
 void draw_parking_places(int n, Parking places[]) {
@@ -37,7 +34,6 @@ void draw_parking_places(int n, Parking places[]) {
     const float scale = 0.5f; // 50% of the real size
 
     for (int i = 0; i < n; i++) {
-        if (!is_valid_place(&places[i])) continue; // <--- évite la place fantôme
         float w = width * scale;
         float h = height * scale;
 
