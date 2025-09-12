@@ -1,6 +1,6 @@
 #include "general.h"
 #include "parking.h"
-//#include "graphic/window_menu.h"
+#include "graphic/window_menu.h"
 
 int main (){
 
