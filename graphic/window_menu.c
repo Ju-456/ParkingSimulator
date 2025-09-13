@@ -49,8 +49,8 @@ void draw_parking_places(int n, Parking places[]) {
     }
 }
 
-void pannel(){
-    DrawTexture(pannel_menu, 0, 560, WHITE);
+void panel(){
+    DrawTexture(panel_menu, 0, 560, WHITE);
 }
 
 void update_barrier_angles(){
@@ -104,7 +104,7 @@ void barrier_management(int barrier_type, int barrier_state){
        else if (barrier_state == 1) // we want to open it
        {
             exit_state = 1;
-            exit_target_angle = 90.0f;
+            exit_target_angle = -90.0f;
        }else{
         fprintf(stderr, "Wrong barrier state: %d\n", barrier_state);
        }
@@ -129,29 +129,32 @@ void handle_barrier_input(){
 }
 
 void draw_entrance_barrier(){
-    const float entrance_barrier_width = 94.0f;
-    //const float entrance_barrier_height = 18.0f;
-    //const float entrance_barrier_x = 140.0f;
-    //const float entrance_barrier_y = 10.0f;
-
-
-    //const float barrier_wall_width = 134.0f;
-    //const float barrier_wall_height = 5.0f;
+    float x = 140.0f, y = 10.0f;
     
-    DrawTexture(barrier_wall, 10, entrance_barrier_width, WHITE);
+    DrawTexture(barrier_wall, 10, 93.0f, WHITE);
 
-    DrawTexture(entrance_barrier, 140, 10, WHITE);
+
+    Rectangle src = (Rectangle){0, 0, (float)entrance_barrier.width, (float)entrance_barrier.height};
+    Rectangle dst = (Rectangle){x, y, (float)entrance_barrier.width, (float)entrance_barrier.height};
+
+    // axis to turn
+    Vector2 origin = (Vector2){0.0f, 0.0f};
+
+    DrawTexturePro(entrance_barrier, src, dst, origin, entrance_angle, WHITE);
 
 
 }
 void draw_exit_barrier(){
-    //const float exit_barrier_width = 94.0f;
-    //const float exit_barrier_height = 18.0f;
-    //const float barrier_wall_width = 134.0f;
-    //const float barrier_wall_height = 5.0f;
-
-    DrawTexture(exit_barrier, 645, 475, WHITE);
     DrawTexture(barrier_wall, 660, 465, WHITE);
+
+    float x = 645.0f, y = 475.0f;
+
+    Rectangle src = (Rectangle){0, 0, (float)exit_barrier.width, (float)exit_barrier.height};
+
+    Vector2 origin = {0.0f, (float)exit_barrier.height};
+    Rectangle dst = (Rectangle){x + origin.x, y + origin.y, (float)exit_barrier.width, (float)exit_barrier.height};
+
+    DrawTexturePro(exit_barrier, src, dst, origin, exit_angle, WHITE);
     
 }
 
@@ -161,7 +164,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
     background = LoadTexture("Assets/background.png");
     parking_place = LoadTexture("Assets/parking_place.png");
-    pannel_menu = LoadTexture("Assets/pannel_menu.png");
+    panel_menu = LoadTexture("Assets/panel_menu.png");
     entrance_barrier = LoadTexture("Assets/entrance_barrier.png");
     exit_barrier = LoadTexture("Assets/exit_barrier.png");
     barrier_wall = LoadTexture("Assets/barrier_wall.png");
@@ -169,11 +172,19 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
     //exit_ticket_dispenser = LoadTexture("Assets/exit_ticket_dispenser.png");
 
     while (!WindowShouldClose()) {
+
+        // open/close barriers management
+        handle_barrier_input();
+
+        // animation of angles
+        update_barrier_angles();
+
+        // result
         BeginDrawing();
         ClearBackground(RAYWHITE);
         DrawTexture(background, 0, 0, WHITE);
 
-        pannel();
+        panel();
         draw_entrance_barrier();
         draw_exit_barrier();
         full_screen_mode(num_parking_places, places, scaled_places);
@@ -184,7 +195,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
     UnloadTexture(background);
     UnloadTexture(parking_place);
-    UnloadTexture(pannel_menu);
+    UnloadTexture(panel_menu);
     UnloadTexture(entrance_barrier);
     UnloadTexture(exit_barrier);
     UnloadTexture(barrier_wall);
