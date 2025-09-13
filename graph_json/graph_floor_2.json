@@ -1,0 +1,65 @@
+{
+    "oriented": 1,
+    "nodesIds": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "J"
+    ],
+    "A": {
+        "x": 280,
+        "y": 100,
+        "adjencyList": []
+    },
+    "B": {
+        "x": 410,
+        "y": 100,
+        "adjencyList": []
+    },
+    "C": {
+        "x": 280,
+        "y": 170,
+        "adjencyList": []
+    },
+    "D": {
+        "x": 410,
+        "y": 170,
+        "adjencyList": []
+    },
+    "E": {
+        "x": 280,
+        "y": 240,
+        "adjencyList": []
+    },
+    "F": {
+        "x": 410,
+        "y": 240,
+        "adjencyList": []
+    },
+    "G": {
+        "x": 280,
+        "y": 310,
+        "adjencyList": []
+    },
+    "H": {
+        "x": 410,
+        "y": 310,
+        "adjencyList": []
+    },
+    "I": {
+        "x": 280,
+        "y": 380,
+        "adjencyList": []
+    },
+    "J": {
+        "x": 410,
+        "y": 380,
+        "adjencyList": []
+    }
+}

@@ -1,0 +1,77 @@
+{
+    "oriented": 1,
+    "nodesIds": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "J",
+        "K",
+        "L"
+    ],
+    "A": {
+        "x": 120,
+        "y": 180,
+        "adjencyList": []
+    },
+    "B": {
+        "x": 240,
+        "y": 180,
+        "adjencyList": []
+    },
+    "C": {
+        "x": 120,
+        "y": 255,
+        "adjencyList": []
+    },
+    "D": {
+        "x": 240,
+        "y": 255,
+        "adjencyList": []
+    },
+    "E": {
+        "x": 120,
+        "y": 330,
+        "adjencyList": []
+    },
+    "F": {
+        "x": 240,
+        "y": 330,
+        "adjencyList": []
+    },
+    "G": {
+        "x": 430,
+        "y": 180,
+        "adjencyList": []
+    },
+    "H": {
+        "x": 550,
+        "y": 180,
+        "adjencyList": []
+    },
+    "I": {
+        "x": 430,
+        "y": 255,
+        "adjencyList": []
+    },
+    "J": {
+        "x": 550,
+        "y": 255,
+        "adjencyList": []
+    },
+    "K": {
+        "x": 430,
+        "y": 330,
+        "adjencyList": []
+    },
+    "L": {
+        "x": 550,
+        "y": 330,
+        "adjencyList": []
+    }
+}

@@ -45,7 +45,7 @@ void draw_parking_places(int n, Parking places[])
 {
     const float width = 180.0f;
     const float height = 95.0f;
-    const float scale = 0.5f; // 50% of the real size
+    const float scale = 0.62f; // 62% of the real size
 
     for (int i = 0; i < n; i++)
     {

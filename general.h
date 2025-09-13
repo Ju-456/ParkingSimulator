@@ -8,7 +8,7 @@
 #include <unistd.h>     
 #include "raylib.h"
 
-#define FILENAME_JSON "graph1.json"
+#define FILENAME_JSON "graph_floor_2.json"
 #define MAX_PLACES 100
 
 #ifndef PATH_MAX
