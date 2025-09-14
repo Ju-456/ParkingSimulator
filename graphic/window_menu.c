@@ -280,9 +280,6 @@ void reload_floor(int floor, Parking places[], int* num_parking_places)
     entrance_state = exit_state = 0;
     entrance_target_angle = exit_target_angle = 0.0f;
     entrance_angle = exit_angle = 0.0f;
-
-    ticket = 1;
-    payment = 0;
     entrance_trigger_time = exit_trigger_time = -1.0;
     entrance_open_time = exit_open_time = -1.0;
 }
