@@ -249,10 +249,10 @@ void draw_entrance_barrier()
 }
 void draw_exit_barrier()
 {
-    float x = 645.0f, y = 475.0f;
+    float x = 645.0f, y = 455.0f;
 
-    DrawTexture(barrier_wall, 660.0f, 465.0f, WHITE);
-    DrawTexture(exit_pay_station, 600.0f, 528.0f, WHITE);
+    DrawTexture(barrier_wall, 660.0f, 445.0f, WHITE);
+    DrawTexture(exit_pay_station, 610.0f, 508.0f, WHITE);
 
     Rectangle src = (Rectangle){0, 0, (float)exit_barrier.width, (float)exit_barrier.height};
 
