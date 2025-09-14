@@ -24,6 +24,12 @@ double entrance_open_time = -1.0;
 double exit_open_time = -1.0;
 const double CLOSE_DELAY = 5.0;
 
+// parking floors
+int current_floor = 0; 
+static const char* FLOOR_FILES[3] = {
+    "graph_floor_0.json", "graph_floor_1.json", "graph_floor_2.json"
+};
+
 // void full_screen_mode(int num_parking_places, Parking places[], Parking scaled_places[])
 // {
 //     int screen_width = GetScreenWidth();
@@ -143,20 +149,15 @@ void barrier_management(int barrier_type, int barrier_state)
         fprintf(stderr, "Wrong barrier type: %d\n", barrier_type);
     }
 }
-// void handle_barrier_input(){
-//     if (IsKeyPressed(KEY_E)) //entrance
-//     {
-//         barrier_management(0, entrance_state ? 0 : 1);
-//     }
-//     if (IsKeyPressed(KEY_X)) //exit
-//     {
-//         barrier_management(1, exit_state ? 0 : 1);
-//     }
-
-// }
 
 void handle_stations_input()
 {
+    if (current_floor != 0) {
+        if (IsKeyPressed(KEY_T) || IsKeyPressed(KEY_P)) {
+            printf("[FLOOR] Take the ticket or pay only on the ground floor (0).\n");
+        }
+        return;
+    }
     // take the ticket at the entrance
     if (IsKeyPressed(KEY_T))
     {
@@ -195,6 +196,7 @@ void handle_stations_input()
 
 void handle_automatic_opening()
 {
+    if (current_floor != 0) return; 
     double now = GetTime();
 
     // entrance
@@ -234,10 +236,10 @@ void handle_automatic_opening()
 
 void draw_entrance_barrier()
 {
-    float x = 140.0f, y = 10.0f;
+    float x = 140.0f, y = 20.0f;
 
-    DrawTexture(barrier_wall, 10.0f, 93.0f, WHITE);
-    DrawTexture(entrance_ticket_dispenser, 100.0f, 10.0f, WHITE);
+    DrawTexture(barrier_wall, 10.0f, 103.0f, WHITE);
+    DrawTexture(entrance_ticket_dispenser, 100.0f, 20.0f, WHITE);
 
     // axis to turn
     Vector2 origin = (Vector2){0.0f, 0.0f};
@@ -262,6 +264,59 @@ void draw_exit_barrier()
     DrawTexturePro(exit_barrier, src, dst, origin, exit_angle, WHITE);
 }
 
+// reload a floor to reset the states
+void reload_floor(int floor, Parking places[], int* num_parking_places)
+{
+    char path[PATH_MAX] = {0};
+    build_path(path, "graph_json/", FLOOR_FILES[floor]);
+
+    *num_parking_places = count_number_places(path);
+    if (load_graph_from_json(path, *num_parking_places, places)) {
+        init_direction_parking_places(*num_parking_places, places);
+    } else {
+        fprintf(stderr, "[FLOOR] Error loading: %s\n", FLOOR_FILES[floor]);
+    }
+
+    entrance_state = exit_state = 0;
+    entrance_target_angle = exit_target_angle = 0.0f;
+    entrance_angle = exit_angle = 0.0f;
+
+    ticket = 1;
+    payment = 0;
+    entrance_trigger_time = exit_trigger_time = -1.0;
+    entrance_open_time = exit_open_time = -1.0;
+}
+
+void handle_floor_input(Parking places[], int* num_parking_places)
+{
+    // UP
+    if (IsKeyPressed(KEY_U)) {
+        if (current_floor < 2) {
+            current_floor++;
+            reload_floor(current_floor, places, num_parking_places);
+        } else {
+            printf("[FLOOR] Already on the top floor (2)\n");
+        }
+    }
+
+    // DOWN
+    if (IsKeyPressed(KEY_D)) {
+        if (current_floor > 0) {
+            current_floor--;
+            reload_floor(current_floor, places, num_parking_places);
+        } else {
+            printf("[FLOOR] Already on the ground floor (0)\n");
+        }
+    }
+}
+
+void draw_floor()
+{
+    DrawTexture(floor_exit, 780.0f, 20.0f, WHITE);
+    DrawTexture(floor_indicator[current_floor], 740.0f, 20.0f, WHITE);
+}
+
+
 void init_window_parking(const char *full_path_json, int num_parking_places, Parking places[])
 {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Parking Simulator");
@@ -275,27 +330,35 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
     barrier_wall = LoadTexture("Assets/barrier_wall.png");
     entrance_ticket_dispenser = LoadTexture("Assets/entrance_ticket_dispenser.png");
     exit_pay_station = LoadTexture("Assets/exit_pay_station.png");
+    floor_exit            = LoadTexture("Assets/floor_exit.png");
+    floor_indicator[0]    = LoadTexture("Assets/floor_indicator0.png");
+    floor_indicator[1]    = LoadTexture("Assets/floor_indicator1.png");
+    floor_indicator[2]    = LoadTexture("Assets/floor_indicator2.png");
+
+    current_floor = 0;
 
     while (!WindowShouldClose())
     {
 
-        // open/close barriers management
-        // handle_barrier_input();
         handle_stations_input();
+        handle_floor_input(places, &num_parking_places); 
         handle_automatic_opening();
 
         // animation of angles
         update_barrier_angles();
 
-        // result
         BeginDrawing();
         ClearBackground(RAYWHITE);
         DrawTexture(background, 0, 0, WHITE);
 
         panel();
-        draw_entrance_barrier();
-        draw_exit_barrier();
+        if (current_floor == 0) {
+            draw_entrance_barrier();
+            draw_exit_barrier();
+        }
+        
         draw_parking_places(num_parking_places, places);
+        draw_floor(); 
 
         EndDrawing();
     }
@@ -308,6 +371,10 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
     UnloadTexture(barrier_wall);
     UnloadTexture(exit_pay_station);
     UnloadTexture(entrance_ticket_dispenser);
+    UnloadTexture(floor_exit);
+    UnloadTexture(floor_indicator[0]);
+    UnloadTexture(floor_indicator[1]);
+    UnloadTexture(floor_indicator[2]);
 
     CloseWindow();
 }

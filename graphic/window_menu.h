@@ -17,6 +17,9 @@ Texture2D barrier_wall;
 Texture2D exit_pay_station;
 Texture2D entrance_ticket_dispenser;
 
+Texture2D floor_exit;
+Texture2D floor_indicator[3];
+
 // window_menu.c functions
 //void full_screen_mode(int num_parking_places, Parking places[], Parking scaled_places[]);
 void draw_parking_places(int n, Parking places[]);
@@ -24,11 +27,15 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
 void draw_exit_barrier();
 void draw_entrance_barrier();
-//void handle_barrier_input();
 void handle_stations_input();
 void handle_automatic_opening();
 void barrier_management(int barrier_type, int barrier_state);
 void update_barrier_angles();
+
+void draw_floor();
+void handle_floor_input(Parking places[], int* num_parking_places);
+void reload_floor(int floor, Parking places[], int* num_parking_places);
+
 
 // menu.c functions
 void panel();
