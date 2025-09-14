@@ -14,6 +14,6 @@ int main (){
 
     if (load_graph_from_json(full_path_json, num_parking_places, places)){
         init_direction_parking_places(num_parking_places, places);
-        init_window_parking(full_path_json, num_parking_places, places, scaled_places);
+        init_window_parking(full_path_json, num_parking_places, places);
     }
 }

@@ -18,9 +18,9 @@ Texture2D exit_pay_station;
 Texture2D entrance_ticket_dispenser;
 
 // window_menu.c functions
-void full_screen_mode(int num_parking_places, Parking places[], Parking scaled_places[]);
+//void full_screen_mode(int num_parking_places, Parking places[], Parking scaled_places[]);
 void draw_parking_places(int n, Parking places[]);
-void init_window_parking(const char *full_path_json, int num_parking_places, Parking places[], Parking scaled_places[]);
+void init_window_parking(const char *full_path_json, int num_parking_places, Parking places[]);
 
 void draw_exit_barrier();
 void draw_entrance_barrier();

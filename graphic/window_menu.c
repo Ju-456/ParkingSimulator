@@ -24,22 +24,22 @@ double entrance_open_time = -1.0;
 double exit_open_time = -1.0;
 const double CLOSE_DELAY = 5.0;
 
-void full_screen_mode(int num_parking_places, Parking places[], Parking scaled_places[])
-{
-    int screen_width = GetScreenWidth();
-    int screen_height = GetScreenHeight();
+// void full_screen_mode(int num_parking_places, Parking places[], Parking scaled_places[])
+// {
+//     int screen_width = GetScreenWidth();
+//     int screen_height = GetScreenHeight();
 
-    float scale = fminf((float)screen_width / SCREEN_WIDTH, (float)screen_height / SCREEN_HEIGHT);
-    float offsetX = (screen_width - SCREEN_WIDTH * scale) / 2.0f;
-    float offsetY = (screen_height - SCREEN_HEIGHT * scale) / 2.0f;
+//     float scale = fminf((float)screen_width / SCREEN_WIDTH, (float)screen_height / SCREEN_HEIGHT);
+//     float offsetX = (screen_width - SCREEN_WIDTH * scale) / 2.0f;
+//     float offsetY = (screen_height - SCREEN_HEIGHT * scale) / 2.0f;
 
-    for (int i = 0; i < num_parking_places; i++)
-    {
-        scaled_places[i] = places[i];
-        scaled_places[i].x = places[i].x * scale + offsetX;
-        scaled_places[i].y = places[i].y * scale + offsetY;
-    }
-}
+//     for (int i = 0; i < num_parking_places; i++)
+//     {
+//         scaled_places[i] = places[i];
+//         scaled_places[i].x = places[i].x * scale + offsetX;
+//         scaled_places[i].y = places[i].y * scale + offsetY;
+//     }
+// }
 
 void draw_parking_places(int n, Parking places[])
 {
@@ -262,7 +262,7 @@ void draw_exit_barrier()
     DrawTexturePro(exit_barrier, src, dst, origin, exit_angle, WHITE);
 }
 
-void init_window_parking(const char *full_path_json, int num_parking_places, Parking places[], Parking scaled_places[])
+void init_window_parking(const char *full_path_json, int num_parking_places, Parking places[])
 {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Parking Simulator");
     SetTargetFPS(60);
@@ -295,8 +295,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
         panel();
         draw_entrance_barrier();
         draw_exit_barrier();
-        full_screen_mode(num_parking_places, places, scaled_places);
-        draw_parking_places(num_parking_places, scaled_places);
+        draw_parking_places(num_parking_places, places);
 
         EndDrawing();
     }
