@@ -30,23 +30,6 @@ static const char* FLOOR_FILES[3] = {
     "graph_floor_0.json", "graph_floor_1.json", "graph_floor_2.json"
 };
 
-// void full_screen_mode(int num_parking_places, Parking places[], Parking scaled_places[])
-// {
-//     int screen_width = GetScreenWidth();
-//     int screen_height = GetScreenHeight();
-
-//     float scale = fminf((float)screen_width / SCREEN_WIDTH, (float)screen_height / SCREEN_HEIGHT);
-//     float offsetX = (screen_width - SCREEN_WIDTH * scale) / 2.0f;
-//     float offsetY = (screen_height - SCREEN_HEIGHT * scale) / 2.0f;
-
-//     for (int i = 0; i < num_parking_places; i++)
-//     {
-//         scaled_places[i] = places[i];
-//         scaled_places[i].x = places[i].x * scale + offsetX;
-//         scaled_places[i].y = places[i].y * scale + offsetY;
-//     }
-// }
-
 void draw_parking_places(int n, Parking places[])
 {
     const float width = 180.0f;
@@ -313,6 +296,30 @@ void draw_floor()
     DrawTexture(floor_indicator[current_floor], 740.0f, 20.0f, WHITE);
 }
 
+void draw_buttons_direction(Texture2D PC) {
+    Rectangle srcUp    = { 129, 320, 60, 57 };
+    Rectangle srcDown  = { 192, 320, 60, 57 };
+
+    Rectangle srcLeft  = { 256, 320, 60, 57 };
+    Rectangle srcRight = { 325, 320, 60, 57 };
+
+    Rectangle srcS     = {  64,  0, 60, 57 };
+
+    Vector2 posUp    = { 440, 650 };
+    Vector2 posDown  = { 440, 710 };
+
+    Vector2 posLeft  = { posDown.x - 60, posDown.y };
+    Vector2 posRight = { posDown.x + 65, posDown.y };
+
+    Vector2 posS     = { posDown.x - 150, posDown.y };    
+
+    DrawTextureRec(PC, srcUp,    posUp,    WHITE);
+    DrawTextureRec(PC, srcDown,  posDown,  WHITE);
+    DrawTextureRec(PC, srcLeft,  posLeft,  WHITE);
+    DrawTextureRec(PC, srcRight, posRight, WHITE);
+
+    DrawTextureRec(PC, srcS, posS, RED); // to imitate a 'stop' button 
+}
 
 void init_window_parking(const char *full_path_json, int num_parking_places, Parking places[])
 {
@@ -322,15 +329,21 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
     background = LoadTexture("Assets/background.png");
     parking_place = LoadTexture("Assets/parking_place.png");
     panel_menu = LoadTexture("Assets/panel_menu.png");
+
     entrance_barrier = LoadTexture("Assets/entrance_barrier.png");
-    exit_barrier = LoadTexture("Assets/exit_barrier.png");
-    barrier_wall = LoadTexture("Assets/barrier_wall.png");
     entrance_ticket_dispenser = LoadTexture("Assets/entrance_ticket_dispenser.png");
+    
+    exit_barrier = LoadTexture("Assets/exit_barrier.png");
     exit_pay_station = LoadTexture("Assets/exit_pay_station.png");
+
+    barrier_wall = LoadTexture("Assets/barrier_wall.png");
+
     floor_exit            = LoadTexture("Assets/floor_exit.png");
     floor_indicator[0]    = LoadTexture("Assets/floor_indicator0.png");
     floor_indicator[1]    = LoadTexture("Assets/floor_indicator1.png");
     floor_indicator[2]    = LoadTexture("Assets/floor_indicator2.png");
+
+    PC = LoadTexture("Assets/PC.png");
 
     current_floor = 0;
 
@@ -356,6 +369,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
         
         draw_parking_places(num_parking_places, places);
         draw_floor(); 
+        draw_buttons_direction(PC);
 
         EndDrawing();
     }
@@ -363,15 +377,21 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
     UnloadTexture(background);
     UnloadTexture(parking_place);
     UnloadTexture(panel_menu);
+
     UnloadTexture(entrance_barrier);
-    UnloadTexture(exit_barrier);
-    UnloadTexture(barrier_wall);
-    UnloadTexture(exit_pay_station);
     UnloadTexture(entrance_ticket_dispenser);
+
+    UnloadTexture(exit_barrier);
+    UnloadTexture(exit_pay_station);
+
+    UnloadTexture(barrier_wall);
+    
     UnloadTexture(floor_exit);
     UnloadTexture(floor_indicator[0]);
     UnloadTexture(floor_indicator[1]);
     UnloadTexture(floor_indicator[2]);
+
+    UnloadTexture(PC);
 
     CloseWindow();
 }
