@@ -24,24 +24,32 @@ Texture2D floor_indicator[3];
 
 Texture2D PC;
 
-// window_menu.c functions
-//void full_screen_mode(int num_parking_places, Parking places[], Parking scaled_places[]);
-void draw_parking_places(int n, Parking places[]);
-void init_window_parking(const char *full_path_json, int num_parking_places, Parking places[]);
+typedef enum {
+    SCREEN_ORDORED_PANEL,
+    SCREEN_RANDOM,
+    SCREEN_MANUAL,
+    SCREEN_HARD_MANUAL
+} Screen;
 
-void draw_exit_barrier();
-void draw_entrance_barrier();
+void draw_parking_places(int n, Parking places[]);
+void panel();
+void update_barrier_angles();
+void barrier_management(int barrier_type, int barrier_state);
+
 void handle_stations_input();
 void handle_automatic_opening();
-void barrier_management(int barrier_type, int barrier_state);
-void update_barrier_angles();
 
-void draw_floor();
-void handle_floor_input(Parking places[], int* num_parking_places);
+void draw_entrance_barrier();
+void draw_exit_barrier();
+
 void reload_floor(int floor, Parking places[], int* num_parking_places);
+void handle_floor_input(Parking places[], int* num_parking_places);
+void draw_floor();
 
+void init_ordored_panel_menu();
+void ordored_panel_menu(Font font);
+void draw_buttons_direction(Texture2D PC);
 
-// menu.c functions
-void panel();
+void init_window_parking(const char *full_path_json, int num_parking_places, Parking places[]);
 
 #endif

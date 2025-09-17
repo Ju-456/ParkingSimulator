@@ -30,6 +30,11 @@ static const char* FLOOR_FILES[3] = {
     "graph_floor_0.json", "graph_floor_1.json", "graph_floor_2.json"
 };
 
+// Rectangle srcMode = { 258, 65, 125, 60 };
+Rectangle btnRandom;
+Rectangle btnManual;
+Rectangle btnHardManual;
+
 void draw_parking_places(int n, Parking places[])
 {
     const float width = 180.0f;
@@ -91,6 +96,7 @@ void update_barrier_angles()
         exit_angle += (deltaX > 0 ? stepX : -stepX);
     }
 }
+
 void barrier_management(int barrier_type, int barrier_state)
 {
     if (barrier_type == 0) // entrance
@@ -232,6 +238,7 @@ void draw_entrance_barrier()
 
     DrawTexturePro(entrance_barrier, src, dst, origin, entrance_angle, WHITE);
 }
+
 void draw_exit_barrier()
 {
     float x = 645.0f, y = 455.0f;
@@ -296,6 +303,28 @@ void draw_floor()
     DrawTexture(floor_indicator[current_floor], 740.0f, 20.0f, WHITE);
 }
 
+void init_ordored_panel_menu() {
+    Rectangle srcMode = { 258, 65, 125, 60 };
+    int buttonWidth  = srcMode.width;
+    int buttonHeight = srcMode.height;
+
+    btnRandom = (Rectangle){ 200, 720, buttonWidth, buttonHeight };
+    btnManual = (Rectangle){ 340, 720, buttonWidth, buttonHeight };
+    btnHardManual   = (Rectangle){ 470, 720, buttonWidth, buttonHeight };
+}
+
+void ordored_panel_menu(Font font) {
+    Rectangle srcMode = { 258, 65, 125, 60 };
+    DrawTextureRec(PC, srcMode, (Vector2){ btnRandom.x, btnRandom.y }, WHITE);
+    DrawTextEx(font, "Random", (Vector2){ btnRandom.x + 28, btnRandom.y + 18 }, 18, 1, BLUE);
+
+    DrawTextureRec(PC, srcMode, (Vector2){ btnManual.x, btnManual.y }, WHITE);
+    DrawTextEx(font, "Manual", (Vector2){ btnManual.x + 32, btnManual.y + 18 }, 18, 1, GREEN);
+
+    DrawTextureRec(PC, srcMode, (Vector2){ btnHardManual.x, btnHardManual.y }, WHITE);
+    DrawTextEx(font, "Hard Manual", (Vector2){ btnHardManual.x + 8, btnHardManual.y + 18 }, 18, 1, RED);
+}
+
 void draw_buttons_direction(Texture2D PC) {
     Rectangle srcUp    = { 129, 320, 60, 57 };
     Rectangle srcDown  = { 192, 320, 60, 57 };
@@ -305,8 +334,8 @@ void draw_buttons_direction(Texture2D PC) {
 
     Rectangle srcS     = {  64,  0, 60, 57 };
 
-    Vector2 posUp    = { 440, 650 };
-    Vector2 posDown  = { 440, 710 };
+    Vector2 posUp    = { 440, 660 };
+    Vector2 posDown  = { 440, 720 };
 
     Vector2 posLeft  = { posDown.x - 60, posDown.y };
     Vector2 posRight = { posDown.x + 65, posDown.y };
@@ -346,19 +375,29 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
     PC = LoadTexture("Assets/PC.png");
 
     current_floor = 0;
+    
+    Font font = LoadFontEx("resources/Minecraftia.ttf", 15, NULL, 0);
 
-    while (!WindowShouldClose())
-    {
+    const char *message1 = "Welcome to our Parking Simulator";
+    const char *message2 = "Choose a Game Mode :";
 
-        handle_stations_input();
-        handle_floor_input(places, &num_parking_places); 
-        handle_automatic_opening();
+    int letters1 = 0;
+    float timer1 = 0.0f;
 
-        // animation of angles
-        update_barrier_angles();
+    int letters2 = 0;
+    float timer2 = -1.0f;   
+    float letterTimer2 = 0.0f;
+
+    float letterDelay = 0.05f;
+    float delayBetween = 1.0f;
+
+Screen currentScreen = SCREEN_ORDORED_PANEL;
+
+    while (!WindowShouldClose()) {
 
         BeginDrawing();
         ClearBackground(RAYWHITE);
+
         DrawTexture(background, 0, 0, WHITE);
 
         panel();
@@ -366,10 +405,69 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             draw_entrance_barrier();
             draw_exit_barrier();
         }
-        
-        draw_parking_places(num_parking_places, places);
-        draw_floor(); 
-        draw_buttons_direction(PC);
+
+        Rectangle srcArrow = { 129, 64, 60, 57 };
+        Rectangle destPreview = { 750, 750, srcArrow.width, srcArrow.height };
+        Rectangle destNext    = {  50, 750, srcArrow.width, srcArrow.height };
+        Vector2 origin = { srcArrow.width / 2.0f, srcArrow.height / 2.0f };
+
+        DrawTexturePro(PC, srcArrow, destPreview, origin, 90.0f, WHITE);
+        DrawTexturePro(PC, srcArrow, destNext, origin, -90.0f, WHITE);
+
+        float dt = GetFrameTime();
+
+        switch (currentScreen) {
+            case SCREEN_ORDORED_PANEL:
+                if (letters1 < strlen(message1)) {
+                    timer1 += dt;
+                    if (timer1 >= letterDelay) {
+                        letters1++;
+                        timer1 = 0.0f;
+                    }
+                } else if (timer2 < 0.0f) {
+                    timer2 = 0.0f;
+                }
+
+                if (timer2 >= 0.0f) {
+                    timer2 += dt;
+                    if (timer2 > delayBetween && letters2 < strlen(message2)) {
+                        letterTimer2 += dt;
+                        if (letterTimer2 >= letterDelay) {
+                            letters2++;
+                            letterTimer2 = 0.0f;
+                        }
+                    }
+                }
+
+                DrawTextEx(font, TextSubtext(message1, 0, letters1), (Vector2){200, 590}, 24, 2, WHITE);  
+                DrawTextEx(font, TextSubtext(message2, 0, letters2), (Vector2){280, 620}, 22, 2, WHITE);
+
+                init_ordored_panel_menu();
+                ordored_panel_menu(font);
+
+                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    Vector2 mouse = GetMousePosition();
+                    if (CheckCollisionPointRec(mouse, btnRandom)) currentScreen = SCREEN_RANDOM;
+                    if (CheckCollisionPointRec(mouse, btnManual)) currentScreen = SCREEN_MANUAL;
+                    if (CheckCollisionPointRec(mouse, btnHardManual)) currentScreen = SCREEN_HARD_MANUAL;
+                }
+                break;
+
+            case SCREEN_MANUAL:
+                draw_buttons_direction(PC); 
+                if (IsKeyPressed(KEY_ESCAPE)) currentScreen = SCREEN_ORDORED_PANEL;
+                break;
+
+            case SCREEN_HARD_MANUAL:
+                DrawText("option 3", 200, 400, 20, DARKGREEN);
+                if (IsKeyPressed(KEY_ESCAPE)) currentScreen = SCREEN_ORDORED_PANEL;
+                break;
+
+            case SCREEN_RANDOM:
+                DrawText("Random mode", 200, 400, 20, DARKBLUE);
+                if (IsKeyPressed(KEY_ESCAPE)) currentScreen = SCREEN_ORDORED_PANEL;
+                break;
+        }
 
         EndDrawing();
     }
@@ -392,6 +490,6 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
     UnloadTexture(floor_indicator[2]);
 
     UnloadTexture(PC);
-
+    UnloadFont(font);
     CloseWindow();
 }
