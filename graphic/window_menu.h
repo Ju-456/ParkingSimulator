@@ -23,6 +23,8 @@ Texture2D floor_exit;
 Texture2D floor_indicator[3];
 
 Texture2D PC;
+Texture2D  blackRightTex,  blueRightTex,  grayRightTex,  pinkRightTex,  redRightTex,  yellowRightTex;
+// blackFrontTex,blueFrontTex,grayFrontTex,pinkFrontTex,redFrontTex,yellowFrontTex,
 
 typedef enum {
     SCREEN_ORDORED_PANEL,

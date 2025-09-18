@@ -30,7 +30,6 @@ static const char* FLOOR_FILES[3] = {
     "graph_floor_0.json", "graph_floor_1.json", "graph_floor_2.json"
 };
 
-// Rectangle srcMode = { 258, 65, 125, 60 };
 Rectangle btnRandom;
 Rectangle btnManual;
 Rectangle btnHardManual;
@@ -311,7 +310,7 @@ void init_ordored_panel_menu() {
     int PosY = 720;
 
     btnRandom = (Rectangle){ 200, PosY, buttonWidth, buttonHeight };
-    btnManual = (Rectangle){ 340, PosY, buttonWidth, buttonHeight };
+    btnManual = (Rectangle){ 335, PosY, buttonWidth, buttonHeight };
     btnHardManual   = (Rectangle){ 470, PosY, buttonWidth, buttonHeight };
 
     btnReturn = (Rectangle){ 120, PosY, 60, 57 }; 
@@ -329,6 +328,67 @@ void ordored_panel_menu(Font font) {
     DrawTextEx(font, "Hard Manual", (Vector2){ btnHardManual.x + 8, btnHardManual.y + 18 }, 18, 1, RED);
 }
 
+void choose_your_car(Font font){
+    const char *message = "Choose a car :";
+
+    static int letters = 0;
+    static float timer = 0.0f;
+
+    float letterDelay = 0.07f;
+    float dt = GetFrameTime();
+
+    if (letters < strlen(message)) {
+        timer += dt;
+        if (timer >= letterDelay) {
+            letters++;
+            timer = 0.0f;
+        }
+    }
+
+    DrawTextEx(font, TextSubtext(message, 0, letters), (Vector2){300, 590}, 24, 2, WHITE); 
+
+    Rectangle srcMode = { 258, 65, 125, 60 };
+
+    float scale = 0.8f;
+
+    // black car
+    DrawTextureRec(PC, srcMode, (Vector2){ btnRandom.x , btnRandom.y - 70}, WHITE);
+    DrawTexturePro(blackRightTex,(Rectangle){0, 0, blackRightTex.width, blackRightTex.height},   
+    (Rectangle){btnRandom.x + 10, btnRandom.y - 65, srcMode.width*scale, srcMode.height*scale}, 
+    (Vector2){0, 0}, 0.0f,WHITE);
+
+    // blue car
+    DrawTextureRec(PC, srcMode, (Vector2){ btnManual.x , btnManual.y - 70}, WHITE);
+    DrawTexturePro(blueRightTex, (Rectangle){0, 0, blueRightTex.width, blueRightTex.height}, 
+    (Rectangle){btnManual.x + 10, btnManual.y - 65, srcMode.width * scale, srcMode.height * scale},
+    (Vector2){0, 0}, 0.0f,WHITE);
+
+    // gray car
+    DrawTextureRec(PC, srcMode, (Vector2){ btnHardManual.x , btnHardManual.y - 70}, WHITE);
+    DrawTexturePro(grayRightTex,(Rectangle){0, 0, grayRightTex.width, grayRightTex.height}, 
+    (Rectangle){btnHardManual.x + 10, btnHardManual.y - 65, srcMode.width * scale, srcMode.height * scale}, 
+    (Vector2){0, 0}, 0.0f,WHITE);
+
+    // pink car
+    DrawTextureRec(PC, srcMode, (Vector2){ btnRandom.x, btnRandom.y }, WHITE);
+    DrawTexturePro(pinkRightTex, (Rectangle){0, 0, pinkRightTex.width, pinkRightTex.height}, 
+    (Rectangle){btnRandom.x + 10, btnManual.y, srcMode.width * scale, srcMode.height * scale}, 
+    (Vector2){0, 0}, 0.0f,WHITE);
+
+    // red car
+    DrawTextureRec(PC, srcMode, (Vector2){ btnManual.x, btnManual.y }, WHITE);
+    DrawTexturePro(redRightTex,(Rectangle){0, 0, redRightTex.width, redRightTex.height}, 
+    (Rectangle){btnManual.x + 10, btnManual.y, srcMode.width * scale, srcMode.height * scale}, 
+    (Vector2){0, 0}, 0.0f,WHITE);
+
+    // yellow car
+    DrawTextureRec(PC, srcMode, (Vector2){ btnHardManual.x, btnHardManual.y }, WHITE);
+    DrawTexturePro(yellowRightTex,(Rectangle){0, 0, yellowRightTex.width, yellowRightTex.height}, 
+    (Rectangle){btnHardManual.x + 10, btnHardManual.y, srcMode.width * scale, srcMode.height * scale}, 
+    (Vector2){0, 0}, 0.0f,WHITE);
+    
+}
+
 void draw_buttons_direction(Texture2D PC) {
     Rectangle srcUp    = { 129, 320, 60, 57 };
     Rectangle srcDown  = { 192, 320, 60, 57 };
@@ -338,13 +398,13 @@ void draw_buttons_direction(Texture2D PC) {
 
     Rectangle srcS     = {  64,  0, 60, 57 };
 
-    Vector2 posUp    = { 440, 660 };
-    Vector2 posDown  = { 440, 720 };
+    Vector2 posUp      = { 440, 660 };
+    Vector2 posDown    = { 440, 720 };
 
-    Vector2 posLeft  = { posDown.x - 60, posDown.y };
-    Vector2 posRight = { posDown.x + 65, posDown.y };
+    Vector2 posLeft    = { posDown.x - 60, posDown.y };
+    Vector2 posRight   = { posDown.x + 65, posDown.y };
 
-    Vector2 posS     = { posDown.x - 150, posDown.y };    
+    Vector2 posS       = { posDown.x - 150, posDown.y };    
 
     DrawTextureRec(PC, srcUp,    posUp,    WHITE);
     DrawTextureRec(PC, srcDown,  posDown,  WHITE);
@@ -377,6 +437,24 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
     floor_indicator[2]    = LoadTexture("Assets/floor_indicator2.png");
 
     PC = LoadTexture("Assets/PC.png");
+
+    // blackFrontTex = LoadTexture("Assets/black_car/blackFront.png");
+    blackRightTex = LoadTexture("Assets/black_car/blackRight.png");
+
+    // blueFrontTex = LoadTexture("Assets/blue_car/blueFront.png");
+    blueRightTex = LoadTexture("Assets/blue_car/blueRight.png");
+
+    // grayFrontTex = LoadTexture("Assets/gray_car/grayFront.png");
+    grayRightTex = LoadTexture("Assets/gray_car/grayRight.png");
+
+    // pinkFrontTex = LoadTexture("Assets/pink_car/pinkFront.png");
+    pinkRightTex = LoadTexture("Assets/pink_car/pinkRight.png");
+    
+    // redFrontTex = LoadTexture("Assets/red_car/redFront.png");
+    redRightTex = LoadTexture("Assets/red_car/redRight.png");
+
+    // yellowFrontTex = LoadTexture("Assets/yellow_car/yellowFront.png");
+    yellowRightTex = LoadTexture("Assets/yellow_car/yellowRight.png");
 
     current_floor = 0;
     
@@ -447,7 +525,6 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
                 init_ordored_panel_menu();
                 ordored_panel_menu(font);
                 
-                DrawRectangleLines((int)btnReturn.x, (int)btnReturn.y, (int)btnReturn.width, (int)btnReturn.height, RED);
                 DrawText(TextFormat("(x;y) = (%d;%d)", (int)mouse.x, (int)mouse.y), 10, 10, 12, BLACK);
 
                 if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
@@ -466,7 +543,8 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
                 break;
             
             case SCREEN_MANUAL:
-                draw_buttons_direction(PC); 
+                // draw_buttons_direction(PC); 
+                choose_your_car(font);
                 if (IsKeyPressed(KEY_ESCAPE) || 
                     (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, btnReturn))) {
                     currentScreen = SCREEN_ORDORED_PANEL;
@@ -505,5 +583,19 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
     UnloadTexture(PC);
     UnloadFont(font);
+
+    // UnloadTexture(blackFrontTex);
+    UnloadTexture(blackRightTex);
+    // UnloadTexture(blueFront);
+    UnloadTexture(blueRightTex);
+    // UnloadTexture(grayFront);
+    UnloadTexture(grayRightTex);
+    // UnloadTexture(pinkFront);
+    UnloadTexture(pinkRightTex);
+    // UnloadTexture(redFront);
+    UnloadTexture(redRightTex);
+    // UnloadTexture(yellowFront);
+    UnloadTexture(yellowRightTex);
+
     CloseWindow();
 }
