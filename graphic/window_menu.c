@@ -34,6 +34,7 @@ static const char* FLOOR_FILES[3] = {
 Rectangle btnRandom;
 Rectangle btnManual;
 Rectangle btnHardManual;
+Rectangle btnReturn;
 
 void draw_parking_places(int n, Parking places[])
 {
@@ -307,10 +308,13 @@ void init_ordored_panel_menu() {
     Rectangle srcMode = { 258, 65, 125, 60 };
     int buttonWidth  = srcMode.width;
     int buttonHeight = srcMode.height;
+    int PosY = 720;
 
-    btnRandom = (Rectangle){ 200, 720, buttonWidth, buttonHeight };
-    btnManual = (Rectangle){ 340, 720, buttonWidth, buttonHeight };
-    btnHardManual   = (Rectangle){ 470, 720, buttonWidth, buttonHeight };
+    btnRandom = (Rectangle){ 200, PosY, buttonWidth, buttonHeight };
+    btnManual = (Rectangle){ 340, PosY, buttonWidth, buttonHeight };
+    btnHardManual   = (Rectangle){ 470, PosY, buttonWidth, buttonHeight };
+
+    btnReturn = (Rectangle){ 120, PosY, 60, 57 }; 
 }
 
 void ordored_panel_menu(Font font) {
@@ -385,16 +389,13 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
     float timer1 = 0.0f;
 
     int letters2 = 0;
-    float timer2 = -1.0f;   
     float letterTimer2 = 0.0f;
 
     float letterDelay = 0.05f;
-    float delayBetween = 1.0f;
 
-Screen currentScreen = SCREEN_ORDORED_PANEL;
+    Screen currentScreen = SCREEN_ORDORED_PANEL;
 
     while (!WindowShouldClose()) {
-
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
@@ -406,15 +407,21 @@ Screen currentScreen = SCREEN_ORDORED_PANEL;
             draw_exit_barrier();
         }
 
-        Rectangle srcArrow = { 129, 64, 60, 57 };
+        // permanent arrows (independently of the mode)
+        Rectangle srcArrow = { 129, 64, 60, 57 }; 
         Rectangle destPreview = { 750, 750, srcArrow.width, srcArrow.height };
         Rectangle destNext    = {  50, 750, srcArrow.width, srcArrow.height };
-        Vector2 origin = { srcArrow.width / 2.0f, srcArrow.height / 2.0f };
+        Vector2 origin1 = { srcArrow.width / 2.0f, srcArrow.height / 2.0f };
 
-        DrawTexturePro(PC, srcArrow, destPreview, origin, 90.0f, WHITE);
-        DrawTexturePro(PC, srcArrow, destNext, origin, -90.0f, WHITE);
+        DrawTexturePro(PC, srcArrow, destPreview, origin1, 90.0f, WHITE);
+        DrawTexturePro(PC, srcArrow, destNext, origin1, -90.0f, WHITE);
+
+        Rectangle srcReturn  = { 0, 130, 60, 60 };
+        Rectangle destReturn = {  140, 750, srcArrow.width, srcArrow.height };
+        DrawTexturePro(PC, srcReturn, destReturn, origin1, 0, BLUE);
 
         float dt = GetFrameTime();
+        Vector2 mouse = GetMousePosition();
 
         switch (currentScreen) {
             case SCREEN_ORDORED_PANEL:
@@ -424,13 +431,8 @@ Screen currentScreen = SCREEN_ORDORED_PANEL;
                         letters1++;
                         timer1 = 0.0f;
                     }
-                } else if (timer2 < 0.0f) {
-                    timer2 = 0.0f;
-                }
-
-                if (timer2 >= 0.0f) {
-                    timer2 += dt;
-                    if (timer2 > delayBetween && letters2 < strlen(message2)) {
+                } else {
+                    if (letters2 < strlen(message2)) {
                         letterTimer2 += dt;
                         if (letterTimer2 >= letterDelay) {
                             letters2++;
@@ -444,29 +446,41 @@ Screen currentScreen = SCREEN_ORDORED_PANEL;
 
                 init_ordored_panel_menu();
                 ordored_panel_menu(font);
+                
+                DrawRectangleLines((int)btnReturn.x, (int)btnReturn.y, (int)btnReturn.width, (int)btnReturn.height, RED);
+                DrawText(TextFormat("(x;y) = (%d;%d)", (int)mouse.x, (int)mouse.y), 10, 10, 12, BLACK);
 
                 if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                    Vector2 mouse = GetMousePosition();
                     if (CheckCollisionPointRec(mouse, btnRandom)) currentScreen = SCREEN_RANDOM;
                     if (CheckCollisionPointRec(mouse, btnManual)) currentScreen = SCREEN_MANUAL;
                     if (CheckCollisionPointRec(mouse, btnHardManual)) currentScreen = SCREEN_HARD_MANUAL;
                 }
                 break;
 
+            case SCREEN_RANDOM:
+                DrawText("Random mode", 200, 400, 20, DARKBLUE);
+                if (IsKeyPressed(KEY_ESCAPE) ||
+                    (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, btnReturn))) {
+                    currentScreen = SCREEN_ORDORED_PANEL;
+                }
+                break;
+            
             case SCREEN_MANUAL:
                 draw_buttons_direction(PC); 
-                if (IsKeyPressed(KEY_ESCAPE)) currentScreen = SCREEN_ORDORED_PANEL;
+                if (IsKeyPressed(KEY_ESCAPE) || 
+                    (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, btnReturn))) {
+                    currentScreen = SCREEN_ORDORED_PANEL;
+                }
                 break;
 
             case SCREEN_HARD_MANUAL:
-                DrawText("option 3", 200, 400, 20, DARKGREEN);
-                if (IsKeyPressed(KEY_ESCAPE)) currentScreen = SCREEN_ORDORED_PANEL;
+                DrawText("Hard Manual mode", 200, 400, 20, DARKGREEN);
+                if (IsKeyPressed(KEY_ESCAPE) || 
+                    (CheckCollisionPointRec(mouse, btnReturn) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))) {
+                    currentScreen = SCREEN_ORDORED_PANEL;
+                }
                 break;
 
-            case SCREEN_RANDOM:
-                DrawText("Random mode", 200, 400, 20, DARKBLUE);
-                if (IsKeyPressed(KEY_ESCAPE)) currentScreen = SCREEN_ORDORED_PANEL;
-                break;
         }
 
         EndDrawing();
