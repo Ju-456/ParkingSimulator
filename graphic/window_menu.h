@@ -23,8 +23,7 @@ Texture2D floor_exit;
 Texture2D floor_indicator[3];
 
 Texture2D PC;
-Texture2D  blackRightTex,  blueRightTex,  grayRightTex,  pinkRightTex,  redRightTex,  yellowRightTex;
-// blackFrontTex,blueFrontTex,grayFrontTex,pinkFrontTex,redFrontTex,yellowFrontTex,
+Texture2D  blackRightTex,  blueRightTex,  grayRightTex,  pinkRightTex,  redRightTex,  yellowRightTex, blackFrontTex,blueFrontTex,grayFrontTex,pinkFrontTex,redFrontTex,yellowFrontTex;
 
 typedef enum {
     SCREEN_ORDORED_PANEL,
@@ -50,6 +49,8 @@ void draw_floor();
 
 void init_ordored_panel_menu();
 void ordored_panel_menu(Font font);
+void choose_your_car(Font font);
+void choose_your_car_condition();
 void draw_buttons_direction(Texture2D PC);
 
 void init_window_parking(const char *full_path_json, int num_parking_places, Parking places[]);

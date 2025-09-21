@@ -386,7 +386,89 @@ void choose_your_car(Font font){
     DrawTexturePro(yellowRightTex,(Rectangle){0, 0, yellowRightTex.width, yellowRightTex.height}, 
     (Rectangle){btnHardManual.x + 10, btnHardManual.y, srcMode.width * scale, srcMode.height * scale}, 
     (Vector2){0, 0}, 0.0f,WHITE);
-    
+
+    choose_your_car_condition();
+}
+
+void choose_your_car_condition() {
+    Rectangle srcMode = { 258, 65, 125, 60 };
+    float scale = 0.75f;
+    static int chosenCar = -1; 
+
+    Vector2 mouse = GetMousePosition();
+
+    Rectangle srcArrow = { 129, 64, 60, 57 }; 
+    Rectangle srcReturn  = { 0, 130, -60, 60 };   
+    Rectangle destReturn = { 650, 750, srcArrow.width, srcArrow.height };
+    Vector2 origin1 = { srcArrow.width / 2.0f, srcArrow.height / 2.0f };
+
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        if (CheckCollisionPointRec(mouse, (Rectangle){ btnRandom.x, btnRandom.y - 70, srcMode.width, srcMode.height })) {
+            chosenCar = 0; // black car
+        }
+        else if (CheckCollisionPointRec(mouse, (Rectangle){ btnManual.x , btnManual.y - 70, srcMode.width, srcMode.height })) {
+            chosenCar = 1; // blue car
+        }
+        else if (CheckCollisionPointRec(mouse, (Rectangle){ btnHardManual.x , btnHardManual.y - 70, srcMode.width, srcMode.height })) {
+            chosenCar = 2; // gray car
+        }
+        else if (CheckCollisionPointRec(mouse, (Rectangle){ btnRandom.x, btnRandom.y, srcMode.width, srcMode.height })) {
+            chosenCar = 3; // pink car
+        }
+        else if (CheckCollisionPointRec(mouse, (Rectangle){ btnManual.x, btnManual.y, srcMode.width, srcMode.height })) {
+            chosenCar = 4; // red car
+        }
+        else if (CheckCollisionPointRec(mouse, (Rectangle){ btnHardManual.x, btnHardManual.y, srcMode.width, srcMode.height })) {
+            chosenCar = 5; // yellow car
+        }
+    }
+
+    if (chosenCar == 0) {
+        DrawTextureRec(PC, srcMode, (Vector2){ 40, 580 }, WHITE);
+        DrawTexturePro(blackFrontTex,
+            (Rectangle){0, 0, blackFrontTex.width, blackFrontTex.height},
+            (Rectangle){65, 583, blackFrontTex.width * scale, blackFrontTex.height * scale},
+            (Vector2){0, 0}, 0.0f, WHITE);
+    }
+    else if (chosenCar == 1) {
+        DrawTextureRec(PC, srcMode, (Vector2){ 40, 580 }, WHITE);
+        DrawTexturePro(blueFrontTex,
+            (Rectangle){0, 0, blueFrontTex.width, blueFrontTex.height},
+            (Rectangle){65, 583, blueFrontTex.width * scale, blueFrontTex.height * scale},
+            (Vector2){0, 0}, 0.0f, WHITE);
+    }
+    else if (chosenCar == 2) {
+        DrawTextureRec(PC, srcMode, (Vector2){ 40, 580 }, WHITE);
+        DrawTexturePro(grayFrontTex,
+            (Rectangle){0, 0, grayFrontTex.width, grayFrontTex.height},
+            (Rectangle){65, 583, grayFrontTex.width * scale, grayFrontTex.height * scale},
+            (Vector2){0, 0}, 0.0f, WHITE);
+    }
+    else if (chosenCar == 3) {
+        DrawTextureRec(PC, srcMode, (Vector2){ 40, 580 }, WHITE);
+        DrawTexturePro(pinkFrontTex,
+            (Rectangle){0, 0, pinkFrontTex.width, pinkFrontTex.height},
+            (Rectangle){65, 583, pinkFrontTex.width * scale, pinkFrontTex.height * scale},
+            (Vector2){0, 0}, 0.0f, WHITE);
+    }
+    else if (chosenCar == 4) {
+        DrawTextureRec(PC, srcMode, (Vector2){ 40, 580 }, WHITE);
+        DrawTexturePro(redFrontTex,
+            (Rectangle){0, 0, redFrontTex.width, redFrontTex.height},
+            (Rectangle){65, 583, redFrontTex.width * scale, redFrontTex.height * scale},
+            (Vector2){0, 0}, 0.0f, WHITE);
+    }
+    else if (chosenCar == 5) {
+        DrawTextureRec(PC, srcMode, (Vector2){ 40, 580 }, WHITE);
+        DrawTexturePro(yellowFrontTex,
+            (Rectangle){0, 0, yellowFrontTex.width, yellowFrontTex.height},
+            (Rectangle){65, 583, yellowFrontTex.width * scale, yellowFrontTex.height * scale},
+            (Vector2){0, 0}, 0.0f, WHITE);
+    }
+
+    if (chosenCar != -1) {
+        DrawTexturePro(PC, srcReturn, destReturn, origin1, 0, GREEN);
+    }
 }
 
 void draw_buttons_direction(Texture2D PC) {
@@ -438,22 +520,22 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
     PC = LoadTexture("Assets/PC.png");
 
-    // blackFrontTex = LoadTexture("Assets/black_car/blackFront.png");
+    blackFrontTex = LoadTexture("Assets/black_car/blackFront.png");
     blackRightTex = LoadTexture("Assets/black_car/blackRight.png");
 
-    // blueFrontTex = LoadTexture("Assets/blue_car/blueFront.png");
+    blueFrontTex = LoadTexture("Assets/blue_car/blueFront.png");
     blueRightTex = LoadTexture("Assets/blue_car/blueRight.png");
 
-    // grayFrontTex = LoadTexture("Assets/gray_car/grayFront.png");
+    grayFrontTex = LoadTexture("Assets/gray_car/grayFront.png");
     grayRightTex = LoadTexture("Assets/gray_car/grayRight.png");
 
-    // pinkFrontTex = LoadTexture("Assets/pink_car/pinkFront.png");
+    pinkFrontTex = LoadTexture("Assets/pink_car/pinkFront.png");
     pinkRightTex = LoadTexture("Assets/pink_car/pinkRight.png");
     
-    // redFrontTex = LoadTexture("Assets/red_car/redFront.png");
+    redFrontTex = LoadTexture("Assets/red_car/redFront.png");
     redRightTex = LoadTexture("Assets/red_car/redRight.png");
 
-    // yellowFrontTex = LoadTexture("Assets/yellow_car/yellowFront.png");
+    yellowFrontTex = LoadTexture("Assets/yellow_car/yellowFront.png");
     yellowRightTex = LoadTexture("Assets/yellow_car/yellowRight.png");
 
     current_floor = 0;
@@ -500,6 +582,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
         float dt = GetFrameTime();
         Vector2 mouse = GetMousePosition();
+        DrawText(TextFormat("(x;y) = (%d;%d)", (int)mouse.x, (int)mouse.y), 10, 10, 12, BLACK);
 
         switch (currentScreen) {
             case SCREEN_ORDORED_PANEL:
@@ -524,8 +607,6 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
                 init_ordored_panel_menu();
                 ordored_panel_menu(font);
-                
-                DrawText(TextFormat("(x;y) = (%d;%d)", (int)mouse.x, (int)mouse.y), 10, 10, 12, BLACK);
 
                 if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                     if (CheckCollisionPointRec(mouse, btnRandom)) currentScreen = SCREEN_RANDOM;
@@ -584,17 +665,17 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
     UnloadTexture(PC);
     UnloadFont(font);
 
-    // UnloadTexture(blackFrontTex);
+    UnloadTexture(blackFrontTex);
     UnloadTexture(blackRightTex);
-    // UnloadTexture(blueFront);
+    UnloadTexture(blueFrontTex);
     UnloadTexture(blueRightTex);
-    // UnloadTexture(grayFront);
+    UnloadTexture(grayFrontTex);
     UnloadTexture(grayRightTex);
-    // UnloadTexture(pinkFront);
+    UnloadTexture(pinkFrontTex);
     UnloadTexture(pinkRightTex);
-    // UnloadTexture(redFront);
+    UnloadTexture(redFrontTex);
     UnloadTexture(redRightTex);
-    // UnloadTexture(yellowFront);
+    UnloadTexture(yellowFrontTex);
     UnloadTexture(yellowRightTex);
 
     CloseWindow();
