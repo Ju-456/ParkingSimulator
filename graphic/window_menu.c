@@ -35,6 +35,13 @@ Rectangle btnManual;
 Rectangle btnHardManual;
 Rectangle btnReturn;
 
+static int chosenCar = -1; 
+Rectangle srcMode = { 258, 65, 125, 60 };
+Rectangle srcArrow = { 129, 64, 60, 57 }; 
+Rectangle srcReturn  = { 0, 130, -60, 60 };   
+Rectangle destReturn = { 650, 750, 60, 57 };
+Vector2 origin1 = { 60 / 2.0f, 57 / 2.0f };
+
 void draw_parking_places(int n, Parking places[])
 {
     const float width = 180.0f;
@@ -391,16 +398,9 @@ void choose_your_car(Font font){
 }
 
 void choose_your_car_condition() {
-    Rectangle srcMode = { 258, 65, 125, 60 };
     float scale = 0.75f;
-    static int chosenCar = -1; 
 
     Vector2 mouse = GetMousePosition();
-
-    Rectangle srcArrow = { 129, 64, 60, 57 }; 
-    Rectangle srcReturn  = { 0, 130, -60, 60 };   
-    Rectangle destReturn = { 650, 750, srcArrow.width, srcArrow.height };
-    Vector2 origin1 = { srcArrow.width / 2.0f, srcArrow.height / 2.0f };
 
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         if (CheckCollisionPointRec(mouse, (Rectangle){ btnRandom.x, btnRandom.y - 70, srcMode.width, srcMode.height })) {
@@ -471,6 +471,55 @@ void choose_your_car_condition() {
     }
 }
 
+void place_car_at_start_pos() {
+    Vector2 mouse = GetMousePosition();
+    float scale = 0.75f;
+
+    switch (chosenCar) {
+        case 0: // black car
+            DrawTexturePro(blackTopTex,
+                (Rectangle){0, 0, blackTopTex.width, blackTopTex.height},
+                (Rectangle){20, 95, blackTopTex.width * scale, blackTopTex.height},
+                (Vector2){0, 0}, -90.0f, WHITE);
+            break;
+
+        case 1: // blue car
+            DrawTexturePro(blueTopTex,
+                (Rectangle){0, 0, blueTopTex.width, blueTopTex.height},
+                (Rectangle){20, 95, blueTopTex.width * scale, blueTopTex.height * scale},
+                (Vector2){0, 0}, -90.0f, WHITE);
+            break;
+
+        case 2: // gray car
+            DrawTexturePro(grayTopTex,
+                (Rectangle){0, 0, grayTopTex.width, grayTopTex.height},
+                (Rectangle){20, 95, grayTopTex.width * scale, grayTopTex.height},
+                (Vector2){0, 0}, -90.0f, WHITE);
+            break;
+
+        case 3: // pink car
+            DrawTexturePro(pinkTopTex,
+                (Rectangle){0, 0, pinkTopTex.width, pinkTopTex.height},
+                (Rectangle){20, 95, pinkTopTex.width * scale, pinkTopTex.height},
+                (Vector2){0, 0}, -90.0f, WHITE);
+            break;
+
+        case 4: // red car
+            DrawTexturePro(redTopTex,
+                (Rectangle){0, 0, redTopTex.width, redTopTex.height},
+                (Rectangle){20, 95, redTopTex.width * scale, redTopTex.height},
+                (Vector2){0, 0}, -90.0f, WHITE);
+            break;
+
+        case 5: // yellow car
+            DrawTexturePro(yellowTopTex,
+                (Rectangle){0, 0, yellowTopTex.width, yellowTopTex.height},
+                (Rectangle){20, 95, yellowTopTex.width * scale, yellowTopTex.height * scale},
+                (Vector2){0, 0}, -90.0f, WHITE);
+            break;
+    }
+}
+
 void draw_buttons_direction(Texture2D PC) {
     Rectangle srcUp    = { 129, 320, 60, 57 };
     Rectangle srcDown  = { 192, 320, 60, 57 };
@@ -499,6 +548,14 @@ void draw_buttons_direction(Texture2D PC) {
 void init_window_parking(const char *full_path_json, int num_parking_places, Parking places[])
 {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Parking Simulator");
+    int monitor = GetCurrentMonitor();
+    int monitorWidth = GetMonitorWidth(monitor);
+    int monitorHeight = GetMonitorHeight(monitor);
+
+    int posX = (monitorWidth - SCREEN_WIDTH) / 2;
+    int posY = (monitorHeight - SCREEN_HEIGHT) / 2;
+
+    SetWindowPosition(posX, posY);
     SetTargetFPS(60);
 
     background = LoadTexture("Assets/background.png");
@@ -522,21 +579,28 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
     blackFrontTex = LoadTexture("Assets/black_car/blackFront.png");
     blackRightTex = LoadTexture("Assets/black_car/blackRight.png");
+    blackTopTex   = LoadTexture("Assets/black_car/blackTop.png");
 
     blueFrontTex = LoadTexture("Assets/blue_car/blueFront.png");
     blueRightTex = LoadTexture("Assets/blue_car/blueRight.png");
+    blueTopTex   = LoadTexture("Assets/blue_car/blueTop.png");
 
     grayFrontTex = LoadTexture("Assets/gray_car/grayFront.png");
     grayRightTex = LoadTexture("Assets/gray_car/grayRight.png");
+    grayTopTex   = LoadTexture("Assets/gray_car/grayTop.png");
 
     pinkFrontTex = LoadTexture("Assets/pink_car/pinkFront.png");
     pinkRightTex = LoadTexture("Assets/pink_car/pinkRight.png");
+    pinkTopTex   = LoadTexture("Assets/pink_car/pinkTop.png");
     
     redFrontTex = LoadTexture("Assets/red_car/redFront.png");
     redRightTex = LoadTexture("Assets/red_car/redRight.png");
+    redTopTex   = LoadTexture("Assets/red_car/redTop.png");
 
     yellowFrontTex = LoadTexture("Assets/yellow_car/yellowFront.png");
     yellowRightTex = LoadTexture("Assets/yellow_car/yellowRight.png");
+    yellowTopTex   = LoadTexture("Assets/yellow_car/yellowTop.png");
+
 
     current_floor = 0;
     
@@ -626,6 +690,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             case SCREEN_MANUAL:
                 // draw_buttons_direction(PC); 
                 choose_your_car(font);
+                place_car_at_start_pos();
                 if (IsKeyPressed(KEY_ESCAPE) || 
                     (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, btnReturn))) {
                     currentScreen = SCREEN_ORDORED_PANEL;
@@ -667,16 +732,27 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
     UnloadTexture(blackFrontTex);
     UnloadTexture(blackRightTex);
+    UnloadTexture(blackTopTex);
+
     UnloadTexture(blueFrontTex);
     UnloadTexture(blueRightTex);
+    UnloadTexture(blueTopTex);
+
     UnloadTexture(grayFrontTex);
     UnloadTexture(grayRightTex);
+    UnloadTexture(grayTopTex);
+
     UnloadTexture(pinkFrontTex);
     UnloadTexture(pinkRightTex);
+    UnloadTexture(pinkTopTex);
+
     UnloadTexture(redFrontTex);
     UnloadTexture(redRightTex);
+    UnloadTexture(redTopTex);
+
     UnloadTexture(yellowFrontTex);
     UnloadTexture(yellowRightTex);
+    UnloadTexture(yellowTopTex);
 
     CloseWindow();
 }
