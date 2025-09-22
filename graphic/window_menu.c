@@ -42,6 +42,11 @@ Rectangle srcReturn  = { 0, 130, -60, 60 };
 Rectangle destReturn = { 650, 750, 60, 57 };
 Vector2 origin1 = { 60 / 2.0f, 57 / 2.0f };
 
+float carX = 70;
+float carY = 73;
+float carStep = 15.0f;   // displacement in pixels by pressing
+float carRotation = -90.0f; // default to the right
+
 void draw_parking_places(int n, Parking places[])
 {
     const float width = 180.0f;
@@ -471,51 +476,75 @@ void choose_your_car_condition() {
     }
 }
 
+void update_car_position() {
+    if (IsKeyPressed(KEY_RIGHT)) {
+        carX += carStep;
+        carRotation = -90.0f;
+    }
+    if (IsKeyPressed(KEY_LEFT)) {
+        carX -= carStep;
+        carRotation = 90.0f;
+    }
+    if (IsKeyPressed(KEY_UP)) {
+        carY -= carStep;
+        carRotation = 0.0f;
+    }
+    if (IsKeyPressed(KEY_DOWN)) {
+        carY += carStep;
+        carRotation = 180.0f;
+    }
+}
+
 void place_car_at_start_pos() {
-    Vector2 mouse = GetMousePosition();
     float scale = 0.75f;
 
     switch (chosenCar) {
         case 0: // black car
             DrawTexturePro(blackTopTex,
                 (Rectangle){0, 0, blackTopTex.width, blackTopTex.height},
-                (Rectangle){20, 95, blackTopTex.width * scale, blackTopTex.height},
-                (Vector2){0, 0}, -90.0f, WHITE);
+                (Rectangle){carX, carY, blackTopTex.width * 0.7, blackTopTex.height * 1.1},
+                (Vector2){blackTopTex.width / 2, blackTopTex.height / 2},
+                carRotation, WHITE);
             break;
 
         case 1: // blue car
             DrawTexturePro(blueTopTex,
                 (Rectangle){0, 0, blueTopTex.width, blueTopTex.height},
-                (Rectangle){20, 95, blueTopTex.width * scale, blueTopTex.height * scale},
-                (Vector2){0, 0}, -90.0f, WHITE);
+                (Rectangle){carX, carY, blueTopTex.width * scale, blueTopTex.height * scale},
+                (Vector2){blueTopTex.width * scale / 2, blueTopTex.height * scale / 2},
+                carRotation, WHITE);
             break;
 
         case 2: // gray car
             DrawTexturePro(grayTopTex,
                 (Rectangle){0, 0, grayTopTex.width, grayTopTex.height},
-                (Rectangle){20, 95, grayTopTex.width * scale, grayTopTex.height},
-                (Vector2){0, 0}, -90.0f, WHITE);
+                (Rectangle){carX, carY, grayTopTex.width * scale, grayTopTex.height * 1.1},
+                (Vector2){grayTopTex.width / 2, grayTopTex.height / 2},
+                carRotation, WHITE);
             break;
 
         case 3: // pink car
             DrawTexturePro(pinkTopTex,
                 (Rectangle){0, 0, pinkTopTex.width, pinkTopTex.height},
-                (Rectangle){20, 95, pinkTopTex.width * scale, pinkTopTex.height},
-                (Vector2){0, 0}, -90.0f, WHITE);
+                (Rectangle){carX, carY, pinkTopTex.width * scale, pinkTopTex.height},
+                (Vector2){pinkTopTex.width * scale / 2, pinkTopTex.height * scale / 2},
+                carRotation, WHITE);
             break;
 
         case 4: // red car
             DrawTexturePro(redTopTex,
                 (Rectangle){0, 0, redTopTex.width, redTopTex.height},
-                (Rectangle){20, 95, redTopTex.width * scale, redTopTex.height},
-                (Vector2){0, 0}, -90.0f, WHITE);
+                (Rectangle){carX, carY, redTopTex.width * scale, redTopTex.height * scale},
+                (Vector2){redTopTex.width * scale / 2, redTopTex.height * scale / 2},
+                carRotation, WHITE);
             break;
 
         case 5: // yellow car
             DrawTexturePro(yellowTopTex,
                 (Rectangle){0, 0, yellowTopTex.width, yellowTopTex.height},
-                (Rectangle){20, 95, yellowTopTex.width * scale, yellowTopTex.height * scale},
-                (Vector2){0, 0}, -90.0f, WHITE);
+                (Rectangle){carX, carY, yellowTopTex.width * scale, yellowTopTex.height * scale},
+                (Vector2){yellowTopTex.width * scale / 2, yellowTopTex.height * scale / 2},
+                carRotation, WHITE);
             break;
     }
 }
@@ -689,8 +718,10 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             
             case SCREEN_MANUAL:
                 // draw_buttons_direction(PC); 
-                choose_your_car(font);
-                place_car_at_start_pos();
+                choose_your_car(font);     // Choix voiture
+                update_car_position();     // Déplacement avec flèches
+                place_car_at_start_pos();  // Dessine la voiture à sa position courante
+
                 if (IsKeyPressed(KEY_ESCAPE) || 
                     (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, btnReturn))) {
                     currentScreen = SCREEN_ORDORED_PANEL;
