@@ -476,23 +476,13 @@ void choose_your_car_condition() {
     }
 }
 
-void update_car_position() {
-    if (IsKeyPressed(KEY_RIGHT)) {
-        carX += carStep;
-        carRotation = -90.0f;
-    }
-    if (IsKeyPressed(KEY_LEFT)) {
-        carX -= carStep;
-        carRotation = 90.0f;
-    }
-    if (IsKeyPressed(KEY_UP)) {
-        carY -= carStep;
-        carRotation = 0.0f;
-    }
-    if (IsKeyPressed(KEY_DOWN)) {
-        carY += carStep;
-        carRotation = 180.0f;
-    }
+void update_car_position(float dt) {
+    float carSpeed = 150.0f; // num of pixel per second
+
+    if (IsKeyDown(KEY_RIGHT)) { carX += carSpeed * dt; carRotation = -90.0f; }
+    if (IsKeyDown(KEY_LEFT))  { carX -= carSpeed * dt; carRotation = 90.0f; }
+    if (IsKeyDown(KEY_UP))    { carY -= carSpeed * dt; carRotation = 0.0f; }
+    if (IsKeyDown(KEY_DOWN))  { carY += carSpeed * dt; carRotation = 180.0f; }
 }
 
 void place_car_at_start_pos() {
@@ -719,7 +709,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             case SCREEN_MANUAL:
                 // draw_buttons_direction(PC); 
                 choose_your_car(font);     // Choix voiture
-                update_car_position();     // Déplacement avec flèches
+                update_car_position(dt);     // Déplacement avec flèches
                 place_car_at_start_pos();  // Dessine la voiture à sa position courante
 
                 if (IsKeyPressed(KEY_ESCAPE) || 
