@@ -35,6 +35,7 @@ typedef enum {
     SCREEN_ORDORED_PANEL,
     SCREEN_RANDOM,
     SCREEN_MANUAL,
+    SCREEN_DIRECTION,
     SCREEN_HARD_MANUAL
 } Screen;
 

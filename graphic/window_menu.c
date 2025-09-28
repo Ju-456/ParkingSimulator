@@ -36,11 +36,12 @@ Rectangle btnHardManual;
 Rectangle btnReturn;
 
 static int chosenCar = -1; 
-Rectangle srcMode = { 258, 65, 125, 60 };
-Rectangle srcArrow = { 129, 64, 60, 57 }; 
-Rectangle srcReturn  = { 0, 130, -60, 60 };   
+Rectangle srcMode    = { 258, 65, 125, 60 };
+Rectangle srcArrow   = { 129, 64, 60, 57 }; 
+Rectangle srcReturn  = { 0, 130, -60, 60 };  
 Rectangle destReturn = { 650, 750, 60, 57 };
-Vector2 origin1 = { 60 / 2.0f, 57 / 2.0f };
+Vector2 origin       = { 0, 0 };
+Vector2 origin1      = { 60 / 2.0f, 57 / 2.0f };
 
 float carX = 70;
 float carY = 73;
@@ -241,9 +242,6 @@ void draw_entrance_barrier()
 
     DrawTexture(barrier_wall, 10.0f, 103.0f, WHITE);
     DrawTexture(entrance_ticket_dispenser, 100.0f, 20.0f, WHITE);
-
-    // axis to turn
-    Vector2 origin = (Vector2){0.0f, 0.0f};
 
     Rectangle src = (Rectangle){0, 0, (float)entrance_barrier.width, (float)entrance_barrier.height};
     Rectangle dst = (Rectangle){x, y, (float)entrance_barrier.width, (float)entrance_barrier.height};
@@ -470,10 +468,6 @@ void choose_your_car_condition() {
             (Rectangle){65, 583, yellowFrontTex.width * scale, yellowFrontTex.height * scale},
             (Vector2){0, 0}, 0.0f, WHITE);
     }
-
-    if (chosenCar != -1) {
-        DrawTexturePro(PC, srcReturn, destReturn, origin1, 0, GREEN);
-    }
 }
 
 void update_car_position(float dt) {
@@ -483,6 +477,10 @@ void update_car_position(float dt) {
     if (IsKeyDown(KEY_LEFT))  { carX -= carSpeed * dt; carRotation = 90.0f; }
     if (IsKeyDown(KEY_UP))    { carY -= carSpeed * dt; carRotation = 0.0f; }
     if (IsKeyDown(KEY_DOWN))  { carY += carSpeed * dt; carRotation = 180.0f; }
+
+    if (carY < 0) carY = 130;
+    if (carY > 550) carY = 480;
+
 }
 
 void place_car_at_start_pos() {
@@ -652,12 +650,12 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
         // permanent arrows (independently of the mode)
         Rectangle srcArrow = { 129, 64, 60, 57 }; 
-        Rectangle destPreview = { 750, 750, srcArrow.width, srcArrow.height };
-        Rectangle destNext    = {  50, 750, srcArrow.width, srcArrow.height };
+        Rectangle destPreviewLevel = { 750, 750, srcArrow.width, srcArrow.height };
+        Rectangle destNextLevel    = {  50, 750, srcArrow.width, srcArrow.height };
         Vector2 origin1 = { srcArrow.width / 2.0f, srcArrow.height / 2.0f };
 
-        DrawTexturePro(PC, srcArrow, destPreview, origin1, 90.0f, WHITE);
-        DrawTexturePro(PC, srcArrow, destNext, origin1, -90.0f, WHITE);
+        DrawTexturePro(PC, srcArrow, destPreviewLevel, origin1, 90.0f, WHITE);
+        DrawTexturePro(PC, srcArrow, destNextLevel, origin1, -90.0f, WHITE);
 
         Rectangle srcReturn  = { 0, 130, 60, 60 };
         Rectangle destReturn = {  140, 750, srcArrow.width, srcArrow.height };
@@ -707,14 +705,32 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
                 break;
             
             case SCREEN_MANUAL:
-                // draw_buttons_direction(PC); 
-                choose_your_car(font);     // Choix voiture
-                update_car_position(dt);     // Déplacement avec flèches
-                place_car_at_start_pos();  // Dessine la voiture à sa position courante
+                choose_your_car(font);
+                place_car_at_start_pos();
 
-                if (IsKeyPressed(KEY_ESCAPE) || 
-                    (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, btnReturn))) {
+                if (chosenCar != -1) {
+                    Rectangle srcReturn1  = { 0, 130, -60, 60 };
+                    Rectangle destNextStep = {  625, 725, srcArrow.width, srcArrow.height }; 
+                    DrawTexturePro(PC, srcReturn1, destNextStep, origin, 0, GREEN);
+                    DrawRectangleLines((int)destNextStep.x, (int)destNextStep.y, (int)destNextStep.width, (int)destNextStep.height, RED);
+
+                    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, destNextStep)) {
+                        currentScreen = SCREEN_DIRECTION;
+                    }
+                }
+
+                if (IsKeyPressed(KEY_ESCAPE) || (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, btnReturn))) {
                     currentScreen = SCREEN_ORDORED_PANEL;
+                }
+                break;
+            
+            case SCREEN_DIRECTION:
+                draw_buttons_direction(PC);
+                update_car_position(dt);      
+                place_car_at_start_pos();     
+
+                if (IsKeyPressed(KEY_ESCAPE) || (CheckCollisionPointRec(mouse, btnReturn) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))) {
+                    currentScreen = SCREEN_MANUAL;
                 }
                 break;
 
