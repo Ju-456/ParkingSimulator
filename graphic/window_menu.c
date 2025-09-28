@@ -1,5 +1,29 @@
 #include "window_menu.h"
 
+Texture2D background;
+Texture2D parking_place;
+Texture2D panel_menu;
+
+Texture2D entrance_barrier;
+Texture2D entrance_ticket_dispenser;
+
+Texture2D exit_pay_station;
+Texture2D exit_barrier;
+
+Texture2D barrier_wall;
+
+Texture2D floor_exit;
+Texture2D floor_indicator[3];
+
+Texture2D PC;
+
+Texture2D blackRightTex, blackFrontTex, blackTopTex;
+Texture2D blueRightTex, blueFrontTex, blueTopTex;
+Texture2D grayRightTex, grayFrontTex, grayTopTex;
+Texture2D pinkRightTex, pinkFrontTex, pinkTopTex;
+Texture2D redRightTex, redFrontTex, redTopTex;
+Texture2D yellowRightTex, yellowFrontTex, yellowTopTex;
+
 int entrance_state = 0; // 0 - closed, 1 - opened
 int exit_state = 0;
 int barrier_type = 0;   // 0 - entrance, 1 - exit
