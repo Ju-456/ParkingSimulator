@@ -4,6 +4,8 @@
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 800
 
+#define MAX_FLOOR 2
+
 #include <math.h>
 #include "parking.h"
 
@@ -37,6 +39,8 @@ void choose_your_car_condition();
 void update_car_position(float dt);
 void place_car_at_start_pos();
 void draw_buttons_direction(Texture2D PC);
+
+void drawFloorArrows(Texture2D PC, Rectangle srcArrow, Rectangle prev, Rectangle next, int floor);
 
 void init_window_parking(const char *full_path_json, int num_parking_places, Parking places[]);
 
