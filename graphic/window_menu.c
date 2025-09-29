@@ -652,8 +652,8 @@ void drawFloorArrows(Texture2D PC, Rectangle srcArrow, Rectangle prev, Rectangle
     Color upTint   = canUp   ? WHITE : Fade(GRAY, 0.5f);
     Color downTint = canDown ? WHITE : Fade(GRAY, 0.5f);
 
-    DrawTexturePro(PC, srcArrow, prev, origin,  90.0f, upTint);
-    DrawTexturePro(PC, srcArrow, next, origin, -90.0f, downTint);
+    DrawTexturePro(PC, srcArrow, prev, origin,  0.0f, upTint);
+    DrawTexturePro(PC, srcArrow, next, origin, 180.0f, downTint);
 }
 
 void init_window_parking(const char *full_path_json, int num_parking_places, Parking places[])
