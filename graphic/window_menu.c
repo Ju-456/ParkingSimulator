@@ -746,6 +746,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             draw_exit_barrier();
         }
         draw_parking_places(num_parking_places, places);
+        draw_floor(); 
 
         // permanent arrows (independently of the mode)
         Rectangle srcArrow = {129, 64, 60, 57};
