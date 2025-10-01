@@ -74,6 +74,11 @@ float carY = 73;
 float carStep = 15.0f;      // displacement in pixels by pressing
 float carRotation = -90.0f; // default to the right
 
+//colors
+Color parkingBlue = (Color){ 72, 153, 175, 255 };
+Color parkingRed = (Color){ 255, 13, 91, 255 };
+Color parkingGreen = (Color){ 123, 144, 75, 255 };
+
 void draw_parking_places(int n, Parking places[])
 {
     const float width = 180.0f;
@@ -371,13 +376,13 @@ void ordored_panel_menu(Font font)
 {
     Rectangle srcMode = {258, 65, 125, 60};
     DrawTextureRec(PC, srcMode, (Vector2){btnRandom.x, btnRandom.y}, WHITE);
-    DrawTextEx(font, "Random", (Vector2){btnRandom.x + 28, btnRandom.y + 18}, 18, 1, DARKBLUE);
+    DrawTextEx(font, "Random", (Vector2){btnRandom.x + 28, btnRandom.y + 18}, 18, 1, parkingBlue);
 
     DrawTextureRec(PC, srcMode, (Vector2){btnManual.x, btnManual.y}, WHITE);
-    DrawTextEx(font, "Manual", (Vector2){btnManual.x + 32, btnManual.y + 18}, 18, 1, DARKGREEN);
+    DrawTextEx(font, "Manual", (Vector2){btnManual.x + 32, btnManual.y + 18}, 18, 1, parkingGreen);
 
     DrawTextureRec(PC, srcMode, (Vector2){btnHardManual.x, btnHardManual.y}, WHITE);
-    DrawTextEx(font, "Hard Manual", (Vector2){btnHardManual.x + 8, btnHardManual.y + 18}, 18, 1, MAROON);
+    DrawTextEx(font, "Hard Manual", (Vector2){btnHardManual.x + 8, btnHardManual.y + 18}, 18, 1, parkingRed);
 }
 
 void choose_your_car(Font font)
@@ -639,7 +644,7 @@ void draw_buttons_direction(Texture2D PC)
     DrawTextureRec(PC, srcLeft, posLeft, WHITE);
     DrawTextureRec(PC, srcRight, posRight, WHITE);
 
-    DrawTextureRec(PC, srcS, posS, RED); // to imitate a 'stop' button
+    DrawTextureRec(PC, srcS, posS, parkingRed); // to imitate a 'stop' button
 }
 
 void drawFloorArrows(Texture2D PC, Rectangle srcArrow, Rectangle prev, Rectangle next, int floor)
@@ -755,7 +760,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
         Rectangle srcReturn = {0, 130, 60, 60};
         Rectangle destReturn = {140, 750, srcArrow.width, srcArrow.height};
-        DrawTexturePro(PC, srcReturn, destReturn, origin1, 0, BLUE);
+        DrawTexturePro(PC, srcReturn, destReturn, origin1, 0, parkingBlue);
 
         float dt = GetFrameTime();
         Vector2 mouse = GetMousePosition();
@@ -835,7 +840,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             break;
 
         case SCREEN_RANDOM:
-            DrawText("Random mode", 200, 400, 20, DARKBLUE);
+            DrawText("Random mode", 200, 400, 20, parkingBlue);
             if (IsKeyPressed(KEY_ESCAPE) ||
                 (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, btnReturn)))
             {
@@ -851,8 +856,8 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             {
                 Rectangle srcReturn1 = {0, 130, -60, 60};
                 Rectangle destNextStep = {625, 725, srcArrow.width, srcArrow.height};
-                DrawTexturePro(PC, srcReturn1, destNextStep, origin, 0, GREEN);
-                DrawRectangleLines((int)destNextStep.x, (int)destNextStep.y, (int)destNextStep.width, (int)destNextStep.height, RED);
+                DrawTexturePro(PC, srcReturn1, destNextStep, origin, 0, parkingGreen);
+                //DrawRectangleLines((int)destNextStep.x, (int)destNextStep.y, (int)destNextStep.width, (int)destNextStep.height, RED);
 
                 if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, destNextStep))
                 {
@@ -878,7 +883,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             break;
 
         case SCREEN_HARD_MANUAL:
-            DrawText("Hard Manual mode", 200, 400, 20, DARKGREEN);
+            DrawText("Hard Manual mode", 200, 400, 20, parkingRed);
             if (IsKeyPressed(KEY_ESCAPE) ||
                 (CheckCollisionPointRec(mouse, btnReturn) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)))
             {
