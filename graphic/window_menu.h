@@ -5,6 +5,8 @@
 #define SCREEN_HEIGHT 800
 
 #define MAX_FLOOR 2
+#define OPEN_DELAY 5.0
+#define CLOSE_DELAY 2.0
 
 #include <math.h>
 #include "parking.h"
@@ -16,7 +18,7 @@ typedef enum {
     SCREEN_DIRECTION,
     SCREEN_HARD_MANUAL
 } Screen;
-
+static inline bool game_mode_selected(Screen s);
 void draw_parking_places(int n, Parking places[]);
 void panel();
 void update_barrier_angles();
@@ -40,7 +42,7 @@ void update_car_position(float dt);
 void place_car_at_start_pos();
 void draw_buttons_direction(Texture2D PC);
 
-void drawFloorArrows(Texture2D PC, Rectangle srcArrow, Rectangle prev, Rectangle next, int floor);
+void draw_floor_arrows(Texture2D PC, Rectangle srcArrow, Rectangle prev, Rectangle next, int floor, bool enabled);
 
 void init_window_parking(const char *full_path_json, int num_parking_places, Parking places[]);
 

@@ -24,14 +24,14 @@ Texture2D pinkRightTex, pinkFrontTex, pinkTopTex;
 Texture2D redRightTex, redFrontTex, redTopTex;
 Texture2D yellowRightTex, yellowFrontTex, yellowTopTex;
 
-int entrance_state = 0; // 0 - closed, 1 - opened
-int exit_state = 0;
-int barrier_type = 0; // 0 - entrance, 1 - exit
+int entranceState = 0; // 0 - closed, 1 - opened
+int exitState = 0;
+int barrierType = 0; // 0 - entrance, 1 - exit
 
-float entrance_angle = 0.0f;
-float exit_angle = 0.0f;
-float entrance_target_angle = 0.0f; // -1.0 - no events pending, >= 0.0 = timer running
-float exit_target_angle = 0.0f;
+float entranceAngle = 0.0f;
+float exitAngle = 0.0f;
+float entranceTargetAngle = 0.0f; // -1.0 - no events pending, >= 0.0 = timer running
+float exitTargetAngle = 0.0f;
 
 const float BARRIER_SPEED = 180.0f; // deg/s
 
@@ -39,17 +39,15 @@ int ticket = 0;  // 0 = not taken, 1 = taken
 int payment = 0; // 0 = not paid, 1 = paid
 
 // to open automaticly
-double entrance_trigger_time = -1.0; // time when the ticket was taken
-double exit_trigger_time = -1.0;     // time when payment was made
-const double OPEN_DELAY = 2.0;
+double entranceTriggerTime = -1.0; // time when the ticket was taken
+double exitTriggerTime = -1.0;     // time when payment was made
 
 // to close automaticly
-double entrance_open_time = -1.0;
-double exit_open_time = -1.0;
-const double CLOSE_DELAY = 5.0;
+double entranceOpenTime = -1.0;
+double exitOpenTime = -1.0;
 
 // parking floors
-int current_floor = 0;
+int currentFloor = 0;
 static const char *FLOOR_FILES[3] = {
     "graph_floor_0.json", "graph_floor_1.json", "graph_floor_2.json"};
 
@@ -115,62 +113,62 @@ void update_barrier_angles()
     float delta_time = GetFrameTime(); // elapsed time since the last frame (in seconds)s
 
     // entrance
-    float deltaE = entrance_target_angle - entrance_angle; // difference between the desired angle and the current angle
+    float deltaE = entranceTargetAngle - entranceAngle; // difference between the desired angle and the current angle
     float stepE = BARRIER_SPEED * delta_time;              // how much we can rotate this frame
 
     if (fabsf(deltaE) <= stepE)
     {
-        entrance_angle = entrance_target_angle; // we can reach the target this frame
+        entranceAngle = entranceTargetAngle; // we can reach the target this frame
     }
     else
     {
-        entrance_angle += (deltaE > 0 ? stepE : -stepE); // move towards the target
+        entranceAngle += (deltaE > 0 ? stepE : -stepE); // move towards the target
     }
 
     // exit
-    float deltaX = exit_target_angle - exit_angle;
+    float deltaX = exitTargetAngle - exitAngle;
     float stepX = BARRIER_SPEED * delta_time;
 
     if (fabsf(deltaX) <= stepX)
     {
-        exit_angle = exit_target_angle;
+        exitAngle = exitTargetAngle;
     }
     else
     {
-        exit_angle += (deltaX > 0 ? stepX : -stepX);
+        exitAngle += (deltaX > 0 ? stepX : -stepX);
     }
 }
 
-void barrier_management(int barrier_type, int barrier_state)
+void barrier_management(int barrierType, int barrier_state)
 {
-    if (barrier_type == 0) // entrance
+    if (barrierType == 0) // entrance
     {
         if (barrier_state == 0) // we want to close it
         {
-            entrance_state = 0;
-            entrance_target_angle = 0.0f;
+            entranceState = 0;
+            entranceTargetAngle = 0.0f;
         }
         else if (barrier_state == 1) // we want to open it
         {
-            entrance_state = 1;
-            entrance_target_angle = -90.0f;
+            entranceState = 1;
+            entranceTargetAngle = -90.0f;
         }
         else
         {
             fprintf(stderr, "Wrong barrier state: %d\n", barrier_state);
         }
     }
-    else if (barrier_type == 1) // exit
+    else if (barrierType == 1) // exit
     {
         if (barrier_state == 0) // we want to close it
         {
-            exit_state = 0;
-            exit_target_angle = 0.0f;
+            exitState = 0;
+            exitTargetAngle = 0.0f;
         }
         else if (barrier_state == 1) // we want to open it
         {
-            exit_state = 1;
-            exit_target_angle = 90.0f;
+            exitState = 1;
+            exitTargetAngle = 90.0f;
         }
         else
         {
@@ -179,13 +177,13 @@ void barrier_management(int barrier_type, int barrier_state)
     }
     else
     {
-        fprintf(stderr, "Wrong barrier type: %d\n", barrier_type);
+        fprintf(stderr, "Wrong barrier type: %d\n", barrierType);
     }
 }
 
 void handle_stations_input()
 {
-    if (current_floor != 0)
+    if (currentFloor != 0)
     {
         if (IsKeyPressed(KEY_T) || IsKeyPressed(KEY_P))
         {
@@ -199,7 +197,7 @@ void handle_stations_input()
         if (ticket == 0)
         {
             ticket = 1;
-            entrance_trigger_time = GetTime();
+            entranceTriggerTime = GetTime();
             printf("[ENTRY] Ticket taken.\n");
         }
         else
@@ -219,7 +217,7 @@ void handle_stations_input()
         else if (payment == 0)
         {
             payment = 1;
-            exit_trigger_time = GetTime();
+            exitTriggerTime = GetTime();
             printf("[EXIT] Ticket paid.\n");
         }
         else
@@ -231,42 +229,42 @@ void handle_stations_input()
 
 void handle_automatic_opening()
 {
-    if (current_floor != 0)
+    if (currentFloor != 0)
         return;
     double now = GetTime();
 
     // entrance
     // open after taking a ticket
-    if (entrance_trigger_time >= 0.0 && (now - entrance_trigger_time) >= OPEN_DELAY)
+    if (entranceTriggerTime >= 0.0 && (now - entranceTriggerTime) >= OPEN_DELAY)
     {
         barrier_management(0, 1);     // open
-        entrance_trigger_time = -1.0; // no pending events
-        entrance_open_time = now;
+        entranceTriggerTime = -1.0; // no pending events
+        entranceOpenTime = now;
     }
 
     // close after 5sec
-    if (entrance_open_time >= 0.0 && (now - entrance_open_time) >= CLOSE_DELAY)
+    if (entranceOpenTime >= 0.0 && (now - entranceOpenTime) >= CLOSE_DELAY)
     {
         barrier_management(0, 0); // close
-        entrance_open_time = -1.0;
+        entranceOpenTime = -1.0;
     }
 
     // exit
     // open after payement
-    if (exit_trigger_time >= 0.0 && (now - exit_trigger_time) >= OPEN_DELAY)
+    if (exitTriggerTime >= 0.0 && (now - exitTriggerTime) >= OPEN_DELAY)
     {
         barrier_management(1, 1);
-        exit_trigger_time = -1.0;
-        exit_open_time = now;
+        exitTriggerTime = -1.0;
+        exitOpenTime = now;
     }
 
     // close after 5sec
-    if (exit_open_time >= 0.0 && (now - exit_open_time) >= CLOSE_DELAY)
+    if (exitOpenTime >= 0.0 && (now - exitOpenTime) >= CLOSE_DELAY)
     {
         barrier_management(1, 0);
         ticket = 0;
         payment = 0;
-        exit_open_time = -1.0;
+        exitOpenTime = -1.0;
     }
 }
 
@@ -280,7 +278,7 @@ void draw_entrance_barrier()
     Rectangle src = (Rectangle){0, 0, (float)entrance_barrier.width, (float)entrance_barrier.height};
     Rectangle dst = (Rectangle){x, y, (float)entrance_barrier.width, (float)entrance_barrier.height};
 
-    DrawTexturePro(entrance_barrier, src, dst, origin, entrance_angle, WHITE);
+    DrawTexturePro(entrance_barrier, src, dst, origin, entranceAngle, WHITE);
 }
 
 void draw_exit_barrier()
@@ -295,7 +293,7 @@ void draw_exit_barrier()
     Vector2 origin = {0.0f, (float)exit_barrier.height};
     Rectangle dst = (Rectangle){x + origin.x, y + origin.y, (float)exit_barrier.width, (float)exit_barrier.height};
 
-    DrawTexturePro(exit_barrier, src, dst, origin, exit_angle, WHITE);
+    DrawTexturePro(exit_barrier, src, dst, origin, exitAngle, WHITE);
 }
 
 // reload a floor to reset the states
@@ -314,11 +312,11 @@ void reload_floor(int floor, Parking places[], int *num_parking_places)
         fprintf(stderr, "[FLOOR] Error loading: %s\n", FLOOR_FILES[floor]);
     }
 
-    entrance_state = exit_state = 0;
-    entrance_target_angle = exit_target_angle = 0.0f;
-    entrance_angle = exit_angle = 0.0f;
-    entrance_trigger_time = exit_trigger_time = -1.0;
-    entrance_open_time = exit_open_time = -1.0;
+    entranceState = exitState = 0;
+    entranceTargetAngle = exitTargetAngle = 0.0f;
+    entranceAngle = exitAngle = 0.0f;
+    entranceTriggerTime = exitTriggerTime = -1.0;
+    entranceOpenTime = exitOpenTime = -1.0;
 }
 // old verison
 void handle_floor_input(Parking places[], int *num_parking_places)
@@ -326,10 +324,10 @@ void handle_floor_input(Parking places[], int *num_parking_places)
     // UP
     if (IsKeyPressed(KEY_U))
     {
-        if (current_floor < 2)
+        if (currentFloor < 2)
         {
-            current_floor++;
-            reload_floor(current_floor, places, num_parking_places);
+            currentFloor++;
+            reload_floor(currentFloor, places, num_parking_places);
         }
         else
         {
@@ -340,10 +338,10 @@ void handle_floor_input(Parking places[], int *num_parking_places)
     // DOWN
     if (IsKeyPressed(KEY_D))
     {
-        if (current_floor > 0)
+        if (currentFloor > 0)
         {
-            current_floor--;
-            reload_floor(current_floor, places, num_parking_places);
+            currentFloor--;
+            reload_floor(currentFloor, places, num_parking_places);
         }
         else
         {
@@ -355,7 +353,7 @@ void handle_floor_input(Parking places[], int *num_parking_places)
 void draw_floor()
 {
     DrawTexture(floor_exit, 780.0f, 20.0f, WHITE);
-    DrawTexture(floor_indicator[current_floor], 740.0f, 20.0f, WHITE);
+    DrawTexture(floor_indicator[currentFloor], 740.0f, 20.0f, WHITE);
 }
 
 void init_ordored_panel_menu()
@@ -647,12 +645,12 @@ void draw_buttons_direction(Texture2D PC)
     DrawTextureRec(PC, srcS, posS, parkingRed); // to imitate a 'stop' button
 }
 
-void drawFloorArrows(Texture2D PC, Rectangle srcArrow, Rectangle prev, Rectangle next, int floor)
+void draw_floor_arrows(Texture2D PC, Rectangle srcArrow, Rectangle prev, Rectangle next, int floor, bool enabled)
 {
     Vector2 origin = { srcArrow.width / 2.0f, srcArrow.height / 2.0f };
 
-    bool canUp   = (floor < MAX_FLOOR);
-    bool canDown = (floor > 0);
+    bool canUp   = enabled && (floor < MAX_FLOOR);
+    bool canDown = enabled && (floor > 0);
 
     Color upTint   = canUp   ? WHITE : Fade(GRAY, 0.5f);
     Color downTint = canDown ? WHITE : Fade(GRAY, 0.5f);
@@ -660,7 +658,9 @@ void drawFloorArrows(Texture2D PC, Rectangle srcArrow, Rectangle prev, Rectangle
     DrawTexturePro(PC, srcArrow, prev, origin,  0.0f, upTint);
     DrawTexturePro(PC, srcArrow, next, origin, 180.0f, downTint);
 }
-
+static inline bool game_mode_selected(Screen s) {
+    return s == SCREEN_RANDOM || s == SCREEN_MANUAL || s == SCREEN_HARD_MANUAL || s == SCREEN_DIRECTION;
+}
 void init_window_parking(const char *full_path_json, int num_parking_places, Parking places[])
 {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Parking Simulator");
@@ -717,7 +717,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
     yellowRightTex = LoadTexture("Assets/yellow_car/yellowRight.png");
     yellowTopTex = LoadTexture("Assets/yellow_car/yellowTop.png");
 
-    current_floor = 0;
+    currentFloor = 0;
 
     Font font = LoadFontEx("resources/Minecraftia.ttf", 15, NULL, 0);
 
@@ -745,7 +745,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
         DrawTexture(background, 0, 0, WHITE);
 
         panel();
-        if (current_floor == 0)
+        if (currentFloor == 0)
         {
             draw_entrance_barrier();
             draw_exit_barrier();
@@ -756,7 +756,8 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
         // permanent arrows (independently of the mode)
         Rectangle srcArrow = {129, 64, 60, 57};
 
-        drawFloorArrows(PC, srcArrow, destPreviewLevel, destNextLevel, current_floor);
+        bool floorsEnabled = game_mode_selected(currentScreen);
+        draw_floor_arrows(PC, srcArrow, destPreviewLevel, destNextLevel, currentFloor, floorsEnabled);
 
         Rectangle srcReturn = {0, 130, 60, 60};
         Rectangle destReturn = {140, 750, srcArrow.width, srcArrow.height};
@@ -766,14 +767,14 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
         Vector2 mouse = GetMousePosition();
         DrawText(TextFormat("(x;y) = (%d;%d)", (int)mouse.x, (int)mouse.y), 10, 10, 12, BLACK);
         //to change floors
-         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+         if (game_mode_selected(currentScreen) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
             {
                 if (CheckCollisionPointRec(mouse, destPreviewLevel))
                 {
-                    if (current_floor < MAX_FLOOR)
+                    if (currentFloor < MAX_FLOOR)
                     {
-                        current_floor++;
-                        reload_floor(current_floor, places, &num_parking_places);
+                        currentFloor++;
+                        reload_floor(currentFloor, places, &num_parking_places);
                     }
                     else
                     {
@@ -782,10 +783,10 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
                 }
                 else if (CheckCollisionPointRec(mouse, destNextLevel))
                 {
-                    if (current_floor > 0)
+                    if (currentFloor > 0)
                     {
-                        current_floor--;
-                        reload_floor(current_floor, places, &num_parking_places);
+                        currentFloor--;
+                        reload_floor(currentFloor, places, &num_parking_places);
                     }
                     else
                     {
