@@ -928,7 +928,8 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             DrawText("Random mode", 200, 400, 20, parkingBlue);
             if (IsKeyPressed(KEY_ESCAPE) ||
                 (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, btnReturn)))
-            {
+            {   
+                controlsUnlocked = true; 
                 currentScreen = SCREEN_ORDORED_PANEL;
             }
             break;
