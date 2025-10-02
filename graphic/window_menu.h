@@ -5,8 +5,8 @@
 #define SCREEN_HEIGHT 800
 
 #define MAX_FLOOR 2
-#define OPEN_DELAY 5.0
-#define CLOSE_DELAY 2.0
+#define OPEN_DELAY 1.0
+#define CLOSE_DELAY 1.0
 
 #include <math.h>
 #include "parking.h"
@@ -43,6 +43,10 @@ void place_car_at_start_pos();
 void draw_buttons_direction(Texture2D PC);
 
 void draw_floor_arrows(Texture2D PC, Rectangle srcArrow, Rectangle prev, Rectangle next, int floor, bool enabled);
+void draw_return_arrow(Texture2D PC, Rectangle srcReturn, Rectangle destReturn, bool enabled);
+static inline Color disabled_tint(Color base, bool enabled);
+void draw_ticket_pay_buttons(Font font, bool enabled);
+void handle_station_buttons_click(Vector2 mouse);
 
 void init_window_parking(const char *full_path_json, int num_parking_places, Parking places[]);
 

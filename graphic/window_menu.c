@@ -77,6 +77,8 @@ Color parkingBlue = (Color){ 72, 153, 175, 255 };
 Color parkingRed = (Color){ 255, 13, 91, 255 };
 Color parkingGreen = (Color){ 123, 144, 75, 255 };
 
+Rectangle btnTicket;
+Rectangle btnPay;
 void draw_parking_places(int n, Parking places[])
 {
     const float width = 180.0f;
@@ -363,9 +365,13 @@ void init_ordored_panel_menu()
     int buttonHeight = srcMode.height;
     int PosY = 720;
 
+
     btnRandom = (Rectangle){200, PosY, buttonWidth, buttonHeight};
     btnManual = (Rectangle){335, PosY, buttonWidth, buttonHeight};
     btnHardManual = (Rectangle){470, PosY, buttonWidth, buttonHeight};
+
+    btnTicket     = (Rectangle){780-buttonWidth, 580, buttonWidth, buttonHeight};
+    btnPay        = (Rectangle){780-buttonWidth, 650, buttonWidth, buttonHeight};
 
     btnReturn = (Rectangle){120, PosY, 60, 57};
 }
@@ -380,7 +386,9 @@ void ordored_panel_menu(Font font)
     DrawTextEx(font, "Manual", (Vector2){btnManual.x + 32, btnManual.y + 18}, 18, 1, parkingGreen);
 
     DrawTextureRec(PC, srcMode, (Vector2){btnHardManual.x, btnHardManual.y}, WHITE);
-    DrawTextEx(font, "Hard Manual", (Vector2){btnHardManual.x + 8, btnHardManual.y + 18}, 18, 1, parkingRed);
+    //DrawTextEx(font, "Hard Manual", (Vector2){btnHardManual.x + 8, btnHardManual.y + 18}, 18, 1, parkingRed);
+    DrawTextEx(font, "     Hard", (Vector2){btnHardManual.x + 8, btnHardManual.y + 18}, 18, 1, parkingRed);
+
 }
 
 void choose_your_car(Font font)
@@ -627,7 +635,6 @@ void draw_buttons_direction(Texture2D PC)
     Rectangle srcLeft = {256, 320, 60, 57};
     Rectangle srcRight = {325, 320, 60, 57};
 
-    Rectangle srcS = {64, 0, 60, 57};
 
     Vector2 posUp = {440, 660};
     Vector2 posDown = {440, 720};
@@ -635,14 +642,12 @@ void draw_buttons_direction(Texture2D PC)
     Vector2 posLeft = {posDown.x - 60, posDown.y};
     Vector2 posRight = {posDown.x + 65, posDown.y};
 
-    Vector2 posS = {posDown.x - 150, posDown.y};
-
     DrawTextureRec(PC, srcUp, posUp, WHITE);
     DrawTextureRec(PC, srcDown, posDown, WHITE);
     DrawTextureRec(PC, srcLeft, posLeft, WHITE);
     DrawTextureRec(PC, srcRight, posRight, WHITE);
 
-    DrawTextureRec(PC, srcS, posS, parkingRed); // to imitate a 'stop' button
+    //DrawTextureRec(PC, srcS, posS, parkingRed); // to imitate a 'stop' button
 }
 
 void draw_floor_arrows(Texture2D PC, Rectangle srcArrow, Rectangle prev, Rectangle next, int floor, bool enabled)
@@ -658,9 +663,83 @@ void draw_floor_arrows(Texture2D PC, Rectangle srcArrow, Rectangle prev, Rectang
     DrawTexturePro(PC, srcArrow, prev, origin,  0.0f, upTint);
     DrawTexturePro(PC, srcArrow, next, origin, 180.0f, downTint);
 }
+
+void draw_return_arrow(Texture2D PC, Rectangle srcReturn, Rectangle destReturn, bool enabled){
+
+    Color returnColor = enabled ? parkingBlue : Fade(GRAY, 0.5f);
+
+    DrawTexturePro(PC, srcReturn, destReturn, origin1, 0, returnColor);
+
+}
+
 static inline bool game_mode_selected(Screen s) {
     return s == SCREEN_RANDOM || s == SCREEN_MANUAL || s == SCREEN_HARD_MANUAL || s == SCREEN_DIRECTION;
 }
+
+static inline Color disabled_tint(Color base, bool enabled){
+    return enabled ? base : Fade(GRAY, 0.5f);
+}
+void draw_ticket_pay_buttons(Font font, bool enabled)
+{
+    bool canUse = (currentFloor == 0) && enabled;
+    Color btnTint   = disabled_tint(WHITE, canUse);
+    Color textTint1 = disabled_tint(parkingBlue, canUse);
+    Color textTint2 = disabled_tint(parkingRed,  canUse);
+
+    DrawTextureRec(PC, srcMode, (Vector2){btnTicket.x, btnTicket.y}, btnTint);
+    DrawTextEx(font, "Ticket", (Vector2){btnTicket.x + 32, btnTicket.y + 18}, 18, 1, textTint1);
+
+    DrawTextureRec(PC, srcMode, (Vector2){btnPay.x, btnPay.y}, btnTint);
+    DrawTextEx(font, "  Pay",  (Vector2){btnPay.x + 35,  btnPay.y + 18}, 18, 1, textTint2);
+}
+void handle_station_buttons_click(Vector2 mouse)
+{
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+    {
+        if (currentFloor != 0)
+        {
+            if (CheckCollisionPointRec(mouse, btnTicket) || CheckCollisionPointRec(mouse, btnPay))
+            {
+                printf("[FLOOR] Take the ticket or pay only on the ground floor (0).\n");
+            }
+            return;
+        }
+
+        if (CheckCollisionPointRec(mouse, btnTicket))
+        {
+            if (ticket == 0)
+            {
+                ticket = 1;
+                entranceTriggerTime = GetTime();
+                printf("[ENTRY] Ticket taken.\n");
+            }
+            else
+            {
+                printf("[ENTRY] Ticket was already taken.\n");
+            }
+        }
+
+        if (CheckCollisionPointRec(mouse, btnPay))
+        {
+            if (ticket == 0)
+            {
+                printf("[EXIT] Unable to pay: no ticket.\n");
+                fflush(stdout);
+            }
+            else if (payment == 0)
+            {
+                payment = 1;
+                exitTriggerTime = GetTime();
+                printf("[EXIT] Ticket paid.\n");
+            }
+            else
+            {
+                printf("[EXIT] Ticket was already paid.\n");
+            }
+        }
+    }
+}
+
 void init_window_parking(const char *full_path_json, int num_parking_places, Parking places[])
 {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Parking Simulator");
@@ -745,6 +824,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
         DrawTexture(background, 0, 0, WHITE);
 
         panel();
+        draw_ticket_pay_buttons(font, game_mode_selected(currentScreen));
         if (currentFloor == 0)
         {
             draw_entrance_barrier();
@@ -761,7 +841,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
         Rectangle srcReturn = {0, 130, 60, 60};
         Rectangle destReturn = {140, 750, srcArrow.width, srcArrow.height};
-        DrawTexturePro(PC, srcReturn, destReturn, origin1, 0, parkingBlue);
+        draw_return_arrow(PC, srcReturn, destReturn, game_mode_selected(currentScreen));
 
         float dt = GetFrameTime();
         Vector2 mouse = GetMousePosition();
@@ -795,7 +875,8 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
                 }
             }
             update_barrier_angles();
-            handle_stations_input();
+            //handle_stations_input();
+            handle_station_buttons_click(mouse);
             handle_automatic_opening();
 
         switch (currentScreen)
