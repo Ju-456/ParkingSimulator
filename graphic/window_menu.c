@@ -79,6 +79,7 @@ Color parkingGreen = (Color){ 123, 144, 75, 255 };
 
 Rectangle btnTicket;
 Rectangle btnPay;
+bool controlsUnlocked = false; 
 void draw_parking_places(int n, Parking places[])
 {
     const float width = 180.0f;
@@ -692,8 +693,9 @@ void draw_ticket_pay_buttons(Font font, bool enabled)
     DrawTextureRec(PC, srcMode, (Vector2){btnPay.x, btnPay.y}, btnTint);
     DrawTextEx(font, "  Pay",  (Vector2){btnPay.x + 35,  btnPay.y + 18}, 18, 1, textTint2);
 }
-void handle_station_buttons_click(Vector2 mouse)
+void handle_station_buttons_click(Vector2 mouse, bool enabled)
 {
+    if (!enabled) return;
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
     {
         if (currentFloor != 0)
@@ -824,7 +826,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
         DrawTexture(background, 0, 0, WHITE);
 
         panel();
-        draw_ticket_pay_buttons(font, game_mode_selected(currentScreen));
+        draw_ticket_pay_buttons(font, controlsUnlocked);
         if (currentFloor == 0)
         {
             draw_entrance_barrier();
@@ -836,7 +838,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
         // permanent arrows (independently of the mode)
         Rectangle srcArrow = {129, 64, 60, 57};
 
-        bool floorsEnabled = game_mode_selected(currentScreen);
+        bool floorsEnabled = controlsUnlocked;
         draw_floor_arrows(PC, srcArrow, destPreviewLevel, destNextLevel, currentFloor, floorsEnabled);
 
         Rectangle srcReturn = {0, 130, 60, 60};
@@ -847,7 +849,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
         Vector2 mouse = GetMousePosition();
         DrawText(TextFormat("(x;y) = (%d;%d)", (int)mouse.x, (int)mouse.y), 10, 10, 12, BLACK);
         //to change floors
-         if (game_mode_selected(currentScreen) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+         if (controlsUnlocked && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
             {
                 if (CheckCollisionPointRec(mouse, destPreviewLevel))
                 {
@@ -876,12 +878,13 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             }
             update_barrier_angles();
             //handle_stations_input();
-            handle_station_buttons_click(mouse);
+            handle_station_buttons_click(mouse, controlsUnlocked);
             handle_automatic_opening();
 
         switch (currentScreen)
         {
         case SCREEN_ORDORED_PANEL:
+            controlsUnlocked = false;
             if (letters1 < strlen(message1))
             {
                 timer1 += dt;
@@ -943,6 +946,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
                 if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, destNextStep))
                 {
+                    controlsUnlocked = true; 
                     currentScreen = SCREEN_DIRECTION;
                 }
             }
@@ -960,6 +964,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
             if (IsKeyPressed(KEY_ESCAPE) || (CheckCollisionPointRec(mouse, btnReturn) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)))
             {
+                controlsUnlocked = false; 
                 currentScreen = SCREEN_MANUAL;
             }
             break;
@@ -969,6 +974,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             if (IsKeyPressed(KEY_ESCAPE) ||
                 (CheckCollisionPointRec(mouse, btnReturn) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)))
             {
+                controlsUnlocked = true; 
                 currentScreen = SCREEN_ORDORED_PANEL;
             }
             break;
