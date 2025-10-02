@@ -76,6 +76,8 @@ float carRotation = -90.0f; // default to the right
 Color parkingBlue = (Color){ 72, 153, 175, 255 };
 Color parkingRed = (Color){ 255, 13, 91, 255 };
 Color parkingGreen = (Color){ 123, 144, 75, 255 };
+Color brightGreen = (Color){ 75, 144, 77, 255 };
+Color brightBlue = (Color){ 72, 77, 175, 255 };
 
 Rectangle btnTicket;
 Rectangle btnPay;
@@ -667,7 +669,7 @@ void draw_floor_arrows(Texture2D PC, Rectangle srcArrow, Rectangle prev, Rectang
 
 void draw_return_arrow(Texture2D PC, Rectangle srcReturn, Rectangle destReturn, bool enabled){
 
-    Color returnColor = enabled ? parkingBlue : Fade(GRAY, 0.5f);
+    Color returnColor = enabled ? brightBlue : Fade(GRAY, 0.5f);
 
     DrawTexturePro(PC, srcReturn, destReturn, origin1, 0, returnColor);
 
@@ -942,7 +944,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             {
                 Rectangle srcReturn1 = {0, 130, -60, 60};
                 Rectangle destNextStep = {625, 725, srcArrow.width, srcArrow.height};
-                DrawTexturePro(PC, srcReturn1, destNextStep, origin, 0, parkingGreen);
+                DrawTexturePro(PC, srcReturn1, destNextStep, origin, 0, brightGreen);
                 //DrawRectangleLines((int)destNextStep.x, (int)destNextStep.y, (int)destNextStep.width, (int)destNextStep.height, RED);
 
                 if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, destNextStep))
