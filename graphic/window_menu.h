@@ -18,6 +18,7 @@ typedef enum {
     SCREEN_DIRECTION,
     SCREEN_HARD_MANUAL
 } Screen;
+
 static inline bool game_mode_selected(Screen s);
 void draw_parking_places(int n, Parking places[]);
 void panel();
@@ -39,6 +40,7 @@ void ordored_panel_menu(Font font);
 void choose_your_car(Font font);
 void choose_your_car_condition();
 void update_car_position(float dt);
+void delimitation_of_screen();
 void place_car_at_start_pos();
 void draw_buttons_direction(Texture2D PC);
 

@@ -60,10 +60,11 @@ Rectangle destPreviewLevel;
 Rectangle destNextLevel;
 
 static int chosenCar = -1;
-Rectangle srcMode = {258, 65, 125, 60};
-Rectangle srcArrow = {129, 64, 60, 57};
+
+Rectangle srcMode = {258, 68, 125, 60};
+Rectangle srcArrow = {129, 64, 60, 60};
 Rectangle srcReturn = {0, 130, -60, 60};
-Rectangle destReturn = {650, 750, 60, 57};
+Rectangle destReturn = {650, 750, 60, 60};
 Vector2 origin = {0, 0};
 Vector2 origin1 = {60 / 2.0f, 57 / 2.0f};
 
@@ -82,6 +83,7 @@ Color brightBlue = (Color){ 72, 77, 175, 255 };
 Rectangle btnTicket;
 Rectangle btnPay;
 bool controlsUnlocked = false; 
+
 void draw_parking_places(int n, Parking places[])
 {
     const float width = 180.0f;
@@ -363,7 +365,6 @@ void draw_floor()
 
 void init_ordored_panel_menu()
 {
-    Rectangle srcMode = {258, 65, 125, 60};
     int buttonWidth = srcMode.width;
     int buttonHeight = srcMode.height;
     int PosY = 720;
@@ -376,12 +377,11 @@ void init_ordored_panel_menu()
     btnTicket     = (Rectangle){780-buttonWidth, 580, buttonWidth, buttonHeight};
     btnPay        = (Rectangle){780-buttonWidth, 650, buttonWidth, buttonHeight};
 
-    btnReturn = (Rectangle){120, PosY, 60, 57};
+    btnReturn = (Rectangle){120, PosY, 60, 60};
 }
 
 void ordored_panel_menu(Font font)
 {
-    Rectangle srcMode = {258, 65, 125, 60};
     DrawTextureRec(PC, srcMode, (Vector2){btnRandom.x, btnRandom.y}, WHITE);
     DrawTextEx(font, "Random", (Vector2){btnRandom.x + 28, btnRandom.y + 18}, 18, 1, parkingBlue);
 
@@ -415,8 +415,6 @@ void choose_your_car(Font font)
     }
 
     DrawTextEx(font, TextSubtext(message, 0, letters), (Vector2){300, 590}, 24, 2, WHITE);
-
-    Rectangle srcMode = {258, 65, 125, 60};
 
     float scale = 0.8f;
 
@@ -545,7 +543,7 @@ void choose_your_car_condition()
 
 void update_car_position(float dt)
 {
-    float carSpeed = 150.0f; // num of pixel per second
+    float carSpeed = 250.0f; // num of pixel per second
 
     if (IsKeyDown(KEY_RIGHT))
     {
@@ -560,18 +558,46 @@ void update_car_position(float dt)
     if (IsKeyDown(KEY_UP))
     {
         carY -= carSpeed * dt;
-        carRotation = 0.0f;
+        carRotation = 180.0f;
     }
     if (IsKeyDown(KEY_DOWN))
     {
         carY += carSpeed * dt;
-        carRotation = 180.0f;
+        carRotation = 0.0f;
     }
 
+    delimitation_of_screen();
+}
+
+void delimitation_of_screen(){
     if (carY < 0)
-        carY = 130;
+        carY = 130; // car height ± 180 so we're used 130 for all boundary adjustments
     if (carY > 550)
         carY = 480;
+
+    if (carX > 750) {
+        if (carY > 0 && carY < 100) {
+            // chgmt of level IF != P-2 
+            printf("chgmt of level IF != P-2\n0 > carY < 100\n");     
+        } 
+        else if (carY > 435 && carY < 750) { 
+            // creation pop up window "Bye" + reorientation SCREEN_PANEL 
+            printf("creation pop up window 'Bye'\n435 > carY < 750\n");
+        } 
+        else if (carY >= 100 && carY <= 435) { //  100 < carY < 435
+            printf("You have nothing to do here !");
+            carX = 670;
+        } 
+    } else if (carX < 0){
+        if (carY > 0 && carY < 100) {
+            printf("return to the garage, => selection of a new car ?\n");     
+        }
+        else {
+            printf("You have nothing to do here !");
+            carX = 200;
+        }  
+    } 
+
 }
 
 void place_car_at_start_pos()
@@ -632,11 +658,11 @@ void place_car_at_start_pos()
 
 void draw_buttons_direction(Texture2D PC)
 {
-    Rectangle srcUp = {129, 320, 60, 57};
-    Rectangle srcDown = {192, 320, 60, 57};
+    Rectangle srcUp = {129, 320, 60, 60};
+    Rectangle srcDown = {192, 320, 60, 60};
 
-    Rectangle srcLeft = {256, 320, 60, 57};
-    Rectangle srcRight = {325, 320, 60, 57};
+    Rectangle srcLeft = {256, 320, 60, 60};
+    Rectangle srcRight = {325, 320, 60, 60};
 
 
     Vector2 posUp = {440, 660};
@@ -682,6 +708,7 @@ static inline bool game_mode_selected(Screen s) {
 static inline Color disabled_tint(Color base, bool enabled){
     return enabled ? base : Fade(GRAY, 0.5f);
 }
+
 void draw_ticket_pay_buttons(Font font, bool enabled)
 {
     bool canUse = (currentFloor == 0) && enabled;
@@ -838,12 +865,12 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
         draw_floor(); 
 
         // permanent arrows (independently of the mode)
-        Rectangle srcArrow = {129, 64, 60, 57};
+        Rectangle srcArrow = {129, 64, 60, 60};
 
         bool floorsEnabled = controlsUnlocked;
         draw_floor_arrows(PC, srcArrow, destPreviewLevel, destNextLevel, currentFloor, floorsEnabled);
 
-        Rectangle srcReturn = {0, 130, 60, 60};
+        Rectangle srcReturn = {0, 130, 65, 60};
         Rectangle destReturn = {140, 750, srcArrow.width, srcArrow.height};
         draw_return_arrow(PC, srcReturn, destReturn, game_mode_selected(currentScreen));
 
@@ -942,7 +969,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
             if (chosenCar != -1)
             {
-                Rectangle srcReturn1 = {0, 130, -60, 60};
+                Rectangle srcReturn1 = {0, 130, -65, 60};
                 Rectangle destNextStep = {625, 725, srcArrow.width, srcArrow.height};
                 DrawTexturePro(PC, srcReturn1, destNextStep, origin, 0, brightGreen);
                 //DrawRectangleLines((int)destNextStep.x, (int)destNextStep.y, (int)destNextStep.width, (int)destNextStep.height, RED);
