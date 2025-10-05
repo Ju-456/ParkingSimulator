@@ -98,6 +98,7 @@ void draw_parking_places(int n, Parking places[]) {
 
         if (places[i].direction == 0) { // positive direction
             DrawTexturePro(parking_place, src, dest, (Vector2){0, 0}, 0.0f, WHITE);
+
         } else { // negative direction => Renversed picture left/right
             Rectangle srcMir = (Rectangle){width, 0, -width, height};
             DrawTexturePro(parking_place, srcMir, dest, (Vector2){0, 0}, 0.0f, WHITE);
@@ -303,6 +304,7 @@ void handle_floor_input(Parking places[], int *num_parking_places) {
 
 void draw_floor() {
     DrawTexture(floor_exit, 780.0f, 20.0f, WHITE);
+
     DrawTexture(floor_indicator[currentFloor], 740.0f, 20.0f, WHITE);
 }
 
@@ -334,6 +336,10 @@ void ordored_panel_menu(Font font) {
     DrawTextEx(font, "     Hard", (Vector2){btnHardManual.x + 8, btnHardManual.y + 18}, 18, 1,
                parkingRed);
 }
+
+// void first_random_simulation() {
+//     place_car_at_start_pos();
+// }
 
 void choose_your_car(Font font) {
     const char *message = "Choose a car :";
@@ -434,29 +440,34 @@ void choose_your_car_condition() {
             blackFrontTex, (Rectangle){0, 0, blackFrontTex.width, blackFrontTex.height},
             (Rectangle){65, 583, blackFrontTex.width * scale, blackFrontTex.height * scale},
             (Vector2){0, 0}, 0.0f, WHITE);
+
     } else if (chosenCar == 1) {
         DrawTextureRec(PC, srcMode, (Vector2){40, 580}, WHITE);
         DrawTexturePro(
             blueFrontTex, (Rectangle){0, 0, blueFrontTex.width, blueFrontTex.height},
             (Rectangle){65, 583, blueFrontTex.width * scale, blueFrontTex.height * scale},
             (Vector2){0, 0}, 0.0f, WHITE);
+
     } else if (chosenCar == 2) {
         DrawTextureRec(PC, srcMode, (Vector2){40, 580}, WHITE);
         DrawTexturePro(
             grayFrontTex, (Rectangle){0, 0, grayFrontTex.width, grayFrontTex.height},
             (Rectangle){65, 583, grayFrontTex.width * scale, grayFrontTex.height * scale},
             (Vector2){0, 0}, 0.0f, WHITE);
+
     } else if (chosenCar == 3) {
         DrawTextureRec(PC, srcMode, (Vector2){40, 580}, WHITE);
         DrawTexturePro(
             pinkFrontTex, (Rectangle){0, 0, pinkFrontTex.width, pinkFrontTex.height},
             (Rectangle){65, 583, pinkFrontTex.width * scale, pinkFrontTex.height * scale},
             (Vector2){0, 0}, 0.0f, WHITE);
+
     } else if (chosenCar == 4) {
         DrawTextureRec(PC, srcMode, (Vector2){40, 580}, WHITE);
         DrawTexturePro(redFrontTex, (Rectangle){0, 0, redFrontTex.width, redFrontTex.height},
                        (Rectangle){65, 583, redFrontTex.width * scale, redFrontTex.height * scale},
                        (Vector2){0, 0}, 0.0f, WHITE);
+
     } else if (chosenCar == 5) {
         DrawTextureRec(PC, srcMode, (Vector2){40, 580}, WHITE);
         DrawTexturePro(
@@ -486,32 +497,37 @@ void update_car_position(float dt) {
         carRotation = 0.0f;
     }
 
-    delimitation_of_screen();
+    delimitation_of_playground();
 }
 
-void delimitation_of_screen() {
+void delimitation_of_playground() {
     if (carY < 0)
-        carY = 130; // car height ± 180 so we're used 130 for all boundary adjustments
+        carY = 130; // car height ± 180 so we're often used 130 for all boundary adjustments
     if (carY > 550)
         carY = 480;
 
-    if (carX > 750) {
-        if (carY > 0 && carY < 100) {
-            // chgmt of level IF != P-2
+    if ((carY > 100 && carY < 110) && (carX > 0 && carX < 150)) { // First barrier wall
+        carY = 75;
+    } else if ((carY > 440 && carY < 450) && (carX > 660 && carX < 750)) { // Second barrier wall
+        carY = 400;
+    } else if (carX > 750) {          // Right boundary
+        if (carY > 0 && carY < 100) { // chgmt of level IF != P-2
             printf("chgmt of level IF != P-2\n0 > carY < 100\n");
+            carX = 20;
+            carY = 75; // to give the illusion of continuity (like the window changed)
         } else if (carY > 435 && carY < 750) {
             // creation pop up window "Bye" + reorientation SCREEN_PANEL
             printf("creation pop up window 'Bye'\n435 > carY < 750\n");
-        } else if (carY >= 100 && carY <= 435) { //  100 < carY < 435
-            printf("You have nothing to do here !");
+        } else if (carY >= 100 && carY <= 435) { // 100 < carY < 435
+            printf("You have nothing to do here !\n");
             carX = 670;
         }
-    } else if (carX < 0) {
+    } else if (carX < 0) { // Left boundary
         if (carY > 0 && carY < 100) {
             printf("return to the garage, => selection of a new car ?\n");
         } else {
-            printf("You have nothing to do here !");
-            carX = 200;
+            printf("You have nothing to do here !\n");
+            carX = 130;
         }
     }
 }

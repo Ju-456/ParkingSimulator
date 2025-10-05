@@ -8,8 +8,8 @@
 #define OPEN_DELAY 1.0
 #define CLOSE_DELAY 5.0
 
-#include <math.h>
 #include "parking.h"
+#include <math.h>
 
 typedef enum {
     SCREEN_ORDORED_PANEL,
@@ -31,8 +31,8 @@ void handle_automatic_opening();
 void draw_entrance_barrier();
 void draw_exit_barrier();
 
-void reload_floor(int floor, Parking places[], int* num_parking_places);
-void handle_floor_input(Parking places[], int* num_parking_places);
+void reload_floor(int floor, Parking places[], int *num_parking_places);
+void handle_floor_input(Parking places[], int *num_parking_places);
 void draw_floor();
 
 void init_ordored_panel_menu();
@@ -40,11 +40,12 @@ void ordored_panel_menu(Font font);
 void choose_your_car(Font font);
 void choose_your_car_condition();
 void update_car_position(float dt);
-void delimitation_of_screen();
+void delimitation_of_playground();
 void place_car_at_start_pos();
 void draw_buttons_direction(Texture2D PC);
 
-void draw_floor_arrows(Texture2D PC, Rectangle srcArrow, Rectangle prev, Rectangle next, int floor, bool enabled);
+void draw_floor_arrows(Texture2D PC, Rectangle srcArrow, Rectangle prev, Rectangle next, int floor,
+                       bool enabled);
 void draw_return_arrow(Texture2D PC, Rectangle srcReturn, Rectangle destReturn, bool enabled);
 static inline Color disabled_tint(Color base, bool enabled);
 void draw_ticket_pay_buttons(Font font, bool enabled);
