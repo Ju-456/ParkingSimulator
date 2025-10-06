@@ -35,6 +35,9 @@ float exitTargetAngle = 0.0f;
 
 const float BARRIER_SPEED = 180.0f; // deg/s
 
+bool floorChangeRequestedUp = false;
+bool floorChangeRequestedDown = false;
+
 int ticket = 0;  // 0 = not taken, 1 = taken
 int payment = 0; // 0 = not paid, 1 = paid
 
@@ -303,7 +306,10 @@ void handle_floor_input(Parking places[], int *num_parking_places) {
 }
 
 void draw_floor() {
+    //top
     DrawTexture(floor_exit, 780.0f, 20.0f, WHITE);
+    //bottom
+    DrawTexture(floor_exit, 10.0f, 460.0f, WHITE);
 
     DrawTexture(floor_indicator[currentFloor], 740.0f, 20.0f, WHITE);
 }
@@ -501,8 +507,15 @@ void update_car_position(float dt) {
 }
 
 void delimitation_of_playground() {
+    if ((carY > 460 && carY < 540) && (carX > 0 && carX < 20)) {
+        if (currentFloor > 0) {
+            floorChangeRequestedDown = true;
+            carX = 710;  
+            carY = 75;
+        }
+    }
     if (carY < 0)
-        carY = 130; // car height ± 180 so we're often used 130 for all boundary adjustments
+        carY = 130; // because height is ± 180 so we're often used 130 for all boundary adjustments
     if (carY > 550)
         carY = 480;
 
@@ -512,9 +525,13 @@ void delimitation_of_playground() {
         carY = 400;
     } else if (carX > 750) {          // Right boundary
         if (carY > 0 && carY < 100) { // chgmt of level IF != P-2
-            printf("chgmt of level IF != P-2\n0 > carY < 100\n");
+            if (currentFloor < MAX_FLOOR) {
+            floorChangeRequestedUp = true;
             carX = 20;
-            carY = 75; // to give the illusion of continuity (like the window changed)
+            carY = 75;
+        } else {
+            carX = 670; 
+        }
         } else if (carY > 435 && carY < 750) {
             // creation pop up window "Bye" + reorientation SCREEN_PANEL
             printf("creation pop up window 'Bye'\n435 > carY < 750\n");
@@ -524,7 +541,7 @@ void delimitation_of_playground() {
         }
     } else if (carX < 0) { // Left boundary
         if (carY > 0 && carY < 100) {
-            printf("return to the garage, => selection of a new car ?\n");
+                carY = 400;
         } else {
             printf("You have nothing to do here !\n");
             carX = 130;
@@ -772,8 +789,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
         Rectangle srcArrow = {129, 64, 60, 60};
 
         bool floorsEnabled = controlsUnlocked;
-        draw_floor_arrows(PC, srcArrow, destPreviewLevel, destNextLevel, currentFloor,
-                          floorsEnabled);
+        draw_floor_arrows(PC, srcArrow, destPreviewLevel, destNextLevel, currentFloor, floorsEnabled);
 
         Rectangle srcReturn = {0, 130, 65, 60};
         Rectangle destReturn = {140, 750, srcArrow.width, srcArrow.height};
@@ -799,6 +815,16 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
                     printf("[FLOOR] Already on the ground floor (0)\n");
                 }
             }
+        }
+        if (floorChangeRequestedUp) {
+            currentFloor++;
+            reload_floor(currentFloor, places, &num_parking_places);
+            floorChangeRequestedUp = false;
+        }
+        if (floorChangeRequestedDown) {
+            currentFloor--;
+            reload_floor(currentFloor, places, &num_parking_places);
+            floorChangeRequestedDown = false;
         }
         update_barrier_angles();
         // handle_stations_input();
@@ -842,10 +868,13 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
         case SCREEN_RANDOM:
             DrawText("Random mode", 200, 400, 20, parkingBlue);
-            if (IsKeyPressed(KEY_ESCAPE) || (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
-                                             CheckCollisionPointRec(mouse, btnReturn))) {
+            if (IsKeyPressed(KEY_ESCAPE) || (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, btnReturn))) {
                 controlsUnlocked = true;
                 currentScreen = SCREEN_ORDORED_PANEL;
+                 if (currentFloor != 0) {
+                    currentFloor = 0;
+                    reload_floor(currentFloor, places, &num_parking_places);
+                }
             }
             break;
 
@@ -867,9 +896,12 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
                 }
             }
 
-            if (IsKeyPressed(KEY_ESCAPE) || (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
-                                             CheckCollisionPointRec(mouse, btnReturn))) {
+            if (IsKeyPressed(KEY_ESCAPE) || (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, btnReturn))) {
                 currentScreen = SCREEN_ORDORED_PANEL;
+                 if (currentFloor != 0) {
+                    currentFloor = 0;
+                    reload_floor(currentFloor, places, &num_parking_places);
+                }
             }
             break;
 
@@ -878,10 +910,13 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             update_car_position(dt);
             place_car_at_start_pos();
 
-            if (IsKeyPressed(KEY_ESCAPE) || (CheckCollisionPointRec(mouse, btnReturn) &&
-                                             IsMouseButtonPressed(MOUSE_LEFT_BUTTON))) {
+            if (IsKeyPressed(KEY_ESCAPE) || (CheckCollisionPointRec(mouse, btnReturn) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))) {
                 controlsUnlocked = false;
                 currentScreen = SCREEN_MANUAL;
+                 if (currentFloor != 0) {
+                    currentFloor = 0;
+                    reload_floor(currentFloor, places, &num_parking_places);
+                }
             }
             break;
 
