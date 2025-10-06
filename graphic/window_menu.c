@@ -306,9 +306,9 @@ void handle_floor_input(Parking places[], int *num_parking_places) {
 }
 
 void draw_floor() {
-    //top
+    // top
     DrawTexture(floor_exit, 780.0f, 20.0f, WHITE);
-    //bottom
+    // bottom
     DrawTexture(floor_exit, 10.0f, 460.0f, WHITE);
 
     DrawTexture(floor_indicator[currentFloor], 740.0f, 20.0f, WHITE);
@@ -510,7 +510,7 @@ void delimitation_of_playground() {
     if ((carY > 460 && carY < 540) && (carX > 0 && carX < 20)) {
         if (currentFloor > 0) {
             floorChangeRequestedDown = true;
-            carX = 710;  
+            carX = 710;
             carY = 75;
         }
     }
@@ -518,20 +518,23 @@ void delimitation_of_playground() {
         carY = 130; // because height is ± 180 so we're often used 130 for all boundary adjustments
     if (carY > 550)
         carY = 480;
-
-    if ((carY > 100 && carY < 110) && (carX > 0 && carX < 150)) { // First barrier wall
-        carY = 75;
-    } else if ((carY > 440 && carY < 450) && (carX > 660 && carX < 750)) { // Second barrier wall
-        carY = 400;
-    } else if (carX > 750) {          // Right boundary
+    if (currentFloor == 0) { // barriers wall are managed only on floor P-0
+        if ((carY > 100 && carY < 110) && (carX > 0 && carX < 150)) { // First barrier wall
+            carY = 75;
+        } else if ((carY > 440 && carY < 450) &&
+                   (carX > 660 && carX < 750)) { // Second barrier wall
+            carY = 400;
+        }
+    }
+    if (carX > 750) {                 // Right boundary
         if (carY > 0 && carY < 100) { // chgmt of level IF != P-2
             if (currentFloor < MAX_FLOOR) {
-            floorChangeRequestedUp = true;
-            carX = 20;
-            carY = 75;
-        } else {
-            carX = 670; 
-        }
+                floorChangeRequestedUp = true;
+                carX = 20;
+                carY = 75;
+            } else {
+                carX = 670;
+            }
         } else if (carY > 435 && carY < 750) {
             // creation pop up window "Bye" + reorientation SCREEN_PANEL
             printf("creation pop up window 'Bye'\n435 > carY < 750\n");
@@ -541,7 +544,7 @@ void delimitation_of_playground() {
         }
     } else if (carX < 0) { // Left boundary
         if (carY > 0 && carY < 100) {
-                carY = 400;
+            carY = 400;
         } else {
             printf("You have nothing to do here !\n");
             carX = 130;
@@ -789,7 +792,8 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
         Rectangle srcArrow = {129, 64, 60, 60};
 
         bool floorsEnabled = controlsUnlocked;
-        draw_floor_arrows(PC, srcArrow, destPreviewLevel, destNextLevel, currentFloor, floorsEnabled);
+        draw_floor_arrows(PC, srcArrow, destPreviewLevel, destNextLevel, currentFloor,
+                          floorsEnabled);
 
         Rectangle srcReturn = {0, 130, 65, 60};
         Rectangle destReturn = {140, 750, srcArrow.width, srcArrow.height};
@@ -868,10 +872,11 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
         case SCREEN_RANDOM:
             DrawText("Random mode", 200, 400, 20, parkingBlue);
-            if (IsKeyPressed(KEY_ESCAPE) || (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, btnReturn))) {
+            if (IsKeyPressed(KEY_ESCAPE) || (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
+                                             CheckCollisionPointRec(mouse, btnReturn))) {
                 controlsUnlocked = true;
                 currentScreen = SCREEN_ORDORED_PANEL;
-                 if (currentFloor != 0) {
+                if (currentFloor != 0) {
                     currentFloor = 0;
                     reload_floor(currentFloor, places, &num_parking_places);
                 }
@@ -896,9 +901,10 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
                 }
             }
 
-            if (IsKeyPressed(KEY_ESCAPE) || (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, btnReturn))) {
+            if (IsKeyPressed(KEY_ESCAPE) || (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
+                                             CheckCollisionPointRec(mouse, btnReturn))) {
                 currentScreen = SCREEN_ORDORED_PANEL;
-                 if (currentFloor != 0) {
+                if (currentFloor != 0) {
                     currentFloor = 0;
                     reload_floor(currentFloor, places, &num_parking_places);
                 }
@@ -910,10 +916,11 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             update_car_position(dt);
             place_car_at_start_pos();
 
-            if (IsKeyPressed(KEY_ESCAPE) || (CheckCollisionPointRec(mouse, btnReturn) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))) {
+            if (IsKeyPressed(KEY_ESCAPE) || (CheckCollisionPointRec(mouse, btnReturn) &&
+                                             IsMouseButtonPressed(MOUSE_LEFT_BUTTON))) {
                 controlsUnlocked = false;
                 currentScreen = SCREEN_MANUAL;
-                 if (currentFloor != 0) {
+                if (currentFloor != 0) {
                     currentFloor = 0;
                     reload_floor(currentFloor, places, &num_parking_places);
                 }
