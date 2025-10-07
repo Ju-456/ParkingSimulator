@@ -484,7 +484,7 @@ void choose_your_car_condition() {
 }
 
 void update_car_position(float dt) {
-    float carSpeed = 250.0f; // num of pixel per second
+    float carSpeed = 350.0f; // num of pixel per second
 
     if (IsKeyDown(KEY_RIGHT)) {
         carX += carSpeed * dt;
@@ -535,11 +535,11 @@ void delimitation_of_playground() {
             } else {
                 carX = 670;
             }
-        } else if (carY > 435 && carY < 750) {
-            // creation pop up window "Bye" + reorientation SCREEN_PANEL
-            printf("creation pop up window 'Bye'\n435 > carY < 750\n");
         } else if (carY >= 100 && carY <= 435) { // 100 < carY < 435
             printf("You have nothing to do here !\n");
+            carX = 670;
+        } else if (currentFloor != 0) {
+            printf("You have nothing to do here bc currentFloor != 0!\n");
             carX = 670;
         }
     } else if (carX < 0) { // Left boundary
