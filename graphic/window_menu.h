@@ -20,19 +20,19 @@ typedef enum {
 } Screen;
 
 static inline bool game_mode_selected(Screen s);
+static inline bool entrance_is_passable();
+static inline bool exit_is_passable();
 void draw_parking_places(int n, Parking places[]);
 void panel();
 void update_barrier_angles();
 void barrier_management(int barrier_type, int barrier_state);
 
-void handle_stations_input();
 void handle_automatic_opening();
 
 void draw_entrance_barrier();
 void draw_exit_barrier();
 
 void reload_floor(int floor, Parking places[], int *num_parking_places);
-void handle_floor_input(Parking places[], int *num_parking_places);
 void draw_floor();
 
 void init_ordored_panel_menu();
@@ -44,8 +44,7 @@ void delimitation_of_playground();
 void place_car_at_start_pos();
 void draw_buttons_direction(Texture2D PC);
 
-void draw_floor_arrows(Texture2D PC, Rectangle srcArrow, Rectangle prev, Rectangle next, int floor,
-                       bool enabled);
+void draw_floor_arrows(Texture2D PC, Rectangle srcArrow, Rectangle prev, Rectangle next, int floor, bool enabled);
 void draw_return_arrow(Texture2D PC, Rectangle srcReturn, Rectangle destReturn, bool enabled);
 static inline Color disabled_tint(Color base, bool enabled);
 void draw_ticket_pay_buttons(Font font, bool enabled);

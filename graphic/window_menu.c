@@ -51,8 +51,7 @@ double exitOpenTime = -1.0;
 
 // parking floors
 int currentFloor = 0;
-static const char *FLOOR_FILES[3] = {"graph_floor_0.json", "graph_floor_1.json",
-                                     "graph_floor_2.json"};
+static const char *FLOOR_FILES[3] = {"graph_floor_0.json", "graph_floor_1.json", "graph_floor_2.json"};
 
 Rectangle btnRandom;
 Rectangle btnManual;
@@ -80,8 +79,8 @@ float carRotation = -90.0f; // default to the right
 Color parkingBlue = (Color){72, 153, 175, 255};
 Color parkingRed = (Color){255, 13, 91, 255};
 Color parkingGreen = (Color){123, 144, 75, 255};
-Color brightGreen = (Color){75, 144, 77, 255};
-Color brightBlue = (Color){72, 77, 175, 255};
+Color brightGreen = (Color){103, 200, 106, 255};
+Color brightBlue = (Color){101, 181, 231, 255};
 
 Rectangle btnTicket;
 Rectangle btnPay;
@@ -117,8 +116,7 @@ void update_barrier_angles() {
     float delta_time = GetFrameTime(); // elapsed time since the last frame (in seconds)s
 
     // entrance
-    float deltaE = entranceTargetAngle -
-                   entranceAngle; // difference between the desired angle and the current angle
+    float deltaE = entranceTargetAngle - entranceAngle; // difference between the desired angle and the current angle
     float stepE = BARRIER_SPEED * delta_time; // how much we can rotate this frame
 
     if (fabsf(deltaE) <= stepE) {
@@ -152,7 +150,6 @@ void barrier_management(int barrierType, int barrier_state) {
         }
     } else if (barrierType == 1) { // exit
         if (barrier_state == 0) {  // we want to close it
-
             exitState = 0;
             exitTargetAngle = 0.0f;
         } else if (barrier_state == 1) { // we want to open it
@@ -166,38 +163,6 @@ void barrier_management(int barrierType, int barrier_state) {
     }
 }
 
-void handle_stations_input() {
-    if (currentFloor != 0) {
-        if (IsKeyPressed(KEY_T) || IsKeyPressed(KEY_P)) {
-            printf("[FLOOR] Take the ticket or pay only on the ground floor (0).\n");
-        }
-        return;
-    }
-    // take the ticket at the entrance
-    if (IsKeyPressed(KEY_T)) {
-        if (ticket == 0) {
-            ticket = 1;
-            entranceTriggerTime = GetTime();
-            printf("[ENTRY] Ticket taken.\n");
-        } else {
-            printf("[ENTRY] Ticket was already taken.\n");
-        }
-    }
-
-    // pay for the ticket on exit
-    if (IsKeyPressed(KEY_P)) {
-        if (ticket == 0) {
-            printf("[EXIT] Unable to pay: no ticket.\n");
-            fflush(stdout);
-        } else if (payment == 0) {
-            payment = 1;
-            exitTriggerTime = GetTime();
-            printf("[EXIT] Ticket paid.\n");
-        } else {
-            printf("[EXIT] Ticket was already paid.\n");
-        }
-    }
-}
 
 void handle_automatic_opening() {
     if (currentFloor != 0)
@@ -241,10 +206,8 @@ void draw_entrance_barrier() {
     DrawTexture(barrier_wall, 10.0f, 103.0f, WHITE);
     DrawTexture(entrance_ticket_dispenser, 100.0f, 20.0f, WHITE);
 
-    Rectangle src =
-        (Rectangle){0, 0, (float)entrance_barrier.width, (float)entrance_barrier.height};
-    Rectangle dst =
-        (Rectangle){x, y, (float)entrance_barrier.width, (float)entrance_barrier.height};
+    Rectangle src = (Rectangle){0, 0, (float)entrance_barrier.width, (float)entrance_barrier.height};
+    Rectangle dst = (Rectangle){x, y, (float)entrance_barrier.width, (float)entrance_barrier.height};
 
     DrawTexturePro(entrance_barrier, src, dst, origin, entranceAngle, WHITE);
 }
@@ -258,8 +221,7 @@ void draw_exit_barrier() {
     Rectangle src = (Rectangle){0, 0, (float)exit_barrier.width, (float)exit_barrier.height};
 
     Vector2 origin = {0.0f, (float)exit_barrier.height};
-    Rectangle dst = (Rectangle){x + origin.x, y + origin.y, (float)exit_barrier.width,
-                                (float)exit_barrier.height};
+    Rectangle dst = (Rectangle){x + origin.x, y + origin.y, (float)exit_barrier.width, (float)exit_barrier.height};
 
     DrawTexturePro(exit_barrier, src, dst, origin, exitAngle, WHITE);
 }
@@ -281,28 +243,6 @@ void reload_floor(int floor, Parking places[], int *num_parking_places) {
     entranceAngle = exitAngle = 0.0f;
     entranceTriggerTime = exitTriggerTime = -1.0;
     entranceOpenTime = exitOpenTime = -1.0;
-}
-// old verison
-void handle_floor_input(Parking places[], int *num_parking_places) {
-    // UP
-    if (IsKeyPressed(KEY_U)) {
-        if (currentFloor < 2) {
-            currentFloor++;
-            reload_floor(currentFloor, places, num_parking_places);
-        } else {
-            printf("[FLOOR] Already on the top floor (2)\n");
-        }
-    }
-
-    // DOWN
-    if (IsKeyPressed(KEY_D)) {
-        if (currentFloor > 0) {
-            currentFloor--;
-            reload_floor(currentFloor, places, num_parking_places);
-        } else {
-            printf("[FLOOR] Already on the ground floor (0)\n");
-        }
-    }
 }
 
 void draw_floor() {
@@ -339,13 +279,22 @@ void ordored_panel_menu(Font font) {
     DrawTextureRec(PC, srcMode, (Vector2){btnHardManual.x, btnHardManual.y}, WHITE);
     // DrawTextEx(font, "Hard Manual", (Vector2){btnHardManual.x + 8, btnHardManual.y + 18}, 18, 1,
     // parkingRed);
-    DrawTextEx(font, "     Hard", (Vector2){btnHardManual.x + 8, btnHardManual.y + 18}, 18, 1,
-               parkingRed);
+    DrawTextEx(font, "     Hard", (Vector2){btnHardManual.x + 8, btnHardManual.y + 18}, 18, 1, parkingRed);
 }
 
 // void first_random_simulation() {
 //     place_car_at_start_pos();
 // }
+//static inline bool entrance_is_passable() {
+    // check that the barrier is open and we have a ticket
+   //return (entranceAngle <= -85.0f) && (ticket == 1);
+//}
+
+//static inline bool exit_is_passable() {
+   // return (exitAngle >=  85.0f) && (payment == 1);
+//}
+
+
 
 void choose_your_car(Font font) {
     const char *message = "Choose a car :";
@@ -371,22 +320,19 @@ void choose_your_car(Font font) {
     // black car
     DrawTextureRec(PC, srcMode, (Vector2){btnRandom.x, btnRandom.y - 70}, WHITE);
     DrawTexturePro(blackRightTex, (Rectangle){0, 0, blackRightTex.width, blackRightTex.height},
-                   (Rectangle){btnRandom.x + 10, btnRandom.y - 65, srcMode.width * scale,
-                               srcMode.height * scale},
+                   (Rectangle){btnRandom.x + 10, btnRandom.y - 65, srcMode.width * scale, srcMode.height * scale},
                    (Vector2){0, 0}, 0.0f, WHITE);
 
     // blue car
     DrawTextureRec(PC, srcMode, (Vector2){btnManual.x, btnManual.y - 70}, WHITE);
     DrawTexturePro(blueRightTex, (Rectangle){0, 0, blueRightTex.width, blueRightTex.height},
-                   (Rectangle){btnManual.x + 10, btnManual.y - 65, srcMode.width * scale,
-                               srcMode.height * scale},
+                   (Rectangle){btnManual.x + 10, btnManual.y - 65, srcMode.width * scale, srcMode.height * scale},
                    (Vector2){0, 0}, 0.0f, WHITE);
 
     // gray car
     DrawTextureRec(PC, srcMode, (Vector2){btnHardManual.x, btnHardManual.y - 70}, WHITE);
     DrawTexturePro(grayRightTex, (Rectangle){0, 0, grayRightTex.width, grayRightTex.height},
-                   (Rectangle){btnHardManual.x + 10, btnHardManual.y - 65, srcMode.width * scale,
-                               srcMode.height * scale},
+                   (Rectangle){btnHardManual.x + 10, btnHardManual.y - 65, srcMode.width * scale, srcMode.height * scale},
                    (Vector2){0, 0}, 0.0f, WHITE);
 
     // pink car
@@ -406,8 +352,7 @@ void choose_your_car(Font font) {
     // yellow car
     DrawTextureRec(PC, srcMode, (Vector2){btnHardManual.x, btnHardManual.y}, WHITE);
     DrawTexturePro(yellowRightTex, (Rectangle){0, 0, yellowRightTex.width, yellowRightTex.height},
-                   (Rectangle){btnHardManual.x + 10, btnHardManual.y, srcMode.width * scale,
-                               srcMode.height * scale},
+                   (Rectangle){btnHardManual.x + 10, btnHardManual.y, srcMode.width * scale, srcMode.height * scale},
                    (Vector2){0, 0}, 0.0f, WHITE);
 
     choose_your_car_condition();
@@ -419,23 +364,17 @@ void choose_your_car_condition() {
     Vector2 mouse = GetMousePosition();
 
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        if (CheckCollisionPointRec(
-                mouse, (Rectangle){btnRandom.x, btnRandom.y - 70, srcMode.width, srcMode.height})) {
+        if (CheckCollisionPointRec(mouse, (Rectangle){btnRandom.x, btnRandom.y - 70, srcMode.width, srcMode.height})) {
             chosenCar = 0; // black car
-        } else if (CheckCollisionPointRec(mouse, (Rectangle){btnManual.x, btnManual.y - 70,
-                                                             srcMode.width, srcMode.height})) {
+        } else if (CheckCollisionPointRec(mouse, (Rectangle){btnManual.x, btnManual.y - 70, srcMode.width, srcMode.height})) {
             chosenCar = 1; // blue car
-        } else if (CheckCollisionPointRec(mouse, (Rectangle){btnHardManual.x, btnHardManual.y - 70,
-                                                             srcMode.width, srcMode.height})) {
+        } else if (CheckCollisionPointRec(mouse, (Rectangle){btnHardManual.x, btnHardManual.y - 70, srcMode.width, srcMode.height})) {
             chosenCar = 2; // gray car
-        } else if (CheckCollisionPointRec(mouse, (Rectangle){btnRandom.x, btnRandom.y,
-                                                             srcMode.width, srcMode.height})) {
+        } else if (CheckCollisionPointRec(mouse, (Rectangle){btnRandom.x, btnRandom.y, srcMode.width, srcMode.height})) {
             chosenCar = 3; // pink car
-        } else if (CheckCollisionPointRec(mouse, (Rectangle){btnManual.x, btnManual.y,
-                                                             srcMode.width, srcMode.height})) {
+        } else if (CheckCollisionPointRec(mouse, (Rectangle){btnManual.x, btnManual.y, srcMode.width, srcMode.height})) {
             chosenCar = 4; // red car
-        } else if (CheckCollisionPointRec(mouse, (Rectangle){btnHardManual.x, btnHardManual.y,
-                                                             srcMode.width, srcMode.height})) {
+        } else if (CheckCollisionPointRec(mouse, (Rectangle){btnHardManual.x, btnHardManual.y, srcMode.width, srcMode.height})) {
             chosenCar = 5; // yellow car
         }
     }
@@ -619,8 +558,7 @@ void draw_buttons_direction(Texture2D PC) {
     DrawTextureRec(PC, srcRight, posRight, WHITE);
 }
 
-void draw_floor_arrows(Texture2D PC, Rectangle srcArrow, Rectangle prev, Rectangle next, int floor,
-                       bool enabled) {
+void draw_floor_arrows(Texture2D PC, Rectangle srcArrow, Rectangle prev, Rectangle next, int floor, bool enabled) {
     Vector2 origin = {srcArrow.width / 2.0f, srcArrow.height / 2.0f};
 
     bool canUp = enabled && (floor < MAX_FLOOR);
@@ -641,8 +579,7 @@ void draw_return_arrow(Texture2D PC, Rectangle srcReturn, Rectangle destReturn, 
 }
 
 static inline bool game_mode_selected(Screen s) {
-    return s == SCREEN_RANDOM || s == SCREEN_MANUAL || s == SCREEN_HARD_MANUAL ||
-           s == SCREEN_DIRECTION;
+    return s == SCREEN_RANDOM || s == SCREEN_MANUAL || s == SCREEN_HARD_MANUAL || s == SCREEN_DIRECTION;
 }
 
 static inline Color disabled_tint(Color base, bool enabled) {
@@ -792,8 +729,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
         Rectangle srcArrow = {129, 64, 60, 60};
 
         bool floorsEnabled = controlsUnlocked;
-        draw_floor_arrows(PC, srcArrow, destPreviewLevel, destNextLevel, currentFloor,
-                          floorsEnabled);
+        draw_floor_arrows(PC, srcArrow, destPreviewLevel, destNextLevel, currentFloor, floorsEnabled);
 
         Rectangle srcReturn = {0, 130, 65, 60};
         Rectangle destReturn = {140, 750, srcArrow.width, srcArrow.height};
@@ -831,7 +767,6 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             floorChangeRequestedDown = false;
         }
         update_barrier_angles();
-        // handle_stations_input();
         handle_station_buttons_click(mouse, controlsUnlocked);
         handle_automatic_opening();
 
