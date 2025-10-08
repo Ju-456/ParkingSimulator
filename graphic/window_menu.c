@@ -254,7 +254,7 @@ void draw_floor() {
     DrawTexture(floor_indicator[currentFloor], 740.0f, 20.0f, WHITE);
 }
 
-void init_ordored_panel_menu() {
+void init_manual_panel_menu() {
     int buttonWidth = srcMode.width;
     int buttonHeight = srcMode.height;
     int PosY = 720;
@@ -269,7 +269,7 @@ void init_ordored_panel_menu() {
     btnReturn = (Rectangle){120, PosY, 60, 60};
 }
 
-void ordored_panel_menu(Font font) {
+void manual_panel_menu(Font font) {
     DrawTextureRec(PC, srcMode, (Vector2){btnRandom.x, btnRandom.y}, WHITE);
     DrawTextEx(font, "Random", (Vector2){btnRandom.x + 28, btnRandom.y + 18}, 18, 1, parkingBlue);
 
@@ -705,7 +705,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
     float letterDelay = 0.05f;
 
-    Screen currentScreen = SCREEN_ORDORED_PANEL;
+    Screen currentScreen = SCREEN_MANUAL_PANEL;
 
     destPreviewLevel = (Rectangle){750, 750, srcArrow.width, srcArrow.height};
     destNextLevel = (Rectangle){50, 750, srcArrow.width, srcArrow.height};
@@ -771,7 +771,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
         handle_automatic_opening();
 
         switch (currentScreen) {
-        case SCREEN_ORDORED_PANEL:
+        case SCREEN_MANUAL_PANEL:
             controlsUnlocked = false;
             if (letters1 < strlen(message1)) {
                 timer1 += dt;
@@ -792,8 +792,8 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             DrawTextEx(font, TextSubtext(message1, 0, letters1), (Vector2){200, 590}, 24, 2, WHITE);
             DrawTextEx(font, TextSubtext(message2, 0, letters2), (Vector2){280, 620}, 22, 2, WHITE);
 
-            init_ordored_panel_menu();
-            ordored_panel_menu(font);
+            init_manual_panel_menu();
+            manual_panel_menu(font);
 
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                 if (CheckCollisionPointRec(mouse, btnRandom))
@@ -810,7 +810,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             if (IsKeyPressed(KEY_ESCAPE) || (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
                                              CheckCollisionPointRec(mouse, btnReturn))) {
                 controlsUnlocked = true;
-                currentScreen = SCREEN_ORDORED_PANEL;
+                currentScreen = SCREEN_MANUAL_PANEL;
                 if (currentFloor != 0) {
                     currentFloor = 0;
                     reload_floor(currentFloor, places, &num_parking_places);
@@ -838,7 +838,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
             if (IsKeyPressed(KEY_ESCAPE) || (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
                                              CheckCollisionPointRec(mouse, btnReturn))) {
-                currentScreen = SCREEN_ORDORED_PANEL;
+                currentScreen = SCREEN_MANUAL_PANEL;
                 if (currentFloor != 0) {
                     currentFloor = 0;
                     reload_floor(currentFloor, places, &num_parking_places);
@@ -867,7 +867,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             if (IsKeyPressed(KEY_ESCAPE) || (CheckCollisionPointRec(mouse, btnReturn) &&
                                              IsMouseButtonPressed(MOUSE_LEFT_BUTTON))) {
                 controlsUnlocked = true;
-                currentScreen = SCREEN_ORDORED_PANEL;
+                currentScreen = SCREEN_MANUAL_PANEL;
             }
             break;
         }

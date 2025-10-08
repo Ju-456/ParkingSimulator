@@ -12,7 +12,7 @@
 #include <math.h>
 
 typedef enum {
-    SCREEN_ORDORED_PANEL,
+    SCREEN_MANUAL_PANEL,
     SCREEN_RANDOM,
     SCREEN_MANUAL,
     SCREEN_DIRECTION,
@@ -35,8 +35,8 @@ void draw_exit_barrier();
 void reload_floor(int floor, Parking places[], int *num_parking_places);
 void draw_floor();
 
-void init_ordored_panel_menu();
-void ordored_panel_menu(Font font);
+void init_manual_panel_menu();
+void manual_panel_menu(Font font);
 void choose_your_car(Font font);
 void choose_your_car_condition();
 void update_car_position(float dt);
