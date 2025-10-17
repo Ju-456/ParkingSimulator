@@ -53,7 +53,6 @@ void choose_your_car_condition();
 void update_car_position(float dt);
 void delimitation_of_playground();
 void place_car_at_start_pos();
-void draw_buttons_direction(Texture2D PC);
 
 void draw_floor_arrows(Texture2D PC, Rectangle srcArrow, Rectangle prev, Rectangle next, int floor,
                        bool enabled);

@@ -46,8 +46,8 @@ double exitOpenTime = -1.0;
 
 // parking floors
 int currentFloor = 0;
-static const char *FLOOR_FILES[3] = {"graph_floor_0.json", "graph_floor_1.json",
-                                     "graph_floor_2.json"};
+static const char *FLOOR_FILES[3] = {"graph_floor_0.json", "graph_floor_1.json", "graph_floor_2.json"};
+int carFloor = 0;
 
 Rectangle btnRandom;
 Rectangle btnManual;
@@ -246,9 +246,13 @@ void reload_floor(int floor, Parking places[], int *num_parking_places) {
 
 void draw_floor() {
     // top
-    DrawTexture(floor_exit, 780.0f, 20.0f, WHITE);
+    if (currentFloor < 2) {
+        DrawTexture(floor_exit, 780.0f, 20.0f, WHITE);
+    }
     // bottom
-    DrawTexture(floor_exit, 10.0f, 460.0f, WHITE);
+    if (currentFloor > 0) {
+        DrawTexture(floor_exit, 10.0f, 460.0f, WHITE);
+    }
 
     DrawTexture(floor_indicator[currentFloor], 740.0f, 20.0f, WHITE);
 }
@@ -520,6 +524,7 @@ void delimitation_of_playground() {
     if ((carY > 460 && carY < 540) && (carX > 0 && carX < 20)) {
         if (currentFloor > 0) {
             floorChangeRequestedDown = true;
+            carFloor--; 
             carX = 710;
             carY = 75;
         }
@@ -540,6 +545,7 @@ void delimitation_of_playground() {
         if (carY > 0 && carY < 100) { // chgmt of level IF != P-2
             if (currentFloor < MAX_FLOOR) {
                 floorChangeRequestedUp = true;
+                carFloor++; 
                 carX = 20;
                 carY = 75;
             } else {
@@ -651,8 +657,7 @@ void draw_buttons_direction(Texture2D PC) {
     DrawTextureRec(PC, srcRight, posRight, WHITE);
 }
 
-void draw_floor_arrows(Texture2D PC, Rectangle srcArrow, Rectangle prev, Rectangle next, int floor,
-                       bool enabled) {
+void draw_floor_arrows(Texture2D PC, Rectangle srcArrow, Rectangle prev, Rectangle next, int floor, bool enabled) {
     Vector2 origin = {srcArrow.width / 2.0f, srcArrow.height / 2.0f};
 
     bool canUp = enabled && (floor < MAX_FLOOR);
@@ -888,8 +893,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
         case SCREEN_RANDOM:
             DrawText("Random mode", 200, 400, 20, parkingBlue);
-            if (IsKeyPressed(KEY_ESCAPE) || (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
-                                             CheckCollisionPointRec(mouse, btnReturn))) {
+            if ((IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, btnReturn))) {
                 controlsUnlocked = true;
                 currentScreen = SCREEN_MANUAL_PANEL;
                 if (currentFloor != 0) {
@@ -901,7 +905,9 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
         case SCREEN_MANUAL:
             choose_your_car(font);
-            place_car_at_start_pos();
+            if (currentFloor == carFloor) {
+                place_car_at_start_pos();
+            }
 
             if (chosenCar != -1) {
                 Rectangle srcReturn1 = {0, 130, -65, 60};
@@ -914,12 +920,13 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
                     CheckCollisionPointRec(mouse, destNextStep)) {
                     controlsUnlocked = true;
                     currentScreen = SCREEN_DIRECTION;
+                    carFloor = currentFloor;
                 }
             }
 
-            if (IsKeyPressed(KEY_ESCAPE) || (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
-                                             CheckCollisionPointRec(mouse, btnReturn))) {
+            if ((IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, btnReturn))) {
                 currentScreen = SCREEN_MANUAL_PANEL;
+                place_car_at_start_pos();
                 if (currentFloor != 0) {
                     currentFloor = 0;
                     reload_floor(currentFloor, places, &num_parking_places);
@@ -928,14 +935,15 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             break;
 
         case SCREEN_DIRECTION:
-            draw_buttons_direction(PC);
-            update_car_position(dt);
-            place_car_at_start_pos();
+            if (currentFloor == carFloor) {
+                update_car_position(dt);
+                place_car_at_start_pos();
+            }
 
-            if (IsKeyPressed(KEY_ESCAPE) || (CheckCollisionPointRec(mouse, btnReturn) &&
-                                             IsMouseButtonPressed(MOUSE_LEFT_BUTTON))) {
+            if ((CheckCollisionPointRec(mouse, btnReturn) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))) {
                 controlsUnlocked = false;
                 currentScreen = SCREEN_MANUAL;
+                place_car_at_start_pos();
                 if (currentFloor != 0) {
                     currentFloor = 0;
                     reload_floor(currentFloor, places, &num_parking_places);
@@ -945,9 +953,9 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
         case SCREEN_HARD_MANUAL:
             DrawText("Hard Manual mode", 200, 400, 20, parkingRed);
-            if (IsKeyPressed(KEY_ESCAPE) || (CheckCollisionPointRec(mouse, btnReturn) &&
-                                             IsMouseButtonPressed(MOUSE_LEFT_BUTTON))) {
+            if ((CheckCollisionPointRec(mouse, btnReturn) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))) {
                 controlsUnlocked = true;
+                place_car_at_start_pos();
                 currentScreen = SCREEN_MANUAL_PANEL;
             }
             break;
