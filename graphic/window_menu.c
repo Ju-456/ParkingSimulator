@@ -97,16 +97,60 @@ void draw_parking_places(int n, Parking places[]) {
 
         Rectangle src = (Rectangle){0, 0, width, height};
         Rectangle dest = (Rectangle){places[i].x, places[i].y, w, h};
+        Texture2D texture = places[i].occupied ? busy_parking_place : free_parking_place;
 
         if (places[i].direction == 0) { // positive direction
-            DrawTexturePro(free_parking_place, src, dest, (Vector2){0, 0}, 0.0f, WHITE);
+            DrawTexturePro(texture, src, dest, (Vector2){0, 0}, 0.0f, WHITE);
 
         } else { // negative direction => Renversed picture left/right
             Rectangle srcMir = (Rectangle){width, 0, -width, height};
-            DrawTexturePro(free_parking_place, srcMir, dest, (Vector2){0, 0}, 0.0f, WHITE);
+            DrawTexturePro(texture, srcMir, dest, (Vector2){0, 0}, 0.0f, WHITE);
         }
     }
 }
+void draw_parked_cars(int n, Parking places[]) {
+    for (int i = 0; i < n; i++) {
+        if (places[i].occupied) {
+            int colorIndex = places[i].colorIndex;
+            float scale = 0.8f;
+            
+            if(colorIndex==5){
+                scale = 0.7f;
+            }
+            if(colorIndex==4){
+                scale = 0.9f;
+            }
+            if(colorIndex==1){
+                scale = 0.7f;
+            }
+            float rotation;
+            if(places[i].direction == 0){
+                rotation = 90.0f;
+                DrawTexturePro(
+                    carOrient[colorIndex].top,
+                    (Rectangle){0, 0, carOrient[colorIndex].top.width, carOrient[colorIndex].top.height},
+                    (Rectangle){places[i].x + 70, places[i].y + 20,
+                                    carOrient[colorIndex].top.width * scale,
+                                    carOrient[colorIndex].top.height * scale},
+                    (Vector2){carOrient[colorIndex].top.width * 0.25f, carOrient[colorIndex].top.height * 0.25f}, rotation, WHITE); 
+
+            } else {
+                rotation = -90.0f;
+                DrawTexturePro(
+                    carOrient[colorIndex].top,
+                    (Rectangle){0, 0, carOrient[colorIndex].top.width, carOrient[colorIndex].top.height},
+                    (Rectangle){places[i].x + 50, places[i].y + 40,
+                                    carOrient[colorIndex].top.width * scale,
+                                    carOrient[colorIndex].top.height * scale},
+                    (Vector2){carOrient[colorIndex].top.width * 0.25f, carOrient[colorIndex].top.height * 0.25f}, rotation, WHITE); 
+            }
+
+
+    
+        }
+    }
+}
+
 
 void panel() {
     DrawTexture(panel_menu, 0, 560, WHITE);
@@ -222,7 +266,14 @@ void draw_exit_barrier() {
 
     DrawTexturePro(exit_barrier, src, dst, origin, exitAngle, WHITE);
 }
-
+void init_parking_state(int n, Parking places[]) {
+    for (int i = 0; i < n; i++) {
+        places[i].occupied = (GetRandomValue(0, 100) < 50);
+        if (places[i].occupied) {
+            places[i].colorIndex = GetRandomValue(0, NUM_CARS - 1);
+        }
+    }
+}
 // reload a floor to reset the states
 void reload_floor(int floor, Parking places[], int *num_parking_places) {
     char path[PATH_MAX] = {0};
@@ -231,6 +282,7 @@ void reload_floor(int floor, Parking places[], int *num_parking_places) {
     *num_parking_places = count_number_places(path);
     if (load_graph_from_json(path, *num_parking_places, places)) {
         init_direction_parking_places(*num_parking_places, places);
+        
     } else {
         fprintf(stderr, "[FLOOR] Error loading: %s\n", FLOOR_FILES[floor]);
     }
@@ -300,6 +352,7 @@ void load_textures() {
 
     background = LoadTexture("Assets/background.png");
     free_parking_place = LoadTexture("Assets/free_parking_place.png");
+    busy_parking_place = LoadTexture("Assets/busy_parking_place.png");
     panel_menu = LoadTexture("Assets/panel_menu.png");
 
     entrance_barrier = LoadTexture("Assets/entrance_barrier.png");
@@ -581,15 +634,15 @@ void delimitation_of_playground() {
 }
 
 void place_car_at_start_pos() {
-    float scale = 0.75f;
+    float scale = 0.65f;
 
     switch (chosenCar) {
     case 0: // black car
         DrawTexturePro(
             carOrient[CAR_BLACK].top,
             (Rectangle){0, 0, carOrient[CAR_BLACK].top.width, carOrient[CAR_BLACK].top.height},
-            (Rectangle){carX, carY - 5, carOrient[CAR_BLACK].top.width * 0.7,
-                        carOrient[CAR_BLACK].top.height * 1.1},
+            (Rectangle){carX, carY - 5, carOrient[CAR_BLACK].top.width * scale,
+                        carOrient[CAR_BLACK].top.height * 1},
             (Vector2){carOrient[CAR_BLACK].top.width / 2, carOrient[CAR_BLACK].top.height / 2},
             carRotation, WHITE);
         break;
@@ -598,10 +651,10 @@ void place_car_at_start_pos() {
         DrawTexturePro(
             carOrient[CAR_BLUE].top,
             (Rectangle){0, 0, carOrient[CAR_BLUE].top.width, carOrient[CAR_BLUE].top.height},
-            (Rectangle){carX, carY, carOrient[CAR_BLUE].top.width * scale,
-                        carOrient[CAR_BLUE].top.height * scale},
-            (Vector2){carOrient[CAR_BLUE].top.width * scale / 2,
-                      carOrient[CAR_BLUE].top.height * scale / 2},
+            (Rectangle){carX, carY, carOrient[CAR_BLUE].top.width * 0.65f,
+                        carOrient[CAR_BLUE].top.height * 0.65f},
+            (Vector2){carOrient[CAR_BLUE].top.width * 0.65f / 2,
+                      carOrient[CAR_BLUE].top.height * 0.65f / 2},
             carRotation, WHITE);
         break;
 
@@ -610,7 +663,7 @@ void place_car_at_start_pos() {
             carOrient[CAR_GRAY].top,
             (Rectangle){0, 0, carOrient[CAR_GRAY].top.width, carOrient[CAR_GRAY].top.height},
             (Rectangle){carX, carY - 5, carOrient[CAR_GRAY].top.width * scale,
-                        carOrient[CAR_GRAY].top.height * 1.1},
+                        carOrient[CAR_GRAY].top.height * 1},
             (Vector2){carOrient[CAR_GRAY].top.width / 2, carOrient[CAR_GRAY].top.height / 2},
             carRotation, WHITE);
         break;
@@ -620,7 +673,7 @@ void place_car_at_start_pos() {
             carOrient[CAR_PINK].top,
             (Rectangle){0, 0, carOrient[CAR_PINK].top.width, carOrient[CAR_PINK].top.height},
             (Rectangle){carX, carY, carOrient[CAR_PINK].top.width * scale,
-                        carOrient[CAR_PINK].top.height},
+                        carOrient[CAR_PINK].top.height * 0.9},
             (Vector2){carOrient[CAR_PINK].top.width * scale / 2,
                       carOrient[CAR_PINK].top.height * scale / 2},
             carRotation, WHITE);
@@ -630,8 +683,8 @@ void place_car_at_start_pos() {
         DrawTexturePro(
             carOrient[CAR_RED].top,
             (Rectangle){0, 0, carOrient[CAR_RED].top.width, carOrient[CAR_RED].top.height},
-            (Rectangle){carX, carY + 5, carOrient[CAR_RED].top.width,
-                        carOrient[CAR_RED].top.height},
+            (Rectangle){carX, carY + 5, carOrient[CAR_RED].top.width *0.9f,
+                        carOrient[CAR_RED].top.height*0.9f},
             (Vector2){carOrient[CAR_RED].top.width * scale / 2,
                       carOrient[CAR_RED].top.height * scale / 2},
             carRotation, WHITE);
@@ -799,6 +852,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
     destPreviewLevel = (Rectangle){750, 750, srcArrow.width, srcArrow.height};
     destNextLevel = (Rectangle){50, 750, srcArrow.width, srcArrow.height};
+    init_parking_state(num_parking_places, places);
 
     while (!WindowShouldClose()) {
         BeginDrawing();
@@ -813,6 +867,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             draw_exit_barrier();
         }
         draw_parking_places(num_parking_places, places);
+        draw_parked_cars(num_parking_places, places);
         draw_floor();
 
         // permanent arrows (independently of the mode)

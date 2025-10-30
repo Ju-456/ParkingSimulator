@@ -9,7 +9,9 @@ typedef struct {
     char id[2];  
     int x;
     int y;
-    bool direction; // 0 = + and 1 = -              
+    bool direction;
+    bool occupied; 
+    int colorIndex;             
 } Parking;
 
 int count_number_places(char full_path_json[]);
