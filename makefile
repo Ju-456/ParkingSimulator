@@ -1,14 +1,19 @@
 CC = gcc
 
-CFLAGS = -Wall -I./ -I/home/ju456/raylib/src
-LDFLAGS = -L/home/ju456/raylib/src -lraylib -lm -lpthread -ldl -lX11
+# CFLAGS = -Wall -I./ -I/home/ju456/raylib/src
+# LDFLAGS = -L/home/ju456/raylib/src -lraylib -lm -lpthread -ldl -lX11
+
+CFLAGS = -Wall -I./ -I/opt/homebrew/opt/raylib/include
+LDFLAGS = -L/opt/homebrew/opt/raylib/lib -lraylib \
+          -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo
+
 
 # Files
 SRCS = main.c general.c graphic/window_menu.c parking.c parson.c
 OBJS = $(SRCS:.c=.o)
 
 HEADERS = general.h graphic/window_menu.h parking.h parson.h
-EXEC = car
+EXEC = parkingSimulator
 
 # Build executable
 $(EXEC): $(OBJS)
