@@ -29,8 +29,8 @@ typedef enum {
 } Screen;
 
 static inline bool game_mode_selected(Screen s);
-// static inline bool entrance_is_passable();
-// static inline bool exit_is_passable();
+static inline bool entrance_is_passable();
+static inline bool exit_is_passable();
 void draw_parking_places(int n, Parking places[]);
 void panel();
 void update_barrier_angles();

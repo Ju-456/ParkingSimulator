@@ -1,7 +1,8 @@
 #include "window_menu.h"
 
 Texture2D background;
-Texture2D parking_place;
+Texture2D free_parking_place;
+Texture2D busy_parking_place;
 Texture2D panel_menu;
 
 Texture2D entrance_barrier;
@@ -16,6 +17,8 @@ Texture2D floor_exit;
 Texture2D floor_indicator[3];
 
 Texture2D PC;
+
+Texture2D car_preview;
 
 carOrientation carOrient[NUM_CARS];
 
@@ -60,6 +63,7 @@ Rectangle destNextLevel;
 static int chosenCar = -1;
 
 Rectangle srcMode = {258, 68, 125, 60};
+Rectangle srcPreview = {258, 68, 150, 80};
 Rectangle srcArrow = {129, 64, 60, 60};
 Rectangle srcReturn = {0, 130, -60, 60};
 Rectangle destReturn = {650, 750, 60, 60};
@@ -95,11 +99,11 @@ void draw_parking_places(int n, Parking places[]) {
         Rectangle dest = (Rectangle){places[i].x, places[i].y, w, h};
 
         if (places[i].direction == 0) { // positive direction
-            DrawTexturePro(parking_place, src, dest, (Vector2){0, 0}, 0.0f, WHITE);
+            DrawTexturePro(free_parking_place, src, dest, (Vector2){0, 0}, 0.0f, WHITE);
 
         } else { // negative direction => Renversed picture left/right
             Rectangle srcMir = (Rectangle){width, 0, -width, height};
-            DrawTexturePro(parking_place, srcMir, dest, (Vector2){0, 0}, 0.0f, WHITE);
+            DrawTexturePro(free_parking_place, srcMir, dest, (Vector2){0, 0}, 0.0f, WHITE);
         }
     }
 }
@@ -142,8 +146,6 @@ void barrier_management(int barrierType, int barrier_state) {
         } else if (barrier_state == 1) { // we want to open it
             entranceState = 1;
             entranceTargetAngle = -90.0f;
-        } else {
-            fprintf(stderr, "Wrong barrier state: %d\n", barrier_state);
         }
     } else if (barrierType == 1) { // exit
         if (barrier_state == 0) {  // we want to close it
@@ -152,12 +154,8 @@ void barrier_management(int barrierType, int barrier_state) {
         } else if (barrier_state == 1) { // we want to open it
             exitState = 1;
             exitTargetAngle = 90.0f;
-        } else {
-            fprintf(stderr, "Wrong barrier state: %d\n", barrier_state);
         }
-    } else {
-        fprintf(stderr, "Wrong barrier type: %d\n", barrierType);
-    }
+    } 
 }
 
 void handle_automatic_opening() {
@@ -289,19 +287,19 @@ void manual_panel_menu(Font font) {
 // void first_random_simulation() {
 //     place_car_at_start_pos();
 // }
-// static inline bool entrance_is_passable() {
-// check that the barrier is open and we have a ticket
-// return (entranceAngle <= -85.0f) && (ticket == 1);
-//}
+static inline bool entrance_is_passable() {
+    return (ticket == 1) || (entranceAngle <= -85.0f);
+}
 
-// static inline bool exit_is_passable() {
-//  return (exitAngle >=  85.0f) && (payment == 1);
-//}
+static inline bool exit_is_passable() {
+    return (payment == 1) || (exitAngle >= 85.0f);
+}
+
 
 void load_textures() {
 
     background = LoadTexture("Assets/background.png");
-    parking_place = LoadTexture("Assets/parking_place.png");
+    free_parking_place = LoadTexture("Assets/free_parking_place.png");
     panel_menu = LoadTexture("Assets/panel_menu.png");
 
     entrance_barrier = LoadTexture("Assets/entrance_barrier.png");
@@ -311,6 +309,7 @@ void load_textures() {
     exit_pay_station = LoadTexture("Assets/exit_pay_station.png");
 
     barrier_wall = LoadTexture("Assets/barrier_wall.png");
+    car_preview = LoadTexture("Assets/car_preview.png");
 
     floor_exit = LoadTexture("Assets/floor_exit.png");
     floor_indicator[0] = LoadTexture("Assets/floor_indicator0.png");
@@ -415,7 +414,7 @@ void choose_your_car(Font font) {
 }
 
 void choose_your_car_condition() {
-    float scale = 0.75f;
+    float scale = 1.f;
 
     Vector2 mouse = GetMousePosition();
 
@@ -442,57 +441,57 @@ void choose_your_car_condition() {
     }
 
     if (chosenCar == 0) {
-        DrawTextureRec(PC, srcMode, (Vector2){40, 580}, WHITE);
+        DrawTextureRec(car_preview, srcPreview, (Vector2){20, 580}, WHITE);
         DrawTexturePro(
             carOrient[CAR_BLACK].front,
             (Rectangle){0, 0, carOrient[CAR_BLACK].front.width, carOrient[CAR_BLACK].front.height},
-            (Rectangle){65, 583, carOrient[CAR_BLACK].front.width * scale,
+            (Rectangle){50, 590, carOrient[CAR_BLACK].front.width * scale,
                         carOrient[CAR_BLACK].front.height * scale},
             (Vector2){0, 0}, 0.0f, WHITE);
 
     } else if (chosenCar == 1) {
-        DrawTextureRec(PC, srcMode, (Vector2){40, 580}, WHITE);
+        DrawTextureRec(car_preview, srcPreview, (Vector2){20, 580}, WHITE);
         DrawTexturePro(
             carOrient[CAR_BLUE].front,
             (Rectangle){0, 0, carOrient[CAR_BLUE].front.width, carOrient[CAR_BLUE].front.height},
-            (Rectangle){65, 583, carOrient[CAR_BLUE].front.width * scale,
+            (Rectangle){50, 590, carOrient[CAR_BLUE].front.width * scale,
                         carOrient[CAR_BLUE].front.height * scale},
             (Vector2){0, 0}, 0.0f, WHITE);
 
     } else if (chosenCar == 2) {
-        DrawTextureRec(PC, srcMode, (Vector2){40, 580}, WHITE);
+        DrawTextureRec(car_preview, srcPreview, (Vector2){20, 580}, WHITE);
         DrawTexturePro(
             carOrient[CAR_GRAY].front,
             (Rectangle){0, 0, carOrient[CAR_GRAY].front.width, carOrient[CAR_GRAY].front.height},
-            (Rectangle){65, 583, carOrient[CAR_GRAY].front.width * scale,
+            (Rectangle){50, 590, carOrient[CAR_GRAY].front.width * scale,
                         carOrient[CAR_GRAY].front.height * scale},
             (Vector2){0, 0}, 0.0f, WHITE);
 
     } else if (chosenCar == 3) {
-        DrawTextureRec(PC, srcMode, (Vector2){40, 580}, WHITE);
+        DrawTextureRec(car_preview, srcPreview, (Vector2){20, 580}, WHITE);
         DrawTexturePro(
             carOrient[CAR_PINK].front,
             (Rectangle){0, 0, carOrient[CAR_PINK].front.width, carOrient[CAR_PINK].front.height},
-            (Rectangle){65, 583, carOrient[CAR_PINK].front.width * scale,
+            (Rectangle){50, 590, carOrient[CAR_PINK].front.width * scale,
                         carOrient[CAR_PINK].front.height * scale},
             (Vector2){0, 0}, 0.0f, WHITE);
 
     } else if (chosenCar == 4) {
-        DrawTextureRec(PC, srcMode, (Vector2){40, 580}, WHITE);
+        DrawTextureRec(car_preview, srcPreview, (Vector2){20, 580}, WHITE);
         DrawTexturePro(
             carOrient[CAR_RED].front,
             (Rectangle){0, 0, carOrient[CAR_RED].front.width, carOrient[CAR_RED].front.height},
-            (Rectangle){65, 583, carOrient[CAR_RED].front.width * scale,
+            (Rectangle){55, 590, carOrient[CAR_RED].front.width * scale,
                         carOrient[CAR_RED].front.height * scale},
             (Vector2){0, 0}, 0.0f, WHITE);
 
     } else if (chosenCar == 5) {
-        DrawTextureRec(PC, srcMode, (Vector2){40, 580}, WHITE);
+        DrawTextureRec(car_preview, srcPreview, (Vector2){20, 580}, WHITE);
         DrawTexturePro(carOrient[CAR_YELLOW].front,
                        (Rectangle){0, 0, carOrient[CAR_YELLOW].front.width,
                                    carOrient[CAR_YELLOW].front.height},
-                       (Rectangle){65, 583, carOrient[CAR_YELLOW].front.width * scale,
-                                   carOrient[CAR_YELLOW].front.height * scale},
+                       (Rectangle){55, 590, carOrient[CAR_YELLOW].front.width * 0.9,
+                                   carOrient[CAR_YELLOW].front.height * 0.9},
                        (Vector2){0, 0}, 0.0f, WHITE);
     }
 }
@@ -521,6 +520,21 @@ void update_car_position(float dt) {
 }
 
 void delimitation_of_playground() {
+    Rectangle carRect = {carX - 20, carY - 20, 40, 40};
+    Rectangle entranceRect = {60, 73, 40, 27};
+    Rectangle exitRect = {630, 455, 40, 80};
+
+    if (currentFloor == 0) {
+        if (CheckCollisionRecs(carRect, entranceRect) && !entrance_is_passable()) {
+            carX = 70;
+            carY = 73;
+        }
+        if (CheckCollisionRecs(carRect, exitRect) && !exit_is_passable()) {
+            carX = 600;
+            carY = 500;
+        }
+
+    }
     if ((carY > 460 && carY < 540) && (carX > 0 && carX < 20)) {
         if (currentFloor > 0) {
             floorChangeRequestedDown = true;
@@ -540,6 +554,7 @@ void delimitation_of_playground() {
                    (carX > 660 && carX < 750)) { // Second barrier wall
             carY = 400;
         }
+        
     }
     if (carX > 750) {                 // Right boundary
         if (carY > 0 && carY < 100) { // chgmt of level IF != P-2
@@ -552,17 +567,14 @@ void delimitation_of_playground() {
                 carX = 670;
             }
         } else if (carY >= 100 && carY <= 435) { // 100 < carY < 435
-            printf("You have nothing to do here !\n");
             carX = 670;
         } else if (currentFloor != 0) {
-            printf("You have nothing to do here bc currentFloor != 0!\n");
             carX = 670;
         }
     } else if (carX < 0) { // Left boundary
         if (carY > 0 && carY < 100) {
             carY = 400;
         } else {
-            printf("You have nothing to do here !\n");
             carX = 130;
         }
     }
@@ -704,9 +716,6 @@ void handle_station_buttons_click(Vector2 mouse, bool enabled) {
         return;
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         if (currentFloor != 0) {
-            if (CheckCollisionPointRec(mouse, btnTicket) || CheckCollisionPointRec(mouse, btnPay)) {
-                printf("[FLOOR] Take the ticket or pay only on the ground floor (0).\n");
-            }
             return;
         }
 
@@ -714,30 +723,24 @@ void handle_station_buttons_click(Vector2 mouse, bool enabled) {
             if (ticket == 0) {
                 ticket = 1;
                 entranceTriggerTime = GetTime();
-                printf("[ENTRY] Ticket taken.\n");
-            } else {
-                printf("[ENTRY] Ticket was already taken.\n");
             }
         }
 
         if (CheckCollisionPointRec(mouse, btnPay)) {
             if (ticket == 0) {
-                printf("[EXIT] Unable to pay: no ticket.\n");
                 fflush(stdout);
             } else if (payment == 0) {
                 payment = 1;
                 exitTriggerTime = GetTime();
-                printf("[EXIT] Ticket paid.\n");
-            } else {
-                printf("[EXIT] Ticket was already paid.\n");
-            }
+            } 
         }
     }
 }
 
 void unload_textures() {
     UnloadTexture(background);
-    UnloadTexture(parking_place);
+    UnloadTexture(free_parking_place);
+    UnloadTexture(busy_parking_place);
     UnloadTexture(panel_menu);
 
     UnloadTexture(entrance_barrier);
@@ -752,6 +755,7 @@ void unload_textures() {
     UnloadTexture(floor_indicator[0]);
     UnloadTexture(floor_indicator[1]);
     UnloadTexture(floor_indicator[2]);
+    UnloadTexture(car_preview);
 
     UnloadTexture(PC);
 
@@ -763,6 +767,7 @@ void unload_textures() {
 }
 
 void init_window_parking(const char *full_path_json, int num_parking_places, Parking places[]) {
+    SetTraceLogLevel(LOG_NONE);
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Parking Simulator");
     int monitor = GetCurrentMonitor();
     int monitorWidth = GetMonitorWidth(monitor);
@@ -830,15 +835,11 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
                 if (currentFloor < MAX_FLOOR) {
                     currentFloor++;
                     reload_floor(currentFloor, places, &num_parking_places);
-                } else {
-                    printf("[FLOOR] Already on the top floor (2)\n");
                 }
             } else if (CheckCollisionPointRec(mouse, destNextLevel)) {
                 if (currentFloor > 0) {
                     currentFloor--;
                     reload_floor(currentFloor, places, &num_parking_places);
-                } else {
-                    printf("[FLOOR] Already on the ground floor (0)\n");
                 }
             }
         }
