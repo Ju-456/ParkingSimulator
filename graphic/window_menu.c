@@ -22,6 +22,9 @@ Texture2D car_preview;
 
 carOrientation carOrient[NUM_CARS];
 
+bool gameFinished = false;
+bool insideParking = false;
+
 int entranceState = 0; // 0 - closed, 1 - opened
 int exitState = 0;
 int barrierType = 0; // 0 - entrance, 1 - exit
@@ -49,7 +52,8 @@ double exitOpenTime = -1.0;
 
 // parking floors
 int currentFloor = 0;
-static const char *FLOOR_FILES[3] = {"graph_floor_0.json", "graph_floor_1.json", "graph_floor_2.json"};
+static const char *FLOOR_FILES[3] = {"graph_floor_0.json", "graph_floor_1.json",
+                                     "graph_floor_2.json"};
 int carFloor = 0;
 
 Rectangle btnRandom;
@@ -86,12 +90,14 @@ Rectangle btnTicket;
 Rectangle btnPay;
 bool controlsUnlocked = false;
 
-void draw_parking_places(int n, Parking places[]) {
+void draw_parking_places(int n, Parking places[])
+{
     const float width = 180.0f;
     const float height = 95.0f;
     const float scale = 0.62f; // 62% of the real size
 
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++)
+    {
         float w = width * scale;
         float h = height * scale;
 
@@ -99,74 +105,89 @@ void draw_parking_places(int n, Parking places[]) {
         Rectangle dest = (Rectangle){places[i].x, places[i].y, w, h};
         Texture2D texture = places[i].occupied ? busy_parking_place : free_parking_place;
 
-        if (places[i].direction == 0) { // positive direction
+        if (places[i].direction == 0)
+        { // positive direction
             DrawTexturePro(texture, src, dest, (Vector2){0, 0}, 0.0f, WHITE);
-
-        } else { // negative direction => Renversed picture left/right
+        }
+        else
+        { // negative direction => Renversed picture left/right
             Rectangle srcMir = (Rectangle){width, 0, -width, height};
             DrawTexturePro(texture, srcMir, dest, (Vector2){0, 0}, 0.0f, WHITE);
         }
     }
 }
-void draw_parked_cars(int n, Parking places[]) {
-    for (int i = 0; i < n; i++) {
-        if (places[i].occupied) {
+void draw_parked_cars(int n, Parking places[])
+{
+    for (int i = 0; i < n; i++)
+    {
+        if (places[i].occupied)
+        {
             int colorIndex = places[i].colorIndex;
             float scale = 0.8f;
-            
-            if(colorIndex==5){
+
+            if (colorIndex == 5)
+            {
                 scale = 0.7f;
             }
-            if(colorIndex==4){
+            if (colorIndex == 4)
+            {
                 scale = 0.9f;
             }
-            if(colorIndex==1){
+            if (colorIndex == 1)
+            {
                 scale = 0.7f;
             }
             float rotation;
-            if(places[i].direction == 0){
+            if (places[i].direction == 0)
+            {
                 rotation = 90.0f;
-                DrawTexturePro(
-                    carOrient[colorIndex].top,
-                    (Rectangle){0, 0, carOrient[colorIndex].top.width, carOrient[colorIndex].top.height},
-                    (Rectangle){places[i].x + 70, places[i].y + 20,
-                                    carOrient[colorIndex].top.width * scale,
-                                    carOrient[colorIndex].top.height * scale},
-                    (Vector2){carOrient[colorIndex].top.width * 0.25f, carOrient[colorIndex].top.height * 0.25f}, rotation, WHITE); 
-
-            } else {
-                rotation = -90.0f;
-                DrawTexturePro(
-                    carOrient[colorIndex].top,
-                    (Rectangle){0, 0, carOrient[colorIndex].top.width, carOrient[colorIndex].top.height},
-                    (Rectangle){places[i].x + 50, places[i].y + 40,
-                                    carOrient[colorIndex].top.width * scale,
-                                    carOrient[colorIndex].top.height * scale},
-                    (Vector2){carOrient[colorIndex].top.width * 0.25f, carOrient[colorIndex].top.height * 0.25f}, rotation, WHITE); 
+                DrawTexturePro(carOrient[colorIndex].top,
+                               (Rectangle){0, 0, carOrient[colorIndex].top.width,
+                                           carOrient[colorIndex].top.height},
+                               (Rectangle){places[i].x + 70, places[i].y + 20,
+                                           carOrient[colorIndex].top.width * scale,
+                                           carOrient[colorIndex].top.height * scale},
+                               (Vector2){carOrient[colorIndex].top.width * 0.25f,
+                                         carOrient[colorIndex].top.height * 0.25f},
+                               rotation, WHITE);
             }
-
-
-    
+            else
+            {
+                rotation = -90.0f;
+                DrawTexturePro(carOrient[colorIndex].top,
+                               (Rectangle){0, 0, carOrient[colorIndex].top.width,
+                                           carOrient[colorIndex].top.height},
+                               (Rectangle){places[i].x + 50, places[i].y + 40,
+                                           carOrient[colorIndex].top.width * scale,
+                                           carOrient[colorIndex].top.height * scale},
+                               (Vector2){carOrient[colorIndex].top.width * 0.25f,
+                                         carOrient[colorIndex].top.height * 0.25f},
+                               rotation, WHITE);
+            }
         }
     }
 }
 
-
-void panel() {
+void panel()
+{
     DrawTexture(panel_menu, 0, 560, WHITE);
 }
 
-void update_barrier_angles() {
+void update_barrier_angles()
+{
     float delta_time = GetFrameTime(); // elapsed time since the last frame (in seconds)s
 
     // entrance
     float deltaE = entranceTargetAngle -
-                   entranceAngle; // difference between the desired angle and the current angle
+                   entranceAngle;             // difference between the desired angle and the current angle
     float stepE = BARRIER_SPEED * delta_time; // how much we can rotate this frame
 
-    if (fabsf(deltaE) <= stepE) {
+    if (fabsf(deltaE) <= stepE)
+    {
         entranceAngle = entranceTargetAngle; // we can reach the target this frame
-    } else {
+    }
+    else
+    {
         entranceAngle += (deltaE > 0 ? stepE : -stepE); // move towards the target
     }
 
@@ -174,63 +195,81 @@ void update_barrier_angles() {
     float deltaX = exitTargetAngle - exitAngle;
     float stepX = BARRIER_SPEED * delta_time;
 
-    if (fabsf(deltaX) <= stepX) {
+    if (fabsf(deltaX) <= stepX)
+    {
         exitAngle = exitTargetAngle;
-    } else {
+    }
+    else
+    {
         exitAngle += (deltaX > 0 ? stepX : -stepX);
     }
 }
 
-void barrier_management(int barrierType, int barrier_state) {
-    if (barrierType == 0) { // entrance
+void barrier_management(int barrierType, int barrier_state)
+{
+    if (barrierType == 0)
+    { // entrance
 
-        if (barrier_state == 0) { // we want to close it
+        if (barrier_state == 0)
+        { // we want to close it
             entranceState = 0;
             entranceTargetAngle = 0.0f;
-        } else if (barrier_state == 1) { // we want to open it
+        }
+        else if (barrier_state == 1)
+        { // we want to open it
             entranceState = 1;
             entranceTargetAngle = -90.0f;
         }
-    } else if (barrierType == 1) { // exit
-        if (barrier_state == 0) {  // we want to close it
+    }
+    else if (barrierType == 1)
+    { // exit
+        if (barrier_state == 0)
+        { // we want to close it
             exitState = 0;
             exitTargetAngle = 0.0f;
-        } else if (barrier_state == 1) { // we want to open it
+        }
+        else if (barrier_state == 1)
+        { // we want to open it
             exitState = 1;
             exitTargetAngle = 90.0f;
         }
-    } 
+    }
 }
 
-void handle_automatic_opening() {
+void handle_automatic_opening()
+{
     if (currentFloor != 0)
         return;
     double now = GetTime();
 
     // entrance
     // open after taking a ticket
-    if (entranceTriggerTime >= 0.0 && (now - entranceTriggerTime) >= OPEN_DELAY) {
+    if (entranceTriggerTime >= 0.0 && (now - entranceTriggerTime) >= OPEN_DELAY)
+    {
         barrier_management(0, 1);   // open
         entranceTriggerTime = -1.0; // no pending events
         entranceOpenTime = now;
     }
 
     // close after 5sec
-    if (entranceOpenTime >= 0.0 && (now - entranceOpenTime) >= CLOSE_DELAY) {
+    if (entranceOpenTime >= 0.0 && (now - entranceOpenTime) >= CLOSE_DELAY)
+    {
         barrier_management(0, 0); // close
         entranceOpenTime = -1.0;
     }
 
     // exit
     // open after payement
-    if (exitTriggerTime >= 0.0 && (now - exitTriggerTime) >= OPEN_DELAY) {
+    if (exitTriggerTime >= 0.0 && (now - exitTriggerTime) >= OPEN_DELAY)
+    {
         barrier_management(1, 1);
         exitTriggerTime = -1.0;
         exitOpenTime = now;
     }
 
     // close after 5sec
-    if (exitOpenTime >= 0.0 && (now - exitOpenTime) >= CLOSE_DELAY) {
+    if (exitOpenTime >= 0.0 && (now - exitOpenTime) >= CLOSE_DELAY)
+    {
         barrier_management(1, 0);
         ticket = 0;
         payment = 0;
@@ -238,7 +277,8 @@ void handle_automatic_opening() {
     }
 }
 
-void draw_entrance_barrier() {
+void draw_entrance_barrier()
+{
     float x = 140.0f, y = 20.0f;
 
     DrawTexture(barrier_wall, 10.0f, 103.0f, WHITE);
@@ -252,7 +292,8 @@ void draw_entrance_barrier() {
     DrawTexturePro(entrance_barrier, src, dst, origin, entranceAngle, WHITE);
 }
 
-void draw_exit_barrier() {
+void draw_exit_barrier()
+{
     float x = 645.0f, y = 455.0f;
 
     DrawTexture(barrier_wall, 660.0f, 445.0f, WHITE);
@@ -266,24 +307,42 @@ void draw_exit_barrier() {
 
     DrawTexturePro(exit_barrier, src, dst, origin, exitAngle, WHITE);
 }
-void init_parking_state(int n, Parking places[]) {
-    for (int i = 0; i < n; i++) {
+void init_parking_state(int n, Parking places[])
+{
+    for (int i = 0; i < n; i++)
+    {
         places[i].occupied = (GetRandomValue(0, 100) < 50);
-        if (places[i].occupied) {
+        if (places[i].occupied)
+        {
             places[i].colorIndex = GetRandomValue(0, NUM_CARS - 1);
         }
     }
 }
+void request_floor_change(int direction, Parking places[], int *num_parking_places)
+{
+    int newFloor = currentFloor + direction;
+
+    if (newFloor < 0 || newFloor > MAX_FLOOR)
+        return;
+
+    currentFloor = newFloor;
+    carFloor = newFloor;
+    reload_floor(currentFloor, places, num_parking_places);
+}
+
 // reload a floor to reset the states
-void reload_floor(int floor, Parking places[], int *num_parking_places) {
+void reload_floor(int floor, Parking places[], int *num_parking_places)
+{
     char path[PATH_MAX] = {0};
     build_path(path, "graph_json/", FLOOR_FILES[floor]);
 
     *num_parking_places = count_number_places(path);
-    if (load_graph_from_json(path, *num_parking_places, places)) {
+    if (load_graph_from_json(path, *num_parking_places, places))
+    {
         init_direction_parking_places(*num_parking_places, places);
-        
-    } else {
+    }
+    else
+    {
         fprintf(stderr, "[FLOOR] Error loading: %s\n", FLOOR_FILES[floor]);
     }
 
@@ -294,20 +353,24 @@ void reload_floor(int floor, Parking places[], int *num_parking_places) {
     entranceOpenTime = exitOpenTime = -1.0;
 }
 
-void draw_floor() {
+void draw_floor()
+{
     // top
-    if (currentFloor < 2) {
+    if (currentFloor < 2)
+    {
         DrawTexture(floor_exit, 780.0f, 20.0f, WHITE);
     }
     // bottom
-    if (currentFloor > 0) {
+    if (currentFloor > 0)
+    {
         DrawTexture(floor_exit, 10.0f, 460.0f, WHITE);
     }
 
     DrawTexture(floor_indicator[currentFloor], 740.0f, 20.0f, WHITE);
 }
 
-void init_manual_panel_menu() {
+void init_manual_panel_menu()
+{
     int buttonWidth = srcMode.width;
     int buttonHeight = srcMode.height;
     int PosY = 720;
@@ -322,7 +385,8 @@ void init_manual_panel_menu() {
     btnReturn = (Rectangle){120, PosY, 60, 60};
 }
 
-void manual_panel_menu(Font font) {
+void manual_panel_menu(Font font)
+{
     DrawTextureRec(PC, srcMode, (Vector2){btnRandom.x, btnRandom.y}, WHITE);
     DrawTextEx(font, "Random", (Vector2){btnRandom.x + 28, btnRandom.y + 18}, 18, 1, parkingBlue);
 
@@ -339,16 +403,14 @@ void manual_panel_menu(Font font) {
 // void first_random_simulation() {
 //     place_car_at_start_pos();
 // }
-static inline bool entrance_is_passable() {
-    return (ticket == 1) || (entranceAngle <= -85.0f);
-}
 
-static inline bool exit_is_passable() {
+static inline bool exit_is_passable()
+{
     return (payment == 1) || (exitAngle >= 85.0f);
 }
 
-
-void load_textures() {
+void load_textures()
+{
 
     background = LoadTexture("Assets/background.png");
     free_parking_place = LoadTexture("Assets/free_parking_place.png");
@@ -373,7 +435,8 @@ void load_textures() {
 
     const char *colorNames[NUM_CARS] = {"black", "blue", "gray", "pink", "red", "yellow"};
 
-    for (int i = 0; i < NUM_CARS; i++) {
+    for (int i = 0; i < NUM_CARS; i++)
+    {
         char path[128];
 
         // Right texture
@@ -390,7 +453,8 @@ void load_textures() {
     }
 }
 
-void choose_your_car(Font font) {
+void choose_your_car(Font font)
+{
     const char *message = "Choose a car :";
 
     static int letters = 0;
@@ -399,9 +463,11 @@ void choose_your_car(Font font) {
     float letterDelay = 0.07f;
     float dt = GetFrameTime();
 
-    if (letters < strlen(message)) {
+    if (letters < strlen(message))
+    {
         timer += dt;
-        if (timer >= letterDelay) {
+        if (timer >= letterDelay)
+        {
             letters++;
             timer = 0.0f;
         }
@@ -466,34 +532,48 @@ void choose_your_car(Font font) {
     choose_your_car_condition();
 }
 
-void choose_your_car_condition() {
+void choose_your_car_condition()
+{
     float scale = 1.f;
 
     Vector2 mouse = GetMousePosition();
 
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+    {
         if (CheckCollisionPointRec(
-                mouse, (Rectangle){btnRandom.x, btnRandom.y - 70, srcMode.width, srcMode.height})) {
+                mouse, (Rectangle){btnRandom.x, btnRandom.y - 70, srcMode.width, srcMode.height}))
+        {
             chosenCar = 0; // black car
-        } else if (CheckCollisionPointRec(mouse, (Rectangle){btnManual.x, btnManual.y - 70,
-                                                             srcMode.width, srcMode.height})) {
+        }
+        else if (CheckCollisionPointRec(mouse, (Rectangle){btnManual.x, btnManual.y - 70,
+                                                           srcMode.width, srcMode.height}))
+        {
             chosenCar = 1; // blue car
-        } else if (CheckCollisionPointRec(mouse, (Rectangle){btnHardManual.x, btnHardManual.y - 70,
-                                                             srcMode.width, srcMode.height})) {
+        }
+        else if (CheckCollisionPointRec(mouse, (Rectangle){btnHardManual.x, btnHardManual.y - 70,
+                                                           srcMode.width, srcMode.height}))
+        {
             chosenCar = 2; // gray car
-        } else if (CheckCollisionPointRec(mouse, (Rectangle){btnRandom.x, btnRandom.y,
-                                                             srcMode.width, srcMode.height})) {
+        }
+        else if (CheckCollisionPointRec(mouse, (Rectangle){btnRandom.x, btnRandom.y,
+                                                           srcMode.width, srcMode.height}))
+        {
             chosenCar = 3; // pink car
-        } else if (CheckCollisionPointRec(mouse, (Rectangle){btnManual.x, btnManual.y,
-                                                             srcMode.width, srcMode.height})) {
+        }
+        else if (CheckCollisionPointRec(mouse, (Rectangle){btnManual.x, btnManual.y,
+                                                           srcMode.width, srcMode.height}))
+        {
             chosenCar = 4; // red car
-        } else if (CheckCollisionPointRec(mouse, (Rectangle){btnHardManual.x, btnHardManual.y,
-                                                             srcMode.width, srcMode.height})) {
+        }
+        else if (CheckCollisionPointRec(mouse, (Rectangle){btnHardManual.x, btnHardManual.y,
+                                                           srcMode.width, srcMode.height}))
+        {
             chosenCar = 5; // yellow car
         }
     }
 
-    if (chosenCar == 0) {
+    if (chosenCar == 0)
+    {
         DrawTextureRec(car_preview, srcPreview, (Vector2){20, 580}, WHITE);
         DrawTexturePro(
             carOrient[CAR_BLACK].front,
@@ -501,8 +581,9 @@ void choose_your_car_condition() {
             (Rectangle){50, 590, carOrient[CAR_BLACK].front.width * scale,
                         carOrient[CAR_BLACK].front.height * scale},
             (Vector2){0, 0}, 0.0f, WHITE);
-
-    } else if (chosenCar == 1) {
+    }
+    else if (chosenCar == 1)
+    {
         DrawTextureRec(car_preview, srcPreview, (Vector2){20, 580}, WHITE);
         DrawTexturePro(
             carOrient[CAR_BLUE].front,
@@ -510,8 +591,9 @@ void choose_your_car_condition() {
             (Rectangle){50, 590, carOrient[CAR_BLUE].front.width * scale,
                         carOrient[CAR_BLUE].front.height * scale},
             (Vector2){0, 0}, 0.0f, WHITE);
-
-    } else if (chosenCar == 2) {
+    }
+    else if (chosenCar == 2)
+    {
         DrawTextureRec(car_preview, srcPreview, (Vector2){20, 580}, WHITE);
         DrawTexturePro(
             carOrient[CAR_GRAY].front,
@@ -519,8 +601,9 @@ void choose_your_car_condition() {
             (Rectangle){50, 590, carOrient[CAR_GRAY].front.width * scale,
                         carOrient[CAR_GRAY].front.height * scale},
             (Vector2){0, 0}, 0.0f, WHITE);
-
-    } else if (chosenCar == 3) {
+    }
+    else if (chosenCar == 3)
+    {
         DrawTextureRec(car_preview, srcPreview, (Vector2){20, 580}, WHITE);
         DrawTexturePro(
             carOrient[CAR_PINK].front,
@@ -528,8 +611,9 @@ void choose_your_car_condition() {
             (Rectangle){50, 590, carOrient[CAR_PINK].front.width * scale,
                         carOrient[CAR_PINK].front.height * scale},
             (Vector2){0, 0}, 0.0f, WHITE);
-
-    } else if (chosenCar == 4) {
+    }
+    else if (chosenCar == 4)
+    {
         DrawTextureRec(car_preview, srcPreview, (Vector2){20, 580}, WHITE);
         DrawTexturePro(
             carOrient[CAR_RED].front,
@@ -537,8 +621,9 @@ void choose_your_car_condition() {
             (Rectangle){55, 590, carOrient[CAR_RED].front.width * scale,
                         carOrient[CAR_RED].front.height * scale},
             (Vector2){0, 0}, 0.0f, WHITE);
-
-    } else if (chosenCar == 5) {
+    }
+    else if (chosenCar == 5)
+    {
         DrawTextureRec(car_preview, srcPreview, (Vector2){20, 580}, WHITE);
         DrawTexturePro(carOrient[CAR_YELLOW].front,
                        (Rectangle){0, 0, carOrient[CAR_YELLOW].front.width,
@@ -549,49 +634,85 @@ void choose_your_car_condition() {
     }
 }
 
-void update_car_position(float dt) {
-    float carSpeed = 350.0f; // num of pixel per second
+void update_car_position(float dt, Parking places[], int n)
+{
+    float carSpeed = 350.0f;
+    float newX = carX;
+    float newY = carY;
 
-    if (IsKeyDown(KEY_RIGHT)) {
-        carX += carSpeed * dt;
+    if (IsKeyDown(KEY_RIGHT))
+    {
+        newX += carSpeed * dt;
         carRotation = -90.0f;
     }
-    if (IsKeyDown(KEY_LEFT)) {
-        carX -= carSpeed * dt;
+    if (IsKeyDown(KEY_LEFT))
+    {
+        newX -= carSpeed * dt;
         carRotation = 90.0f;
     }
-    if (IsKeyDown(KEY_UP)) {
-        carY -= carSpeed * dt;
+    if (IsKeyDown(KEY_UP))
+    {
+        newY -= carSpeed * dt;
         carRotation = 180.0f;
     }
-    if (IsKeyDown(KEY_DOWN)) {
-        carY += carSpeed * dt;
+    if (IsKeyDown(KEY_DOWN))
+    {
+        newY += carSpeed * dt;
         carRotation = 0.0f;
+    }
+    // to avoid collision with occupied parking places
+    if (!check_collision_with_parking(newX, newY, places, n))
+    {
+        carX = newX;
+        carY = newY;
     }
 
     delimitation_of_playground();
 }
-
-void delimitation_of_playground() {
+void delimitation_of_playground()
+{
     Rectangle carRect = {carX - 20, carY - 20, 40, 40};
     Rectangle entranceRect = {60, 73, 40, 27};
     Rectangle exitRect = {630, 455, 40, 80};
+    Rectangle exitEndRect = {730, 455, 40, 80};
 
-    if (currentFloor == 0) {
-        if (CheckCollisionRecs(carRect, entranceRect) && !entrance_is_passable()) {
+    if (currentFloor == 0 && payment == 1 && exit_is_passable())
+    {
+        Rectangle carRect = {carX - 20, carY - 20, 40, 40};
+        if (CheckCollisionRecs(carRect, exitEndRect))
+        {
+            gameFinished = true;
+        }
+    }
+
+    if (currentFloor == 0)
+    {
+        if (CheckCollisionRecs(carRect, entranceRect) && ticket == 0)
+        {
             carX = 70;
             carY = 73;
         }
-        if (CheckCollisionRecs(carRect, exitRect) && !exit_is_passable()) {
+        if (!insideParking && carX - 20 > entranceRect.x + entranceRect.width)
+        {
+            insideParking = true;
+        }
+
+        if (insideParking && CheckCollisionRecs(carRect, entranceRect))
+        {
+            carX = entranceRect.x + entranceRect.width + 80;
+        }
+        if (CheckCollisionRecs(carRect, exitRect) && !exit_is_passable())
+        {
             carX = 600;
             carY = 500;
         }
-
     }
-    if ((carY > 460 && carY < 540) && (carX > 0 && carX < 20)) {
-        if (currentFloor > 0) {
+    if ((carY > 460 && carY < 540) && (carX > 0 && carX < 20))
+    {
+        if (currentFloor > 0)
+        {
             floorChangeRequestedDown = true;
-            carFloor--; 
+            carFloor--;
             carX = 710;
             carY = 75;
         }
@@ -600,43 +721,62 @@ void delimitation_of_playground() {
         carY = 130; // because height is ± 180 so we're often used 130 for all boundary adjustments
     if (carY > 550)
         carY = 480;
-    if (currentFloor == 0) { // barriers wall are managed only on floor P-0
-        if ((carY > 100 && carY < 110) && (carX > 0 && carX < 150)) { // First barrier wall
+    if (currentFloor == 0)
+    { // barriers wall are managed only on floor P-0
+        if ((carY > 100 && carY < 110) && (carX > 0 && carX < 150))
+        { // First barrier wall
             carY = 100;
-        } else if ((carY > 440 && carY < 450) &&
-                   (carX > 660 && carX < 750)) { // Second barrier wall
+        }
+        else if ((carY > 440 && carY < 450) &&
+                 (carX > 660 && carX < 750))
+        { // Second barrier wall
             carY = 400;
         }
-        
     }
-    if (carX > 750) {                 // Right boundary
-        if (carY > 0 && carY < 100) { // chgmt of level IF != P-2
-            if (currentFloor < MAX_FLOOR) {
+    if (carX > 750)
+    { // Right boundary
+        if (carY > 0 && carY < 100)
+        { // chgmt of level IF != P-2
+            if (currentFloor < MAX_FLOOR)
+            {
                 floorChangeRequestedUp = true;
-                carFloor++; 
+                carFloor++;
                 carX = 20;
                 carY = 75;
-            } else {
+            }
+            else
+            {
                 carX = 670;
             }
-        } else if (carY >= 100 && carY <= 435) { // 100 < carY < 435
-            carX = 670;
-        } else if (currentFloor != 0) {
+        }
+        else if (carY >= 100 && carY <= 435)
+        { // 100 < carY < 435
             carX = 670;
         }
-    } else if (carX < 0) { // Left boundary
-        if (carY > 0 && carY < 100) {
+        else if (currentFloor != 0)
+        {
+            carX = 670;
+        }
+    }
+    else if (carX < 0)
+    { // Left boundary
+        if (carY > 0 && carY < 100)
+        {
             carY = 400;
-        } else {
+        }
+        else
+        {
             carX = 130;
         }
     }
 }
 
-void place_car_at_start_pos() {
+void place_car_at_start_pos()
+{
     float scale = 0.65f;
 
-    switch (chosenCar) {
+    switch (chosenCar)
+    {
     case 0: // black car
         DrawTexturePro(
             carOrient[CAR_BLACK].top,
@@ -683,8 +823,8 @@ void place_car_at_start_pos() {
         DrawTexturePro(
             carOrient[CAR_RED].top,
             (Rectangle){0, 0, carOrient[CAR_RED].top.width, carOrient[CAR_RED].top.height},
-            (Rectangle){carX, carY + 5, carOrient[CAR_RED].top.width *0.9f,
-                        carOrient[CAR_RED].top.height*0.9f},
+            (Rectangle){carX, carY + 5, carOrient[CAR_RED].top.width * 0.9f,
+                        carOrient[CAR_RED].top.height * 0.9f},
             (Vector2){carOrient[CAR_RED].top.width * scale / 2,
                       carOrient[CAR_RED].top.height * scale / 2},
             carRotation, WHITE);
@@ -703,7 +843,8 @@ void place_car_at_start_pos() {
     }
 }
 
-void draw_buttons_direction(Texture2D PC) {
+void draw_buttons_direction(Texture2D PC)
+{
     Rectangle srcUp = {129, 320, 60, 60};
     Rectangle srcDown = {192, 320, 60, 60};
 
@@ -722,7 +863,8 @@ void draw_buttons_direction(Texture2D PC) {
     DrawTextureRec(PC, srcRight, posRight, WHITE);
 }
 
-void draw_floor_arrows(Texture2D PC, Rectangle srcArrow, Rectangle prev, Rectangle next, int floor, bool enabled) {
+void draw_floor_arrows(Texture2D PC, Rectangle srcArrow, Rectangle prev, Rectangle next, int floor, bool enabled)
+{
     Vector2 origin = {srcArrow.width / 2.0f, srcArrow.height / 2.0f};
 
     bool canUp = enabled && (floor < MAX_FLOOR);
@@ -735,23 +877,27 @@ void draw_floor_arrows(Texture2D PC, Rectangle srcArrow, Rectangle prev, Rectang
     DrawTexturePro(PC, srcArrow, next, origin, 180.0f, downTint);
 }
 
-void draw_return_arrow(Texture2D PC, Rectangle srcReturn, Rectangle destReturn, bool enabled) {
+void draw_return_arrow(Texture2D PC, Rectangle srcReturn, Rectangle destReturn, bool enabled)
+{
 
     Color returnColor = enabled ? brightBlue : Fade(GRAY, 0.5f);
 
     DrawTexturePro(PC, srcReturn, destReturn, origin1, 0, returnColor);
 }
 
-static inline bool game_mode_selected(Screen s) {
+static inline bool game_mode_selected(Screen s)
+{
     return s == SCREEN_RANDOM || s == SCREEN_MANUAL || s == SCREEN_HARD_MANUAL ||
            s == SCREEN_DIRECTION;
 }
 
-static inline Color disabled_tint(Color base, bool enabled) {
+static inline Color disabled_tint(Color base, bool enabled)
+{
     return enabled ? base : Fade(GRAY, 0.5f);
 }
 
-void draw_ticket_pay_buttons(Font font, bool enabled) {
+void draw_ticket_pay_buttons(Font font, bool enabled)
+{
     bool canUse = (currentFloor == 0) && enabled;
     Color btnTint = disabled_tint(WHITE, canUse);
     Color textTint1 = disabled_tint(parkingBlue, canUse);
@@ -764,33 +910,43 @@ void draw_ticket_pay_buttons(Font font, bool enabled) {
     DrawTextEx(font, "  Pay", (Vector2){btnPay.x + 35, btnPay.y + 18}, 18, 1, textTint2);
 }
 
-void handle_station_buttons_click(Vector2 mouse, bool enabled) {
+void handle_station_buttons_click(Vector2 mouse, bool enabled)
+{
     if (!enabled)
         return;
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        if (currentFloor != 0) {
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+    {
+        if (currentFloor != 0)
+        {
             return;
         }
 
-        if (CheckCollisionPointRec(mouse, btnTicket)) {
-            if (ticket == 0) {
+        if (CheckCollisionPointRec(mouse, btnTicket))
+        {
+            if (ticket == 0)
+            {
                 ticket = 1;
                 entranceTriggerTime = GetTime();
             }
         }
 
-        if (CheckCollisionPointRec(mouse, btnPay)) {
-            if (ticket == 0) {
+        if (CheckCollisionPointRec(mouse, btnPay))
+        {
+            if (ticket == 0)
+            {
                 fflush(stdout);
-            } else if (payment == 0) {
+            }
+            else if (payment == 0)
+            {
                 payment = 1;
                 exitTriggerTime = GetTime();
-            } 
+            }
         }
     }
 }
 
-void unload_textures() {
+void unload_textures()
+{
     UnloadTexture(background);
     UnloadTexture(free_parking_place);
     UnloadTexture(busy_parking_place);
@@ -812,14 +968,37 @@ void unload_textures() {
 
     UnloadTexture(PC);
 
-    for (int i = 0; i < NUM_CARS; i++) {
+    for (int i = 0; i < NUM_CARS; i++)
+    {
         UnloadTexture(carOrient[i].front);
         UnloadTexture(carOrient[i].right);
         UnloadTexture(carOrient[i].top);
     }
 }
+bool check_collision_with_parking(float carX, float carY, Parking places[], int n)
+{
+    Rectangle carRect = {carX - 20, carY - 20, 40, 40};
 
-void init_window_parking(const char *full_path_json, int num_parking_places, Parking places[]) {
+    for (int i = 0; i < n; i++)
+    {
+        if (places[i].occupied)
+        {
+            // parking place sizes
+            float w = 180.0f * 0.62f;
+            float h = 95.0f * 0.62f;
+            Rectangle placeRect = {places[i].x, places[i].y, w, h};
+
+            if (CheckCollisionRecs(carRect, placeRect))
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void init_window_parking(const char *full_path_json, int num_parking_places, Parking places[])
+{
     SetTraceLogLevel(LOG_NONE);
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Parking Simulator");
     int monitor = GetCurrentMonitor();
@@ -853,8 +1032,10 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
     destPreviewLevel = (Rectangle){750, 750, srcArrow.width, srcArrow.height};
     destNextLevel = (Rectangle){50, 750, srcArrow.width, srcArrow.height};
     init_parking_state(num_parking_places, places);
+    reload_floor(currentFloor, places, &num_parking_places);
 
-    while (!WindowShouldClose()) {
+    while (!WindowShouldClose())
+    {
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
@@ -862,7 +1043,8 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
         panel();
         draw_ticket_pay_buttons(font, controlsUnlocked);
-        if (currentFloor == 0) {
+        if (currentFloor == 0)
+        {
             draw_entrance_barrier();
             draw_exit_barrier();
         }
@@ -885,46 +1067,55 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
         Vector2 mouse = GetMousePosition();
         DrawText(TextFormat("(x;y) = (%d;%d)", (int)mouse.x, (int)mouse.y), 10, 10, 12, BLACK);
         // to change floors
-        if (controlsUnlocked && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            if (CheckCollisionPointRec(mouse, destPreviewLevel)) {
-                if (currentFloor < MAX_FLOOR) {
-                    currentFloor++;
-                    reload_floor(currentFloor, places, &num_parking_places);
-                }
-            } else if (CheckCollisionPointRec(mouse, destNextLevel)) {
-                if (currentFloor > 0) {
-                    currentFloor--;
-                    reload_floor(currentFloor, places, &num_parking_places);
-                }
+        if (controlsUnlocked && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+        {
+            if (CheckCollisionPointRec(mouse, destPreviewLevel))
+            {
+                request_floor_change(1, places, &num_parking_places);
+            }
+            else if (CheckCollisionPointRec(mouse, destNextLevel))
+            {
+                request_floor_change(-1, places, &num_parking_places);
             }
         }
-        if (floorChangeRequestedUp) {
-            currentFloor++;
-            reload_floor(currentFloor, places, &num_parking_places);
+        if (floorChangeRequestedUp)
+        {
+            request_floor_change(1, places, &num_parking_places);
             floorChangeRequestedUp = false;
         }
-        if (floorChangeRequestedDown) {
-            currentFloor--;
-            reload_floor(currentFloor, places, &num_parking_places);
+        if (floorChangeRequestedDown)
+        {
+            request_floor_change(-1, places, &num_parking_places);
             floorChangeRequestedDown = false;
         }
         update_barrier_angles();
         handle_station_buttons_click(mouse, controlsUnlocked);
         handle_automatic_opening();
+        if (gameFinished && currentScreen != SCREEN_END)
+        {
+            currentScreen = SCREEN_END;
+        }
 
-        switch (currentScreen) {
+        switch (currentScreen)
+        {
         case SCREEN_MANUAL_PANEL:
             controlsUnlocked = false;
-            if (letters1 < strlen(message1)) {
+            if (letters1 < strlen(message1))
+            {
                 timer1 += dt;
-                if (timer1 >= letterDelay) {
+                if (timer1 >= letterDelay)
+                {
                     letters1++;
                     timer1 = 0.0f;
                 }
-            } else {
-                if (letters2 < strlen(message2)) {
+            }
+            else
+            {
+                if (letters2 < strlen(message2))
+                {
                     letterTimer2 += dt;
-                    if (letterTimer2 >= letterDelay) {
+                    if (letterTimer2 >= letterDelay)
+                    {
                         letters2++;
                         letterTimer2 = 0.0f;
                     }
@@ -937,7 +1128,8 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             init_manual_panel_menu();
             manual_panel_menu(font);
 
-            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            {
                 if (CheckCollisionPointRec(mouse, btnRandom))
                     currentScreen = SCREEN_RANDOM;
                 if (CheckCollisionPointRec(mouse, btnManual))
@@ -949,23 +1141,51 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
         case SCREEN_RANDOM:
             DrawText("Random mode", 200, 400, 20, parkingBlue);
-            if ((IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, btnReturn))) {
+            if ((IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
+                 CheckCollisionPointRec(mouse, btnReturn)))
+            {
                 controlsUnlocked = true;
                 currentScreen = SCREEN_MANUAL_PANEL;
-                if (currentFloor != 0) {
+                if (currentFloor != 0)
+                {
                     currentFloor = 0;
                     reload_floor(currentFloor, places, &num_parking_places);
                 }
             }
             break;
+        case SCREEN_END:
+            controlsUnlocked = false;
+            DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, Fade(BLACK, 0.8f));
+            DrawText("*** Merci d'avoir joué au Parking Simulator ! ***", 160, 300, 20, WHITE);
+            DrawText("Appuyez sur [Entrée] pour revenir au menu", 180, 350, 20, WHITE);
+            static float blink = 0;
+            blink += 0.05f;
+            if (sin(blink) > 0)
+            {
+                DrawText("--> Rejouer <--", 320, 420, 24, SKYBLUE);
+            }
+            if (IsKeyDown(KEY_ENTER))
+            {
+                currentScreen = SCREEN_MANUAL_PANEL;
+                gameFinished = false;
+                carX = 70;
+                carY = 73;
+                payment = 0;
+                ticket = 0;
+                reload_floor(0, places, &num_parking_places);
+            }
+
+            break;
 
         case SCREEN_MANUAL:
             choose_your_car(font);
-            if (currentFloor == carFloor) {
+            if (currentFloor == carFloor)
+            {
                 place_car_at_start_pos();
             }
 
-            if (chosenCar != -1) {
+            if (chosenCar != -1)
+            {
                 Rectangle srcReturn1 = {0, 130, -65, 60};
                 Rectangle destNextStep = {625, 725, srcArrow.width, srcArrow.height};
                 DrawTexturePro(PC, srcReturn1, destNextStep, origin, 0, brightGreen);
@@ -973,17 +1193,21 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
                 // (int)destNextStep.width, (int)destNextStep.height, RED);
 
                 if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
-                    CheckCollisionPointRec(mouse, destNextStep)) {
+                    CheckCollisionPointRec(mouse, destNextStep))
+                {
                     controlsUnlocked = true;
                     currentScreen = SCREEN_DIRECTION;
                     carFloor = currentFloor;
                 }
             }
 
-            if ((IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, btnReturn))) {
+            if ((IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
+                 CheckCollisionPointRec(mouse, btnReturn)))
+            {
                 currentScreen = SCREEN_MANUAL_PANEL;
                 place_car_at_start_pos();
-                if (currentFloor != 0) {
+                if (currentFloor != 0)
+                {
                     currentFloor = 0;
                     reload_floor(currentFloor, places, &num_parking_places);
                 }
@@ -991,16 +1215,20 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             break;
 
         case SCREEN_DIRECTION:
-            if (currentFloor == carFloor) {
-                update_car_position(dt);
+            if (currentFloor == carFloor)
+            {
+                update_car_position(dt, places, num_parking_places);
                 place_car_at_start_pos();
             }
 
-            if ((CheckCollisionPointRec(mouse, btnReturn) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))) {
+            if ((CheckCollisionPointRec(mouse, btnReturn) &&
+                 IsMouseButtonPressed(MOUSE_LEFT_BUTTON)))
+            {
                 controlsUnlocked = false;
                 currentScreen = SCREEN_MANUAL;
                 place_car_at_start_pos();
-                if (currentFloor != 0) {
+                if (currentFloor != 0)
+                {
                     currentFloor = 0;
                     reload_floor(currentFloor, places, &num_parking_places);
                 }
@@ -1009,7 +1237,9 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
         case SCREEN_HARD_MANUAL:
             DrawText("Hard Manual mode", 200, 400, 20, parkingRed);
-            if ((CheckCollisionPointRec(mouse, btnReturn) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))) {
+            if ((CheckCollisionPointRec(mouse, btnReturn) &&
+                 IsMouseButtonPressed(MOUSE_LEFT_BUTTON)))
+            {
                 controlsUnlocked = true;
                 place_car_at_start_pos();
                 currentScreen = SCREEN_MANUAL_PANEL;

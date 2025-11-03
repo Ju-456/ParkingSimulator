@@ -25,11 +25,11 @@ typedef enum {
     SCREEN_RANDOM,
     SCREEN_MANUAL,
     SCREEN_DIRECTION,
-    SCREEN_HARD_MANUAL
+    SCREEN_HARD_MANUAL,
+    SCREEN_END
 } Screen;
 
 static inline bool game_mode_selected(Screen s);
-static inline bool entrance_is_passable();
 static inline bool exit_is_passable();
 void draw_parking_places(int n, Parking places[]);
 void panel();
@@ -50,16 +50,17 @@ void manual_panel_menu(Font font);
 void load_textures();
 void choose_your_car(Font font);
 void choose_your_car_condition();
-void update_car_position(float dt);
+void update_car_position(float dt, Parking places[], int n);
 void delimitation_of_playground();
 void place_car_at_start_pos();
+bool check_collision_with_parking(float carX, float carY, Parking places[], int n);
 
-void draw_floor_arrows(Texture2D PC, Rectangle srcArrow, Rectangle prev, Rectangle next, int floor,
-                       bool enabled);
+void draw_floor_arrows(Texture2D PC, Rectangle srcArrow, Rectangle prev, Rectangle next, int floor, bool enabled);
 void draw_return_arrow(Texture2D PC, Rectangle srcReturn, Rectangle destReturn, bool enabled);
 static inline Color disabled_tint(Color base, bool enabled);
 void draw_ticket_pay_buttons(Font font, bool enabled);
 void handle_station_buttons_click(Vector2 mouse, bool enabled);
+void request_floor_change(int direction, Parking places[], int *num_parking_places);
 
 void unload_textures();
 
