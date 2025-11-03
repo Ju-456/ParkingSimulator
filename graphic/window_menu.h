@@ -31,6 +31,7 @@ typedef enum {
 
 static inline bool game_mode_selected(Screen s);
 static inline bool exit_is_passable();
+void reset_parking_state(Parking places[], int *num_parking_places);
 void draw_parking_places(int n, Parking places[]);
 void panel();
 void update_barrier_angles();

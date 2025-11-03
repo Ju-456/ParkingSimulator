@@ -996,6 +996,34 @@ bool check_collision_with_parking(float carX, float carY, Parking places[], int 
     }
     return false;
 }
+void reset_parking_state(Parking places[], int *num_parking_places)
+{
+    currentFloor = 0;
+    carFloor = 0;
+
+    entranceState = 0;
+    exitState = 0;
+    entranceAngle = 0.0f;
+    exitAngle = 0.0f;
+    entranceTargetAngle = 0.0f;
+    exitTargetAngle = 0.0f;
+
+    entranceTriggerTime = -1.0;
+    exitTriggerTime = -1.0;
+    entranceOpenTime = -1.0;
+    exitOpenTime = -1.0;
+
+    ticket = 0;
+    payment = 0;
+    insideParking = false;
+    gameFinished = false;
+
+    reload_floor(currentFloor, places, num_parking_places);
+
+    carX = 70;
+    carY = 73;
+    carRotation = -90.0f;
+}
 
 void init_window_parking(const char *full_path_json, int num_parking_places, Parking places[])
 {
@@ -1144,13 +1172,8 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             if ((IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
                  CheckCollisionPointRec(mouse, btnReturn)))
             {
-                controlsUnlocked = true;
                 currentScreen = SCREEN_MANUAL_PANEL;
-                if (currentFloor != 0)
-                {
-                    currentFloor = 0;
-                    reload_floor(currentFloor, places, &num_parking_places);
-                }
+                reset_parking_state(places, &num_parking_places);
             }
             break;
         case SCREEN_END:
@@ -1167,12 +1190,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             if (IsKeyDown(KEY_ENTER))
             {
                 currentScreen = SCREEN_MANUAL_PANEL;
-                gameFinished = false;
-                carX = 70;
-                carY = 73;
-                payment = 0;
-                ticket = 0;
-                reload_floor(0, places, &num_parking_places);
+                reset_parking_state(places, &num_parking_places);
             }
 
             break;
@@ -1205,12 +1223,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
                  CheckCollisionPointRec(mouse, btnReturn)))
             {
                 currentScreen = SCREEN_MANUAL_PANEL;
-                place_car_at_start_pos();
-                if (currentFloor != 0)
-                {
-                    currentFloor = 0;
-                    reload_floor(currentFloor, places, &num_parking_places);
-                }
+                reset_parking_state(places, &num_parking_places);
             }
             break;
 
@@ -1224,14 +1237,8 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             if ((CheckCollisionPointRec(mouse, btnReturn) &&
                  IsMouseButtonPressed(MOUSE_LEFT_BUTTON)))
             {
-                controlsUnlocked = false;
-                currentScreen = SCREEN_MANUAL;
-                place_car_at_start_pos();
-                if (currentFloor != 0)
-                {
-                    currentFloor = 0;
-                    reload_floor(currentFloor, places, &num_parking_places);
-                }
+                currentScreen = SCREEN_MANUAL_PANEL;
+                reset_parking_state(places, &num_parking_places);
             }
             break;
 
@@ -1240,9 +1247,8 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             if ((CheckCollisionPointRec(mouse, btnReturn) &&
                  IsMouseButtonPressed(MOUSE_LEFT_BUTTON)))
             {
-                controlsUnlocked = true;
-                place_car_at_start_pos();
                 currentScreen = SCREEN_MANUAL_PANEL;
+                reset_parking_state(places, &num_parking_places);
             }
             break;
         }
