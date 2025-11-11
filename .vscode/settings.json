@@ -1,7 +1,0 @@
-{
-    "files.associations": {
-        "raylib.h": "c",
-        "parking.h": "c",
-        "window_menu.h": "c"
-    }
-}

@@ -1,4 +1,4 @@
-#include "general.h"
+#include "utils.h"
 
 void build_path(char *full_path, const char *base_path, const char *filename) {
     char cwd[PATH_MAX];

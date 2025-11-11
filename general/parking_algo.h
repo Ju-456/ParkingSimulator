@@ -3,7 +3,7 @@
 
 #include "parson.h"
 #include "raylib.h"
-#include "general.h"
+#include "utils.h"
 
 typedef struct {
     char id[2];  

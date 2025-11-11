@@ -1,10 +1,10 @@
 
 #define MAX_PLACES 100
-#include "parking.h"
-#include "general.h"
+#include "parking_algo.h"
+#include "utils.h"
 
 int count_number_places(char full_path_json[]) {
-    FILE *file = fopen(full_path_json, "r"); 
+    FILE *file = fopen(full_path_json, "r");
     if (file == NULL) {
         fprintf(stderr, "Error opening JSON file\n");
         return 0;
@@ -13,7 +13,7 @@ int count_number_places(char full_path_json[]) {
     int count = 0;
     char c;
     char token[MAX_PLACES];
-    int inNodesIds = 0; 
+    int inNodesIds = 0;
 
     while ((c = fgetc(file)) != EOF) {
         if (!inNodesIds) {
@@ -28,7 +28,7 @@ int count_number_places(char full_path_json[]) {
         }
 
         if (c == '"') {
-            ungetc(c, file); 
+            ungetc(c, file);
             if (fscanf(file, " \"%[^\"]\"", token) == 1) { // "%d"
                 count++;
             }
@@ -50,7 +50,7 @@ void read_id_from_json(const char *full_path_json, Parking places[], int num_par
     JSON_Array *ids = json_object_get_array(root_obj, "nodesIds");
     num_parking_places = json_array_get_count(ids);
 
-    for (int i = 0; i < num_parking_places ; i++) {
+    for (int i = 0; i < num_parking_places; i++) {
         const char *id = json_array_get_string(ids, i);
         strcpy(places[i].id, id);
     }
@@ -59,9 +59,9 @@ void read_id_from_json(const char *full_path_json, Parking places[], int num_par
 }
 
 int load_graph_from_json(const char *full_path_json, int num_parking_places, Parking places[]) {
-    char* strTmp = (char*)malloc(256*sizeof(char));
-    strcpy(strTmp,full_path_json);
-    //build_path(strTmp, "graph_json/", FILENAME_JSON);
+    char *strTmp = (char *)malloc(256 * sizeof(char));
+    strcpy(strTmp, full_path_json);
+    // build_path(strTmp, "graph_json/", FILENAME_JSON);
 
     read_id_from_json(full_path_json, places, num_parking_places);
 
@@ -71,7 +71,7 @@ int load_graph_from_json(const char *full_path_json, int num_parking_places, Par
     if (root_val == NULL) {
         fprintf(stderr, "Error parsing JSON file: %s\n", full_path_json);
         return 0;
-    }    
+    }
 
     JSON_Array *ids = json_object_get_array(root_obj, "nodesIds");
     num_parking_places = json_array_get_count(ids);
@@ -84,7 +84,7 @@ int load_graph_from_json(const char *full_path_json, int num_parking_places, Par
         places[i].x = (float)json_object_get_number(node, "x");
         places[i].y = (float)json_object_get_number(node, "y");
 
-        //printf("Place %s : (x = %d, y = %d)\n", places[i].id, places[i].x, places[i].y);
+        // printf("Place %s : (x = %d, y = %d)\n", places[i].id, places[i].x, places[i].y);
     }
 
     json_value_free(root_val);
@@ -92,7 +92,7 @@ int load_graph_from_json(const char *full_path_json, int num_parking_places, Par
 }
 
 int init_direction_parking_places(int num_parking_places, Parking places[MAX_PLACES]) {
-    int xGroups[MAX_PLACES];  
+    int xGroups[MAX_PLACES];
     int numGroups = 0;
 
     for (int i = 0; i < num_parking_places; i++) {
@@ -110,15 +110,14 @@ int init_direction_parking_places(int num_parking_places, Parking places[MAX_PLA
             xGroups[numGroups] = x;
             groupIndex = numGroups;
             numGroups++;
-            //printf("Xgroup%d = %d\n", groupIndex + 1, x);
+            // printf("Xgroup%d = %d\n", groupIndex + 1, x);
         }
 
         places[i].direction = groupIndex % 2; //  // even group = 0, odd group = 1
-        //printf("Place %s → direction = %d\n", places[i].id, places[i].direction);
+        // printf("Place %s → direction = %d\n", places[i].id, places[i].direction);
     }
 
-    //printf("\n");
-    //printf("There are %d different groups (diff columns)\n", numGroups);
+    // printf("\n");
+    // printf("There are %d different groups (diff columns)\n", numGroups);
     return numGroups;
 }
-
