@@ -21,14 +21,7 @@ typedef struct {
 
 typedef enum { CAR_BLACK = 0, CAR_BLUE, CAR_GRAY, CAR_PINK, CAR_RED, CAR_YELLOW } CarColor;
 
-typedef enum {
-    SCREEN_MANUAL_PANEL,
-    SCREEN_RANDOM,
-    SCREEN_MANUAL,
-    SCREEN_DIRECTION,
-    SCREEN_HARD_MANUAL,
-    SCREEN_END
-} Screen;
+typedef enum { SCREEN_MANUAL_PANEL, SCREEN_RANDOM, SCREEN_MANUAL, SCREEN_DIRECTION, SCREEN_HARD_MANUAL, SCREEN_END } Screen;
 
 // Textures générales
 extern Texture2D background;
@@ -132,7 +125,7 @@ void draw_entrance_barrier();
 void draw_exit_barrier();
 bool exit_is_passable();
 
-//parking part
+// parking part
 void draw_parking_places(int n, Parking places[]);
 void draw_parked_cars(int n, Parking places[]);
 void init_parking_state(int n, Parking places[]);
@@ -149,14 +142,19 @@ void delimitation_of_playground();
 void load_textures();
 void unload_textures();
 
-// random mode part
-void request_simulation_start(int sim) ;
+// RANDOM MODE PART :
+// to create a scenario for a random simu
+void open_new_sim_file_session();
+void close_sim_file_session();
+void collect_and_save_simulation_data_auto(float dt);
+void request_simulation_start(int sim);
 void select_random_car();
-void first_simulation(float dt);
-void second_simulation(float dt);
-void third_simulation(float dt);
+
+// to apply created  scenarios for a random simu
+void random_sim_ordered(int sim, float dt);
 void update_simulation(float dt);
-void debug_print_state_periodic();
+void stop_replay_file();
+/*---------------------------------------------*/
 
 // hard and manual mode part
 void choose_your_car(Font font);

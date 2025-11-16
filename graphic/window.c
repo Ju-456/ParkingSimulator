@@ -264,8 +264,9 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             if (!randomSimulationStarted) {
                 select_random_car();
                 place_car_at_start_pos();
-                // int chosenSim = rand() % 3; // after programming others simulations
-                int chosenSim = 0;
+
+                // int chosenSim = rand() % 3;
+                int chosenSim = 0; // temporary, just to test the barrier
                 request_simulation_start(chosenSim);
 
                 randomSimulationStarted = true;
@@ -275,41 +276,50 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             {
                 float dt_sim = GetFrameTime();
 
-                // animate barrier visuals
                 update_barrier_angles();
                 handle_automatic_opening();
-                update_simulation(dt_sim);
+
+                update_simulation(dt_sim); // Update simulation (reads positions from file)
                 delimitation_of_playground();
 
-                if (currentFloor == carFloor) {
-                    place_car_at_start_pos();
+                if (currentFloor != carFloor) { // Ensure (currentFloor == carFloor) => so car is always visible !!!
+                    currentFloor = carFloor;
+                    reload_floor(currentFloor, places, &num_parking_places);
                 }
 
-                debug_print_state_periodic();
+                if (currentFloor == carFloor) { // Draw car if on current floor
+                    place_car_at_start_pos();
+                }
             }
 
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, btnReturn)) {
                 simRunning = false;
                 simPendingStart = false;
                 randomSimulationStarted = false;
-                barrier_management(0, 0);
+
+                barrier_management(0, 0); // close barrier
+
                 controlsUnlocked = true;
                 currentScreen = SCREEN_MANUAL_PANEL;
-                if (currentFloor != 0) {
+
+                if (currentFloor != 0) { // in case
                     currentFloor = 0;
                     reload_floor(currentFloor, places, &num_parking_places);
                 }
             }
             break;
+
         case SCREEN_END:
             controlsUnlocked = false;
+
             DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, Fade(BLACK, 0.8f));
-            DrawText("*** Merci d'avoir joué au Parking Simulator ! ***", 160, 300, 20, WHITE);
-            DrawText("Appuyez sur [Entrée] pour revenir au menu", 180, 350, 20, WHITE);
+            DrawText("*** Thank you for playing Parking Simulator! ***", 160, 300, 20, WHITE);
+            DrawText("Press [Enter] to return to the menu", 180, 350, 20, WHITE);
+
             static float blink = 0;
             blink += 0.05f;
             if (sin(blink) > 0) {
-                DrawText("--> Rejouer <--", 320, 420, 24, SKYBLUE);
+                DrawText("--> Replay <--", 320, 420, 24, SKYBLUE);
             }
             if (IsKeyDown(KEY_ENTER)) {
                 currentScreen = SCREEN_MANUAL_PANEL;

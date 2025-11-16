@@ -123,11 +123,13 @@ void update_car_position(float dt, Parking places[], int n) {
         newY += carSpeed * dt;
         carRotation = 0.0f;
     }
-    // to avoid collision with occupied parking places
+
     if (!check_collision_with_parking(newX, newY, places, n)) {
         carX = newX;
         carY = newY;
     }
 
     delimitation_of_playground();
+
+    collect_and_save_simulation_data_auto(dt);
 }
