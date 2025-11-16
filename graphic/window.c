@@ -265,31 +265,38 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
                 select_random_car();
                 place_car_at_start_pos();
 
-                // int chosenSim = rand() % 3;
-                int chosenSim = 0; // temporary, just to test the barrier
+                int chosenSim = rand() % 6;
                 request_simulation_start(chosenSim);
 
                 randomSimulationStarted = true;
                 printf("randomSimulationStarted = %d, simRequested = %d\n", randomSimulationStarted, chosenSim);
             }
 
-            {
-                float dt_sim = GetFrameTime();
+            float dt_sim = GetFrameTime();
 
-                update_barrier_angles();
-                handle_automatic_opening();
+            update_barrier_angles();
+            handle_automatic_opening();
 
-                update_simulation(dt_sim); // Update simulation (reads positions from file)
-                delimitation_of_playground();
+            update_simulation(dt_sim); // Update simulation (reads positions from file)
+            delimitation_of_playground();
 
-                if (currentFloor != carFloor) { // Ensure (currentFloor == carFloor) => so car is always visible !!!
-                    currentFloor = carFloor;
-                    reload_floor(currentFloor, places, &num_parking_places);
-                }
+            if (currentFloor != carFloor) { // Ensure (currentFloor == carFloor) => so car is always visible !!!
+                currentFloor = carFloor;
+                reload_floor(currentFloor, places, &num_parking_places);
+            }
 
-                if (currentFloor == carFloor) { // Draw car if on current floor
-                    place_car_at_start_pos();
-                }
+            if (currentFloor == carFloor) { // Draw car if on current floor
+                place_car_at_start_pos();
+            }
+
+            if (is_replay_finished() && randomSimulationStarted) {
+                randomSimulationStarted = false;
+                simRunning = false;
+                simPendingStart = false;
+                stop_replay_file(); // ensure closed
+                controlsUnlocked = false;
+                currentScreen = SCREEN_END;
+                printf("Randow replay finished direction to 'SCREEN_END'\n");
             }
 
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, btnReturn)) {
@@ -297,12 +304,10 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
                 simPendingStart = false;
                 randomSimulationStarted = false;
 
-                barrier_management(0, 0); // close barrier
-
                 controlsUnlocked = true;
                 currentScreen = SCREEN_MANUAL_PANEL;
 
-                if (currentFloor != 0) { // in case
+                if (currentFloor != 0) { // in case !
                     currentFloor = 0;
                     reload_floor(currentFloor, places, &num_parking_places);
                 }

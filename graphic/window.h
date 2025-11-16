@@ -20,7 +20,6 @@ typedef struct {
 } carOrientation;
 
 typedef enum { CAR_BLACK = 0, CAR_BLUE, CAR_GRAY, CAR_PINK, CAR_RED, CAR_YELLOW } CarColor;
-
 typedef enum { SCREEN_MANUAL_PANEL, SCREEN_RANDOM, SCREEN_MANUAL, SCREEN_DIRECTION, SCREEN_HARD_MANUAL, SCREEN_END } Screen;
 
 // Textures générales
@@ -154,6 +153,7 @@ void select_random_car();
 void random_sim_ordered(int sim, float dt);
 void update_simulation(float dt);
 void stop_replay_file();
+int is_replay_finished(); // to make liaison between random mode and window.c
 /*---------------------------------------------*/
 
 // hard and manual mode part

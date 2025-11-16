@@ -7,7 +7,7 @@ static char simFilename[64];
 static FILE *simFile = NULL;
 static FILE *replay_fp = NULL;
 static char replay_fullpath[PATH_MAX];
-static int replay_active = 0;
+int replay_active = 0;
 static int lastLoadedCar = -1;
 #define SIMDATA_PATH "graphic/simdata/"
 
@@ -68,8 +68,21 @@ void request_simulation_start(int sim) {
 }
 
 void select_random_car() {
-    chosenCar = rand() % 6;
-    printf("chosenCar = %d\n", chosenCar);
+    static int lastCar = -1;
+    int newCar;
+    int prev = lastCar;
+
+    do {
+        newCar = rand() % 6;
+    } while (newCar == lastCar);
+
+    chosenCar = newCar;
+    lastCar = newCar;
+
+    if (prev >= 0)
+        printf("chosenCar = %d (previous was %d)\n", chosenCar, prev);
+    else
+        printf("chosenCar = %d\n", chosenCar);
 }
 
 // to apply created  scenarios for a random simu
@@ -156,6 +169,15 @@ void update_simulation(float dt) {
     case 2:
         random_sim_ordered(2, dt);
         break;
+    case 3:
+        random_sim_ordered(3, dt);
+        break;
+    case 4:
+        random_sim_ordered(4, dt);
+        break;
+    case 5:
+        random_sim_ordered(5, dt);
+        break;
     }
 }
 
@@ -165,4 +187,8 @@ void stop_replay_file() {
         replay_fp = NULL;
     }
     replay_active = 0;
+}
+
+int is_replay_finished() {
+    return (replay_active == 0);
 }
