@@ -46,38 +46,48 @@ void barrier_management(int barrierType, int barrier_state) {
 }
 
 void handle_automatic_opening() {
-    if (currentFloor != 0)
-        return;
     double now = GetTime();
 
-    // entrance
-    // open after taking a ticket
-    if (entranceTriggerTime >= 0.0 && (now - entranceTriggerTime) >= OPEN_DELAY) {
-        barrier_management(0, 1);   // open
-        entranceTriggerTime = -1.0; // no pending events
-        entranceOpenTime = now;
-    }
+    // Only handle entrance/exit on floor 0 (manual and hard mode)
+    if (currentFloor == 0) {
+        // entrance
+        // open after taking a ticket
+        if (entranceTriggerTime >= 0.0 && (now - entranceTriggerTime) >= OPEN_DELAY) {
+            barrier_management(0, 1);   // open
+            entranceTriggerTime = -1.0; // no pending events
+            entranceOpenTime = now;
+        }
 
-    // close after 5sec
-    if (entranceOpenTime >= 0.0 && (now - entranceOpenTime) >= CLOSE_DELAY) {
-        barrier_management(0, 0); // close
-        entranceOpenTime = -1.0;
-    }
+        // close after 5sec
+        if (entranceOpenTime >= 0.0 && (now - entranceOpenTime) >= CLOSE_DELAY) {
+            barrier_management(0, 0); // close
+            entranceOpenTime = -1.0;
+        }
 
-    // exit
-    // open after payement
-    if (exitTriggerTime >= 0.0 && (now - exitTriggerTime) >= OPEN_DELAY) {
-        barrier_management(1, 1);
-        exitTriggerTime = -1.0;
-        exitOpenTime = now;
-    }
+        // exit
+        // open after payement
+        if (exitTriggerTime >= 0.0 && (now - exitTriggerTime) >= OPEN_DELAY) {
+            barrier_management(1, 1);
+            exitTriggerTime = -1.0;
+            exitOpenTime = now;
+        }
 
-    // close after 5sec
-    if (exitOpenTime >= 0.0 && (now - exitOpenTime) >= CLOSE_DELAY) {
-        barrier_management(1, 0);
-        ticket = 0;
-        payment = 0;
-        exitOpenTime = -1.0;
+        // close after 5sec
+        if (exitOpenTime >= 0.0 && (now - exitOpenTime) >= CLOSE_DELAY) {
+            barrier_management(1, 0);
+            ticket = 0;
+            payment = 0;
+            exitOpenTime = -1.0;
+        }
+    } else {
+        // In random/simulation mode on upper floors, prepare exit barrier
+        // Open exit barrier when simulation is near completion or car is exiting
+        if (simRunning && exitTriggerTime < 0.0) {
+            // Exit barrier should be open during random simulation
+            barrier_management(1, 1);
+            exitTriggerTime = now;
+            exitOpenTime = now;
+        }
     }
 }
 

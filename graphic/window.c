@@ -57,6 +57,7 @@ Rectangle destPreviewLevel;
 Rectangle destNextLevel;
 
 int chosenCar = -1;
+int isItRanOrHardMode = -1;
 
 Rectangle srcMode = {258, 68, 125, 60};
 Rectangle srcPreview = {258, 68, 150, 80};
@@ -87,12 +88,51 @@ bool randomSimulationStarted = false;
 bool simPendingStart = false;
 bool simRunning = false;
 
+// Hard mode AI state
+static bool hardModeAIInitialized = false;
+
+// Timer state
+static double timerStartTime = -1.0;
+static bool timerActive = false;
+
 Color disabled_tint(Color base, bool enabled) {
     return enabled ? base : Fade(GRAY, 0.5f);
 }
 
 bool game_mode_selected(Screen s) {
-    return s == SCREEN_RANDOM || s == SCREEN_MANUAL || s == SCREEN_HARD_MANUAL || s == SCREEN_DIRECTION;
+    return s == SCREEN_RANDOM || s == SCREEN_MANUAL || s == SCREEN_HARD_MANUAL || s == SCREEN_HARD_DIRECTION || s == SCREEN_DIRECTION;
+}
+
+void draw_timer() {
+    if (!timerActive || timerStartTime < 0.0) {
+        return;
+    }
+
+    double elapsed = GetTime() - timerStartTime - 2.0; // Subtract 2 sec delay to give the user time to start the game properly
+    if (elapsed < 0.0)
+        elapsed = 0.0; // Don't show negative time
+
+    int minutes = (int)elapsed / 60;
+    int seconds = (int)elapsed % 60;
+
+    Rectangle timerRect = {10, 575, 100, 30};
+    DrawRectangleRec(timerRect, WHITE);
+    DrawRectangleLinesEx(timerRect, 2, BLACK);
+
+    // Draw time text (MM:SS only, no milliseconds to avoid stress)
+    char timeText[16];
+    snprintf(timeText, sizeof(timeText), "%02d:%02d", minutes, seconds);
+    DrawText(timeText, 22, 582, 16, BLACK);
+}
+
+void start_timer() {
+    timerStartTime = GetTime();
+    timerActive = true;
+}
+
+void stop_timer() {
+    timerActive = false;
+    timerStartTime = -1.0;
 }
 
 void place_car_at_start_pos() {
@@ -272,12 +312,17 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
                 printf("randomSimulationStarted = %d, simRequested = %d\n", randomSimulationStarted, chosenSim);
             }
 
+            // Start timer when simulation starts moving
+            if (simRunning && !timerActive) {
+                start_timer();
+            }
+
             float dt_sim = GetFrameTime();
 
             update_barrier_angles();
             handle_automatic_opening();
 
-            update_simulation(dt_sim); // Update simulation (reads positions from file)
+            update_simulation(dt_sim, 0); // Update simulation (reads positions from file) and 0 is for rand_mode
             delimitation_of_playground();
 
             if (currentFloor != carFloor) { // Ensure (currentFloor == carFloor) => so car is always visible !!!
@@ -294,6 +339,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
                 simRunning = false;
                 simPendingStart = false;
                 stop_replay_file(); // ensure closed
+                stop_timer();
                 controlsUnlocked = false;
                 currentScreen = SCREEN_END;
                 printf("Randow replay finished direction to 'SCREEN_END'\n");
@@ -303,6 +349,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
                 simRunning = false;
                 simPendingStart = false;
                 randomSimulationStarted = false;
+                stop_timer();
 
                 controlsUnlocked = true;
                 currentScreen = SCREEN_MANUAL_PANEL;
@@ -362,6 +409,11 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             break;
 
         case SCREEN_DIRECTION:
+            // Start timer on first frame
+            if (!timerActive) {
+                start_timer();
+            }
+
             if (currentFloor == carFloor) {
                 update_car_position(dt, places, num_parking_places);
                 place_car_at_start_pos();
@@ -370,17 +422,73 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             if ((CheckCollisionPointRec(mouse, btnReturn) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))) {
                 currentScreen = SCREEN_MANUAL_PANEL;
                 reset_parking_state(places, &num_parking_places);
+                stop_timer();
             }
             break;
 
         case SCREEN_HARD_MANUAL:
-            DrawText("Hard Manual mode", 200, 400, 20, parkingRed);
+            choose_your_car(font);
+            if (currentFloor == carFloor) {
+                carX = 70;
+                carY = 73;
+                place_car_at_start_pos();
+            }
+
+            if (chosenCar != -1) {
+                Rectangle srcReturn1 = {0, 130, -65, 60};
+                Rectangle destNextStep = {625, 725, srcArrow.width, srcArrow.height};
+                DrawTexturePro(PC, srcReturn1, destNextStep, origin, 0, brightGreen);
+
+                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, destNextStep)) {
+                    // Initialize AI cars before entering driving mode
+                    if (!hardModeAIInitialized) {
+                        init_hard_mode_ai_cars();
+                        hardModeAIInitialized = true;
+                    }
+
+                    controlsUnlocked = true;
+                    currentScreen = SCREEN_HARD_DIRECTION;
+                    carFloor = currentFloor;
+                }
+            }
+
+            if ((IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, btnReturn))) {
+                currentScreen = SCREEN_MANUAL_PANEL;
+                reset_parking_state(places, &num_parking_places);
+                cleanup_hard_mode_ai_cars();
+                hardModeAIInitialized = false;
+                randomSimulationStarted = false;
+            }
+            break;
+
+        case SCREEN_HARD_DIRECTION:
+            // Start timer on first frame
+            if (!timerActive) {
+                start_timer();
+            }
+
+            if (currentFloor == carFloor) {
+                update_car_position(dt, places, num_parking_places);
+                place_car_at_start_pos();
+            }
+
+            float dt_hard = GetFrameTime();
+            update_hard_mode_ai_cars(dt_hard);
+            draw_hard_mode_ai_cars();
+
             if ((CheckCollisionPointRec(mouse, btnReturn) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))) {
                 currentScreen = SCREEN_MANUAL_PANEL;
                 reset_parking_state(places, &num_parking_places);
+                cleanup_hard_mode_ai_cars();
+                hardModeAIInitialized = false;
+                randomSimulationStarted = false;
+                stop_timer();
             }
             break;
         }
+
+        // Draw timer
+        draw_timer();
 
         EndDrawing();
     }

@@ -20,7 +20,7 @@ typedef struct {
 } carOrientation;
 
 typedef enum { CAR_BLACK = 0, CAR_BLUE, CAR_GRAY, CAR_PINK, CAR_RED, CAR_YELLOW } CarColor;
-typedef enum { SCREEN_MANUAL_PANEL, SCREEN_RANDOM, SCREEN_MANUAL, SCREEN_DIRECTION, SCREEN_HARD_MANUAL, SCREEN_END } Screen;
+typedef enum { SCREEN_MANUAL_PANEL, SCREEN_RANDOM, SCREEN_MANUAL, SCREEN_DIRECTION, SCREEN_HARD_MANUAL, SCREEN_HARD_DIRECTION, SCREEN_END } Screen;
 
 // Textures générales
 extern Texture2D background;
@@ -150,16 +150,32 @@ void request_simulation_start(int sim);
 void select_random_car();
 
 // to apply created  scenarios for a random simu
-void random_sim_ordered(int sim, float dt);
-void update_simulation(float dt);
+void random_sim_ordered(int sim, float dt, int simMode);
+void update_simulation(float dt, int simMode);
 void stop_replay_file();
 int is_replay_finished(); // to make liaison between random mode and window.c
 /*---------------------------------------------*/
 
 // hard and manual mode part
+typedef struct {
+    float x;
+    float y;
+    float rotation;
+    int floor;
+    int colorIndex;
+    int active;
+} AICar;
+
 void choose_your_car(Font font);
 void choose_your_car_condition();
 void update_car_position(float dt, Parking places[], int n);
+
+// Hard mode AI cars
+void init_hard_mode_ai_cars();
+void update_hard_mode_ai_cars(float dt);
+void draw_hard_mode_ai_cars();
+void cleanup_hard_mode_ai_cars();
+void update_ai_simulation(float dt, int vehicleIndex);
 
 // buttons
 void draw_buttons_direction(Texture2D PC);

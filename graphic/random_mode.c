@@ -85,8 +85,8 @@ void select_random_car() {
         printf("chosenCar = %d\n", chosenCar);
 }
 
-// to apply created  scenarios for a random simu
-static void open_random_sim_file(int chosenSim) {
+// to apply created  scenarios for a random simu and also for hard mode
+static void open_random_sim_file(int chosenSim, int simMode) {
     if (replay_fp && lastLoadedCar == chosenSim)
         return;
 
@@ -97,7 +97,11 @@ static void open_random_sim_file(int chosenSim) {
 
     lastLoadedCar = chosenSim;
 
-    snprintf(replay_fullpath, sizeof(replay_fullpath), "graphic/simdata/simulation_data_%d.txt", chosenSim);
+    if (simMode == 0) {
+        snprintf(replay_fullpath, sizeof(replay_fullpath), "graphic/simdata/rand_mode/simulation_data_%d.txt", chosenSim);
+    } else if (simMode == 1) {
+        snprintf(replay_fullpath, sizeof(replay_fullpath), "graphic/simdata/hard_mode/simulation_data_%d.txt", chosenSim);
+    }
 
     replay_fp = fopen(replay_fullpath, "r");
 
@@ -144,16 +148,22 @@ static int random_sim_read_and_apply() {
     return 1;
 }
 
-void random_sim_ordered(int sim, float dt) {
+void random_sim_ordered(int sim, float dt, int simMode) {
     if (!simRunning || simIndex != sim)
         return;
 
-    open_random_sim_file(sim);
+    if (simMode == 0) {
+        open_random_sim_file(sim, 0); // graphic/rand_mode/simulation_dataX.txt
+    } else if (simMode == 1) {
+        open_random_sim_file(sim, 1); // graphic/hard_mode/simulation_dataX.txt
+    }
+
     random_sim_read_and_apply();
     delimitation_of_playground();
 }
 
-void update_simulation(float dt) {
+// if simMode == 0 => rand_mode, else if simMode == 1 => hard_mode
+void update_simulation(float dt, int simMode) {
     if (!simRunning && simPendingStart) {
         simRunning = true;
         simPendingStart = false;
@@ -161,22 +171,22 @@ void update_simulation(float dt) {
 
     switch (simIndex) {
     case 0:
-        random_sim_ordered(0, dt);
+        random_sim_ordered(0, dt, simMode);
         break;
     case 1:
-        random_sim_ordered(1, dt);
+        random_sim_ordered(1, dt, simMode);
         break;
     case 2:
-        random_sim_ordered(2, dt);
+        random_sim_ordered(2, dt, simMode);
         break;
     case 3:
-        random_sim_ordered(3, dt);
+        random_sim_ordered(3, dt, simMode);
         break;
     case 4:
-        random_sim_ordered(4, dt);
+        random_sim_ordered(4, dt, simMode);
         break;
     case 5:
-        random_sim_ordered(5, dt);
+        random_sim_ordered(5, dt, simMode);
         break;
     }
 }

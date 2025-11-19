@@ -1,5 +1,145 @@
 #include "window.h"
 
+// AI Cars for hard mode
+#define NUM_AI_CARS 3
+#define MAX_AVAILABLE_SIMS 5
+static AICar aiCars[NUM_AI_CARS];
+static FILE *aiSimFiles[NUM_AI_CARS] = {NULL, NULL, NULL};
+static int aiSimActive[NUM_AI_CARS] = {0, 0, 0};
+static int aiCarColors[NUM_AI_CARS] = {CAR_BLUE, CAR_RED, CAR_YELLOW};
+static double aiSimTime[NUM_AI_CARS] = {0.0, 0.0, 0.0};
+static int selectedSimulations[NUM_AI_CARS] = {0, 0, 0};
+
+void init_hard_mode_ai_cars() {
+    int numSims = (rand() % 2) + 2;
+
+    int availableSims[MAX_AVAILABLE_SIMS];
+    for (int i = 0; i < MAX_AVAILABLE_SIMS; i++) {
+        availableSims[i] = i;
+    }
+
+    for (int i = MAX_AVAILABLE_SIMS - 1; i > MAX_AVAILABLE_SIMS - numSims - 1; i--) {
+        int j = rand() % (i + 1);
+        int temp = availableSims[i];
+        availableSims[i] = availableSims[j];
+        availableSims[j] = temp;
+    }
+
+    // Assign selected simulations to AI cars
+    for (int i = 0; i < NUM_AI_CARS; i++) {
+        aiCars[i].x = 0.0f;
+        aiCars[i].y = 0.0f;
+        aiCars[i].rotation = 0.0f;
+        aiCars[i].floor = 0;
+        aiCars[i].colorIndex = aiCarColors[i];
+        aiCars[i].active = 1;
+
+        selectedSimulations[i] = (i < numSims) ? availableSims[i] : 0;
+
+        char filepath[PATH_MAX];
+        snprintf(filepath, sizeof(filepath), "graphic/simdata/hard_mode/simulation_data_%d.txt", selectedSimulations[i]);
+        aiSimFiles[i] = fopen(filepath, "r");
+
+        if (aiSimFiles[i]) {
+            aiSimActive[i] = 1;
+            printf("AI car %d using simulation %d (%s)\n", i, selectedSimulations[i], filepath);
+        } else {
+            printf("Failed to open AI car %d simulation: %s\n", i, filepath);
+            aiSimActive[i] = 0;
+        }
+
+        aiSimTime[i] = 0.0;
+    }
+}
+
+// Update AI cars based on simulation files
+void update_ai_simulation(float dt, int carIndex) {
+    if (carIndex < 0 || carIndex >= NUM_AI_CARS || !aiSimActive[carIndex] || !aiSimFiles[carIndex]) {
+        return;
+    }
+
+    aiSimTime[carIndex] += dt;
+
+    char line[512];
+    if (fgets(line, sizeof(line), aiSimFiles[carIndex])) {
+        float rx, ry, rrot;
+        int rfloor;
+        double rtime;
+
+        int scanned = sscanf(line, "Car X: %f, Car Y: %f, Rotation: %f, Floor: %d, simTime : %lf", &rx, &ry, &rrot, &rfloor, &rtime);
+
+        if (scanned < 4) {
+            scanned = sscanf(line, "Car X:%f ,Car Y:%f ,Rotation:%f ,Floor:%d ,simTime :%lf", &rx, &ry, &rrot, &rfloor, &rtime);
+        }
+
+        if (scanned >= 4) {
+            aiCars[carIndex].x = rx;
+            aiCars[carIndex].y = ry;
+            aiCars[carIndex].rotation = rrot;
+            aiCars[carIndex].floor = rfloor;
+        }
+    } else {
+        // End of file reached, rewind or deactivate
+        rewind(aiSimFiles[carIndex]);
+        aiSimActive[carIndex] = 0;
+    }
+}
+
+// Update all AI cars
+void update_hard_mode_ai_cars(float dt) {
+    for (int i = 0; i < NUM_AI_CARS; i++) {
+        if (aiCars[i].active) {
+            update_ai_simulation(dt, i);
+        }
+    }
+}
+
+void draw_hard_mode_ai_cars() {
+    for (int i = 0; i < NUM_AI_CARS; i++) {
+        if (!aiCars[i].active || aiCars[i].floor != carFloor) {
+            continue;
+        }
+
+        float scale = 0.65f;
+        int colorIdx = aiCars[i].colorIndex;
+
+        switch (colorIdx) {
+        case CAR_BLACK:
+        case CAR_GRAY:
+            scale = 0.65f;
+            break;
+        case CAR_BLUE:
+            scale = 0.65f;
+            break;
+        case CAR_PINK:
+            scale = 0.6f;
+            break;
+        case CAR_RED:
+            scale = 0.9f;
+            break;
+        case CAR_YELLOW:
+            scale = 0.65f;
+            break;
+        default:
+            scale = 0.65f;
+        }
+
+        DrawTexturePro(carOrient[colorIdx].top, (Rectangle){0, 0, carOrient[colorIdx].top.width, carOrient[colorIdx].top.height},
+                       (Rectangle){aiCars[i].x, aiCars[i].y, carOrient[colorIdx].top.width * scale, carOrient[colorIdx].top.height * scale},
+                       (Vector2){carOrient[colorIdx].top.width * scale / 2, carOrient[colorIdx].top.height * scale / 2}, aiCars[i].rotation, WHITE);
+    }
+}
+
+void cleanup_hard_mode_ai_cars() {
+    for (int i = 0; i < NUM_AI_CARS; i++) {
+        if (aiSimFiles[i]) {
+            fclose(aiSimFiles[i]);
+            aiSimFiles[i] = NULL;
+        }
+        aiSimActive[i] = 0;
+    }
+}
+
 void choose_your_car(Font font) {
     const char *message = "Choose a car :";
 
