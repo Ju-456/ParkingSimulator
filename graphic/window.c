@@ -48,6 +48,14 @@ int payment = 0;
 int currentFloor = 0;
 int carFloor = 0;
 
+bool ignoreParkingDetection = false;
+double ignoreUntil = 0.0;
+
+
+bool carParked = false;
+int parkedPlaceIndex = -1;
+int parkedCarColorIndex = -1;
+
 Rectangle btnRandom;
 Rectangle btnManual;
 Rectangle btnHardManual;
@@ -385,6 +393,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             if (currentFloor == carFloor) {
                 carX = 70;
                 carY = 73;
+                //update_car_position(dt, places, num_parking_places);
                 place_car_at_start_pos();
             }
 
@@ -417,6 +426,10 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             if (currentFloor == carFloor) {
                 update_car_position(dt, places, num_parking_places);
                 place_car_at_start_pos();
+            }
+            if (IsKeyPressed(KEY_SPACE) && carParked)
+            {
+                release_car(places);
             }
 
             if ((CheckCollisionPointRec(mouse, btnReturn) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))) {

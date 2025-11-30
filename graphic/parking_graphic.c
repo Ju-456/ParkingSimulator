@@ -31,6 +31,8 @@ void draw_parked_cars(int n, Parking places[]){
     {
         if (places[i].occupied)
         {
+            if (i == parkedPlaceIndex) 
+                continue;
             int colorIndex = places[i].colorIndex;
             float scale = 0.8f;
 

@@ -10,6 +10,37 @@ static int aiCarColors[NUM_AI_CARS] = {CAR_BLUE, CAR_RED, CAR_YELLOW};
 static double aiSimTime[NUM_AI_CARS] = {0.0, 0.0, 0.0};
 static int selectedSimulations[NUM_AI_CARS] = {0, 0, 0};
 
+// true if the rectangle a is fully inside rectangle b
+static inline bool rect_fully_inside(Rectangle a, Rectangle b)
+{
+    return (a.x >= b.x) &&
+           (a.y >= b.y) &&
+           (a.x + a.width <= b.x + b.width) &&
+           (a.y + a.height <= b.y + b.height);
+}
+
+// returns the index of the parking place if the car is FULLY INSIDE, otherwise -1
+int detect_full_parking(float carX, float carY, Parking places[], int n)
+{
+    Rectangle carRect = {carX - 20, carY - 20, 40, 40};
+
+    for (int i = 0; i < n; i++)
+    {
+        if (!places[i].occupied) // only check free places
+        {
+            float w = 180.0f * 0.62f;
+            float h = 95.0f * 0.62f;
+            Rectangle placeRect = {places[i].x, places[i].y, w, h};
+
+            if (rect_fully_inside(carRect, placeRect))
+            {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+
 void init_hard_mode_ai_cars() {
     int numSims = (rand() % 2) + 2;
 
@@ -243,6 +274,7 @@ void choose_your_car_condition() {
 }
 
 void update_car_position(float dt, Parking places[], int n) {
+    if (carParked) return;
     float carSpeed = 350.0f;
     float newX = carX;
     float newY = carY;
@@ -264,7 +296,44 @@ void update_car_position(float dt, Parking places[], int n) {
         carRotation = 0.0f;
     }
 
-    if (!check_collision_with_parking(newX, newY, places, n)) {
+       if (ignoreParkingDetection && GetTime() >= ignoreUntil) {
+        ignoreParkingDetection = false;
+    }
+
+    int placeIndex = -1;
+    if (!ignoreParkingDetection) {
+        placeIndex = detect_full_parking(newX, newY, places, n);
+    }
+
+    if (placeIndex != -1 && !carParked)
+    {
+        // we are fully inside a free parking place => snap to it
+        float w = 180.0f * 0.62f;
+        float h = 95.0f * 0.62f;
+        Rectangle placeRect = {places[placeIndex].x, places[placeIndex].y, w, h};
+
+        // center the car in the parking place
+        carX = placeRect.x + placeRect.width * 0.5f;
+        carY = placeRect.y + placeRect.height * 0.5f;
+
+        // sync car orientation with parking place direction
+        if (places[placeIndex].direction == 0) carRotation = 90.0f;
+        else
+            carRotation = -90.0f;
+
+        // set parking state
+        carParked = true;
+        parkedPlaceIndex = placeIndex;
+        parkedCarColorIndex = chosenCar >= 0 ? chosenCar : 0;
+
+        places[placeIndex].occupied = true;
+        places[placeIndex].colorIndex = parkedCarColorIndex;
+        return;
+    }
+
+    // to avoid collision with occupied parking places
+    if (!check_collision_with_parking(newX, newY, places, n) && !carParked)
+    {
         carX = newX;
         carY = newY;
     }
@@ -272,4 +341,21 @@ void update_car_position(float dt, Parking places[], int n) {
     delimitation_of_playground();
 
     collect_and_save_simulation_data_auto(dt);
+}
+void release_car(Parking places[])
+{
+    if (!carParked) return;
+
+    if (parkedPlaceIndex != -1)
+    {
+        places[parkedPlaceIndex].occupied = false;
+        places[parkedPlaceIndex].colorIndex = -1;
+    }
+
+    carParked = false;
+    parkedPlaceIndex = -1;
+
+    ignoreParkingDetection = true;
+    ignoreUntil = GetTime() + 2;
+
 }

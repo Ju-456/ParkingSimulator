@@ -69,6 +69,12 @@ extern Rectangle destReturn;
 extern Vector2 origin;
 extern Vector2 origin1;
 
+extern bool ignoreParkingDetection;
+extern double ignoreUntil;
+extern bool carParked;
+extern int parkedPlaceIndex;
+extern int parkedCarColorIndex;
+
 // Déplacements voiture
 extern float carX;
 extern float carY;
@@ -191,5 +197,7 @@ void place_car_at_start_pos();
 
 // main window
 void init_window_parking(const char *full_path_json, int num_parking_places, Parking places[]);
+
+void release_car(Parking places[]);
 
 #endif
