@@ -103,6 +103,21 @@ static bool hardModeAIInitialized = false;
 static double timerStartTime = -1.0;
 static bool timerActive = false;
 
+// Places fixes FLOOR 0
+const int fixed_floor_0[] = {0, 3, 5};
+const int fixed_floor_0_colors[] = {1, 4, 2};
+const int FIXED_FLOOR_0_COUNT = 3;
+
+// Places fixes FLOOR 1
+const int fixed_floor_1[] = {1, 4, 6, 9};
+const int fixed_floor_1_colors[] = {0, 2, 5, 3};
+const int FIXED_FLOOR_1_COUNT = 4;
+
+// Places fixes FLOOR 2
+const int fixed_floor_2[] = {2, 3, 6};
+const int fixed_floor_2_colors[] = {4, 1, 0};
+const int FIXED_FLOOR_2_COUNT = 3;
+
 Color disabled_tint(Color base, bool enabled) {
     return enabled ? base : Fade(GRAY, 0.5f);
 }
@@ -315,6 +330,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
                 int chosenSim = rand() % 6;
                 request_simulation_start(chosenSim);
+                init_fixed_parked_cars_all_floors(places, &num_parking_places);
 
                 randomSimulationStarted = true;
                 printf("randomSimulationStarted = %d, simRequested = %d\n", randomSimulationStarted, chosenSim);

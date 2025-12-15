@@ -40,6 +40,19 @@ extern Texture2D floor_indicator[3];
 extern Texture2D PC;
 extern Texture2D car_preview;
 
+
+extern const int fixed_floor_0[];
+extern const int fixed_floor_0_colors[];
+extern const int FIXED_FLOOR_0_COUNT;
+
+extern const int fixed_floor_1[];
+extern const int fixed_floor_1_colors[];
+extern const int FIXED_FLOOR_1_COUNT;
+
+extern const int fixed_floor_2[];
+extern const int fixed_floor_2_colors[];
+extern const int FIXED_FLOOR_2_COUNT;
+
 // Voitures
 extern carOrientation carOrient[NUM_CARS];
 
@@ -136,6 +149,8 @@ void draw_parked_cars(int n, Parking places[]);
 void init_parking_state(int n, Parking places[]);
 void reset_parking_state(Parking places[], int *num_parking_places);
 bool check_collision_with_parking(float carX, float carY, Parking places[], int n);
+void init_fixed_parked_cars_by_floor(int floor, Parking places[], int n);
+void init_fixed_parked_cars_all_floors(Parking places[], int *num_parking_places);
 
 // floor part
 void request_floor_change(int direction, Parking places[], int *num_parking_places);
@@ -199,5 +214,6 @@ void place_car_at_start_pos();
 void init_window_parking(const char *full_path_json, int num_parking_places, Parking places[]);
 
 void release_car(Parking places[]);
+
 
 #endif
