@@ -53,7 +53,8 @@ void collect_and_save_simulation_data_auto(float dt) {
 
     simTime += dt;
 
-    fprintf(simFile, "Car X: %.2f, Car Y: %.2f, Rotation: %.2f, Floor: %d, simTime : %.2f\n", carX, carY, carRotation, carFloor, simTime);
+    fprintf(simFile, "Car X: %.2f, Car Y: %.2f, Rotation: %.2f, Floor: %d, simTime : %.2f, EntranceState: %d, EntranceAngle: %.2f, ExitState: %d, ExitAngle: %.2f\n", 
+            carX, carY, carRotation, carFloor, simTime, entranceState, entranceAngle, exitState, exitAngle);
 
     fflush(simFile);
 }
@@ -131,19 +132,25 @@ static int random_sim_read_and_apply() {
     float rx, ry, rrot;
     int rfloor;
     double rtime;
+    int rentState, rexState;
+    float rentAngle, rexAngle;
 
-    int scanned = sscanf(line, "Car X: %f, Car Y: %f, Rotation: %f, Floor: %d, simTime : %lf", &rx, &ry, &rrot, &rfloor, &rtime);
+    int scanned = sscanf(line, "Car X: %f, Car Y: %f, Rotation: %f, Floor: %d, simTime : %lf, EntranceState: %d, EntranceAngle: %f, ExitState: %d, ExitAngle: %f", 
+                        &rx, &ry, &rrot, &rfloor, &rtime, &rentState, &rentAngle, &rexState, &rexAngle);
 
-    if (scanned < 4) {
-        scanned = sscanf(line, "Car X:%f ,Car Y:%f ,Rotation:%f ,Floor:%d ,simTime :%lf", &rx, &ry, &rrot, &rfloor, &rtime);
-        if (scanned < 4)
-            return 1;
+    if (scanned < 9) {
+        return 1;
     }
 
     carX = rx;
     carY = ry;
     carRotation = rrot;
     carFloor = rfloor;
+
+    entranceState = rentState;
+    entranceAngle = rentAngle;
+    exitState = rexState;
+    exitAngle = rexAngle;
 
     return 1;
 }

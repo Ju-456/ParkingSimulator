@@ -96,18 +96,25 @@ void update_ai_simulation(float dt, int carIndex) {
         float rx, ry, rrot;
         int rfloor;
         double rtime;
+        int rentState, rexState;
+        float rentAngle, rexAngle;
 
-        int scanned = sscanf(line, "Car X: %f, Car Y: %f, Rotation: %f, Floor: %d, simTime : %lf", &rx, &ry, &rrot, &rfloor, &rtime);
-
-        if (scanned < 4) {
-            scanned = sscanf(line, "Car X:%f ,Car Y:%f ,Rotation:%f ,Floor:%d ,simTime :%lf", &rx, &ry, &rrot, &rfloor, &rtime);
-        }
+        int scanned = sscanf(line, "Car X: %f, Car Y: %f, Rotation: %f, Floor: %d, simTime : %lf, EntranceState: %d, EntranceAngle: %f, ExitState: %d, ExitAngle: %f", 
+                            &rx, &ry, &rrot, &rfloor, &rtime, &rentState, &rentAngle, &rexState, &rexAngle);
 
         if (scanned >= 4) {
             aiCars[carIndex].x = rx;
             aiCars[carIndex].y = ry;
             aiCars[carIndex].rotation = rrot;
             aiCars[carIndex].floor = rfloor;
+
+            // Apply barrier states if they were read
+            if (rentState >= 0) {
+                entranceState = rentState;
+                entranceAngle = rentAngle;
+                exitState = rexState;
+                exitAngle = rexAngle;
+            }
         }
     } else {
         // End of file reached, rewind or deactivate
