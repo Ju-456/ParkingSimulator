@@ -41,14 +41,14 @@ void draw_return_arrow(Texture2D PC, Rectangle srcReturn, Rectangle destReturn, 
 void draw_ticket_pay_buttons(Font font, bool enabled) {
     bool canUse = (currentFloor == 0) && enabled;
     Color btnTint = disabled_tint(WHITE, canUse);
-    Color textTint1 = disabled_tint(parkingBlue, canUse);
     Color textTint2 = disabled_tint(parkingRed, canUse);
+    Color textTint3 = disabled_tint(parkingGreen, canUse);
 
     DrawTextureRec(PC, srcMode, (Vector2){btnTicket.x, btnTicket.y}, btnTint);
-    DrawTextEx(font, "Ticket", (Vector2){btnTicket.x + 32, btnTicket.y + 18}, 18, 1, textTint1);
+    DrawTextEx(font, "Ticket", (Vector2){btnTicket.x + 32, btnTicket.y + 18}, 18, 1, textTint3);
 
     DrawTextureRec(PC, srcMode, (Vector2){btnPay.x, btnPay.y}, btnTint);
-    DrawTextEx(font, "  Pay", (Vector2){btnPay.x + 35, btnPay.y + 18}, 18, 1, textTint2);
+    DrawTextEx(font, " Pay", (Vector2){btnPay.x + 35, btnPay.y + 18}, 18, 1, textTint2);
 }
 
 void handle_station_buttons_click(Vector2 mouse, bool enabled) {
@@ -67,6 +67,12 @@ void handle_station_buttons_click(Vector2 mouse, bool enabled) {
         }
 
         if (CheckCollisionPointRec(mouse, btnPay)) {
+            if (!hasEverParked)
+            {
+                showPayErrorMessage = true;
+                payErrorMessageStartTime = GetTime();
+                return;
+            }
             if (ticket == 0) {
                 fflush(stdout);
             } else if (payment == 0) {

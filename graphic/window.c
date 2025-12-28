@@ -118,6 +118,18 @@ const int fixed_floor_2[] = {2, 3, 6};
 const int fixed_floor_2_colors[] = {4, 1, 0};
 const int FIXED_FLOOR_2_COUNT = 3;
 
+Rectangle btnRules;
+static Screen previousScreen;
+
+bool showParkedMessage = false;
+double parkedMessageStartTime = 0.0;
+
+bool hasEverParked = false;
+bool showPayErrorMessage = false;
+double payErrorMessageStartTime = 0.0;
+
+
+
 Color disabled_tint(Color base, bool enabled) {
     return enabled ? base : Fade(GRAY, 0.5f);
 }
@@ -200,6 +212,62 @@ void place_car_at_start_pos() {
     }
 }
 
+void draw_rules_button(Font font)
+{
+    DrawRectangleRec(btnRules, parkingBlue);
+    DrawRectangleLinesEx(btnRules, 2, WHITE);
+    DrawTextEx(
+        font,
+        " RULES",
+        (Vector2){btnRules.x + 10, btnRules.y + 7},
+        16,
+        1,
+        WHITE
+    );
+}
+void draw_pay_error_message(Font font)
+{
+    Rectangle panel = {170, 250, 460, 140};
+
+    DrawRectangleRec(panel, Fade(BLACK, 0.6f));
+    DrawRectangleLinesEx(panel, 2, parkingRed);
+
+    DrawTextEx(
+        font,
+        "PAYMENT DENIED",
+        (Vector2){panel.x + 140, panel.y + 25},
+        22, 2, parkingRed
+    );
+
+    DrawTextEx(
+        font,
+        "You must park your car before paying",
+        (Vector2){panel.x + 60, panel.y + 75},
+        18, 1, WHITE
+    );
+}
+
+void draw_parked_message(Font font)
+{
+    Rectangle panel = {180, 250, 440, 140};
+
+    DrawRectangleRec(panel, Fade(BLACK, 0.65f));
+    DrawRectangleLinesEx(panel, 2, parkingBlue);
+
+    DrawTextEx(
+        font,
+        "CAR PARKED SUCCESSFULLY!",
+        (Vector2){panel.x + 60, panel.y + 25},
+        22, 2, WHITE
+    );
+
+    DrawTextEx(
+        font,
+        "Press [SPACE] to leave the parking spot",
+        (Vector2){panel.x + 40, panel.y + 70},
+        18, 1, WHITE
+    );
+}
 void init_window_parking(const char *full_path_json, int num_parking_places, Parking places[]) {
     SetTraceLogLevel(LOG_NONE);
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Parking Simulator");
@@ -213,7 +281,9 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
     SetWindowPosition(posX, posY);
     SetTargetFPS(60);
 
-    Font font = LoadFontEx("resources/Minecraftia.ttf", 15, NULL, 0);
+
+    Font font = LoadFontEx("Assets/DejaVuSansMono.ttf", 18, NULL, 0);
+
 
     currentFloor = 0;
     load_textures();
@@ -229,12 +299,18 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
     float letterDelay = 0.05f;
 
-    Screen currentScreen = SCREEN_MANUAL_PANEL;
+    //Screen currentScreen = SCREEN_MANUAL_PANEL;
+    Screen currentScreen = SCREEN_RULES;
+    previousScreen = SCREEN_MANUAL_PANEL;
+
 
     destPreviewLevel = (Rectangle){750, 750, srcArrow.width, srcArrow.height};
     destNextLevel = (Rectangle){50, 750, srcArrow.width, srcArrow.height};
     init_parking_state(num_parking_places, places);
     reload_floor(currentFloor, places, &num_parking_places);
+
+    btnRules = (Rectangle){10, 500, 80, 30};
+    previousScreen = SCREEN_RULES;
 
     while (!WindowShouldClose()) {
         BeginDrawing();
@@ -264,7 +340,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
         float dt = GetFrameTime();
         Vector2 mouse = GetMousePosition();
-        DrawText(TextFormat("(x;y) = (%d;%d)", (int)mouse.x, (int)mouse.y), 10, 10, 12, BLACK);
+        //DrawText(TextFormat("(x;y) = (%d;%d)", (int)mouse.x, (int)mouse.y), 10, 10, 12, BLACK);
         // to change floors
         if (controlsUnlocked && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             if (CheckCollisionPointRec(mouse, destPreviewLevel)) {
@@ -287,8 +363,178 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
         if (gameFinished && currentScreen != SCREEN_END) {
             currentScreen = SCREEN_END;
         }
+        if (currentScreen != SCREEN_RULES)
+        {
+            draw_rules_button(font);
+
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
+                CheckCollisionPointRec(mouse, btnRules))
+            {
+                previousScreen = currentScreen;
+                currentScreen = SCREEN_RULES;
+            }
+        }
+
 
         switch (currentScreen) {
+        case SCREEN_RULES:
+            {
+                controlsUnlocked = false;
+
+                DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, Fade(BLACK, 0.85f));
+
+                DrawTextEx(
+                    font,
+                    "WELCOME TO PARKING SIMULATOR",
+                    (Vector2){140, 100},
+                    26,
+                    2,
+                    WHITE
+                );
+
+                DrawTextEx(
+                    font,
+                    "GAME MODES",
+                    (Vector2){120, 160},
+                    22,
+                    2,
+                    SKYBLUE
+                );
+
+                DrawTextEx(
+                    font,
+                    "- RANDOM MODE  : automatic parking simulation",
+                    (Vector2){140, 200},
+                    18,
+                    1,
+                    WHITE
+                );
+
+                DrawTextEx(
+                    font,
+                    "- MANUAL MODE  : drive and park by yourself",
+                    (Vector2){140, 225},
+                    18,
+                    1,
+                    WHITE
+                );
+
+                DrawTextEx(
+                    font,
+                    "- HARD MODE    : traffic with AI cars + manual driving",
+                    (Vector2){140, 250},
+                    18,
+                    1,
+                    WHITE
+                );
+
+                DrawTextEx(
+                    font,
+                    "RULES",
+                    (Vector2){120, 300},
+                    22,
+                    2,
+                    SKYBLUE
+                );
+
+                DrawTextEx(
+                    font,
+                    "- Click [TICKET] to enter the parking",
+                    (Vector2){140, 335},
+                    18,
+                    1,
+                    WHITE
+                );
+
+                DrawTextEx(
+                    font,
+                    "- Find a free parking place and park your car",
+                    (Vector2){140, 360},
+                    18,
+                    1,
+                    WHITE
+                );
+
+                DrawTextEx(
+                    font,
+                    "- Once parked, press [SPACE] to leave the parking spot",
+                    (Vector2){140, 385},
+                    18,
+                    1,
+                    WHITE
+                );
+
+                DrawTextEx(
+                    font,
+                    "- Click [PAY] to exit the parking",
+                    (Vector2){140, 410},
+                    18,
+                    1,
+                    WHITE
+                );
+
+                DrawTextEx(
+                    font,
+                    "CONTROLS",
+                    (Vector2){120, 460},
+                    22,
+                    2,
+                    SKYBLUE
+                );
+
+                DrawTextEx(
+                    font,
+                    "- Arrow keys or mouse : drive the car",
+                    (Vector2){140, 495},
+                    18,
+                    1,
+                    WHITE
+                );
+
+                DrawTextEx(
+                    font,
+                    "- SPACE              : leave parking place",
+                    (Vector2){140, 520},
+                    18,
+                    1,
+                    WHITE
+                );
+
+                DrawTextEx(
+                    font,
+                    "Press [ENTER] to continue",
+                    (Vector2){220, 590},
+                    20,
+                    2,
+                    brightGreen
+                );
+
+                static float blinkRules = 0;
+                blinkRules += 0.05f;
+                if (sin(blinkRules) > 0)
+                {
+                    DrawTextEx(
+                        font,
+                        "--> START <--",
+                        (Vector2){300, 630},
+                        24,
+                        2,
+                        SKYBLUE
+                    );
+            
+                }
+
+                if (IsKeyPressed(KEY_ENTER))
+                {
+                    if (previousScreen == SCREEN_RULES)
+                        currentScreen = SCREEN_MANUAL_PANEL;
+                    else
+                        currentScreen = previousScreen;
+                }
+
+            }
+            break;
+
         case SCREEN_MANUAL_PANEL:
             controlsUnlocked = false;
             if (letters1 < strlen(message1)) {
@@ -307,7 +553,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
                 }
             }
 
-            DrawTextEx(font, TextSubtext(message1, 0, letters1), (Vector2){200, 590}, 24, 2, WHITE);
+            DrawTextEx(font, TextSubtext(message1, 0, letters1), (Vector2){150, 590}, 24, 2, WHITE);
             DrawTextEx(font, TextSubtext(message2, 0, letters2), (Vector2){280, 620}, 22, 2, WHITE);
 
             init_manual_panel_menu();
@@ -389,13 +635,36 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             controlsUnlocked = false;
 
             DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, Fade(BLACK, 0.8f));
-            DrawText("*** Thank you for playing Parking Simulator! ***", 160, 300, 20, WHITE);
-            DrawText("Press [Enter] to return to the menu", 180, 350, 20, WHITE);
+            DrawTextEx(
+                font,
+                "THANK YOU FOR PLAYING PARKING SIMULATOR",
+                (Vector2){140, 300},
+                22,
+                2,
+                WHITE
+            );
+
+            DrawTextEx(
+                font,
+                "Press [ENTER] to return to the main menu",
+                (Vector2){200, 345},
+                18,
+                1,
+                brightGreen
+            );
+
 
             static float blink = 0;
             blink += 0.05f;
             if (sin(blink) > 0) {
-                DrawText("--> Replay <--", 320, 420, 24, SKYBLUE);
+                DrawTextEx(
+                    font,
+                    "--> REPLAY <--",
+                    (Vector2){300, 420},
+                    24,
+                    2,
+                    SKYBLUE
+                );
             }
             if (IsKeyDown(KEY_ENTER)) {
                 currentScreen = SCREEN_MANUAL_PANEL;
@@ -516,9 +785,20 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             break;
         }
 
+        if (carParked && showParkedMessage)
+        {
+            draw_parked_message(font);
+        }
         // Draw timer
         draw_timer();
-
+        if (showPayErrorMessage && GetTime() - payErrorMessageStartTime > 5.0)
+        {
+            showPayErrorMessage = false;
+        }
+        if (showPayErrorMessage)
+        {
+            draw_pay_error_message(font);
+        }
         EndDrawing();
     }
 

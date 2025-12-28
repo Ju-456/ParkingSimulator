@@ -20,7 +20,7 @@ typedef struct {
 } carOrientation;
 
 typedef enum { CAR_BLACK = 0, CAR_BLUE, CAR_GRAY, CAR_PINK, CAR_RED, CAR_YELLOW } CarColor;
-typedef enum { SCREEN_MANUAL_PANEL, SCREEN_RANDOM, SCREEN_MANUAL, SCREEN_DIRECTION, SCREEN_HARD_MANUAL, SCREEN_HARD_DIRECTION, SCREEN_END } Screen;
+typedef enum { SCREEN_RULES, SCREEN_MANUAL_PANEL, SCREEN_RANDOM, SCREEN_MANUAL, SCREEN_DIRECTION, SCREEN_HARD_MANUAL, SCREEN_HARD_DIRECTION, SCREEN_END } Screen;
 
 // Textures générales
 extern Texture2D background;
@@ -52,6 +52,12 @@ extern const int FIXED_FLOOR_1_COUNT;
 extern const int fixed_floor_2[];
 extern const int fixed_floor_2_colors[];
 extern const int FIXED_FLOOR_2_COUNT;
+
+extern bool showParkedMessage;
+extern double parkedMessageStartTime;
+extern bool hasEverParked;
+extern bool showPayErrorMessage;
+extern double payErrorMessageStartTime;
 
 // Voitures
 extern carOrientation carOrient[NUM_CARS];
@@ -214,6 +220,9 @@ void place_car_at_start_pos();
 void init_window_parking(const char *full_path_json, int num_parking_places, Parking places[]);
 
 void release_car(Parking places[]);
+
+void draw_rules_button(Font font);
+void draw_parked_message(Font font);
 
 
 #endif

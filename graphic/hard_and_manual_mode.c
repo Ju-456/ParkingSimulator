@@ -330,11 +330,14 @@ void update_car_position(float dt, Parking places[], int n) {
 
         // set parking state
         carParked = true;
+        hasEverParked = true; 
         parkedPlaceIndex = placeIndex;
         parkedCarColorIndex = chosenCar >= 0 ? chosenCar : 0;
 
         places[placeIndex].occupied = true;
         places[placeIndex].colorIndex = parkedCarColorIndex;
+        showParkedMessage = true;
+        parkedMessageStartTime = GetTime();
         return;
     }
 
@@ -352,6 +355,7 @@ void update_car_position(float dt, Parking places[], int n) {
 void release_car(Parking places[])
 {
     if (!carParked) return;
+    showParkedMessage = false;
 
     if (parkedPlaceIndex != -1)
     {

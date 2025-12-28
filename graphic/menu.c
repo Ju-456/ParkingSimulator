@@ -27,5 +27,5 @@ void manual_panel_menu(Font font) {
     DrawTextEx(font, "Manual", (Vector2){btnManual.x + 32, btnManual.y + 18}, 18, 1, parkingGreen);
 
     DrawTextureRec(PC, srcMode, (Vector2){btnHardManual.x, btnHardManual.y}, WHITE);
-    DrawTextEx(font, "     Hard", (Vector2){btnHardManual.x + 8, btnHardManual.y + 18}, 18, 1, parkingRed);
+    DrawTextEx(font, "   Hard", (Vector2){btnHardManual.x + 8, btnHardManual.y + 18}, 18, 1, parkingRed);
 }

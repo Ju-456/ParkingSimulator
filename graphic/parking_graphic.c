@@ -183,6 +183,8 @@ void reset_parking_state(Parking places[], int *num_parking_places){
     carX = 70;
     carY = 73;
     carRotation = -90.0f;
+    hasEverParked = false;
+    showParkedMessage = false;
 }
 
 bool check_collision_with_parking(float carX, float carY, Parking places[], int n){
