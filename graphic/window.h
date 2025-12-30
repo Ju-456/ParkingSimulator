@@ -93,6 +93,7 @@ extern double ignoreUntil;
 extern bool carParked;
 extern int parkedPlaceIndex;
 extern int parkedCarColorIndex;
+extern double parkedTime;
 
 // Déplacements voiture
 extern float carX;

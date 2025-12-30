@@ -55,6 +55,7 @@ double ignoreUntil = 0.0;
 bool carParked = false;
 int parkedPlaceIndex = -1;
 int parkedCarColorIndex = -1;
+double parkedTime = 0.0;
 
 Rectangle btnRandom;
 Rectangle btnManual;
@@ -266,7 +267,7 @@ void draw_pay_error_message(Font font)
 
 void draw_parked_message(Font font)
 {
-    Rectangle panel = {180, 250, 440, 140};
+    Rectangle panel = {180, 250, 440, 160};
 
     DrawRectangleRec(panel, Fade(BLACK, 0.65f));
     DrawRectangleLinesEx(panel, 2, parkingBlue);
@@ -274,15 +275,28 @@ void draw_parked_message(Font font)
     DrawTextEx(
         font,
         "CAR PARKED SUCCESSFULLY!",
-        (Vector2){panel.x + 60, panel.y + 25},
+        (Vector2){panel.x + 60, panel.y + 15},
         22, 2, WHITE
+    );
+
+    double timeSinceParked = GetTime() - parkedTime;
+    double timeRemaining = 4.0 - timeSinceParked;
+    if (timeRemaining < 0) timeRemaining = 0;
+    
+    char timeText[50];
+    snprintf(timeText, sizeof(timeText), "Min parked time: %.1f sec", 4.0);
+    DrawTextEx(
+        font,
+        timeText,
+        (Vector2){panel.x + 85, panel.y + 50},
+        16, 1, parkingGreen
     );
 
     DrawTextEx(
         font,
         "Press [SPACE] to leave the parking spot",
-        (Vector2){panel.x + 40, panel.y + 70},
-        18, 1, WHITE
+        (Vector2){panel.x + 40, panel.y + 80},
+        18, 1, (timeRemaining <= 0.0) ? WHITE : Fade(WHITE, 0.5f)
     );
 }
 
@@ -765,12 +779,22 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             }
 
             if (currentFloor == carFloor) {
-                update_car_position(dt, places, num_parking_places);
+                // Bloquer les mouvements pendant 4 secondes après le stationnement
+                double timeSinceParked = GetTime() - parkedTime;
+                if (!carParked || timeSinceParked > 4.0)
+                {
+                    update_car_position(dt, places, num_parking_places);
+                }
                 place_car_at_start_pos();
             }
             if ((IsKeyPressed(KEY_SPACE) || IsKeyDown(KEY_SPACE)) && carParked)
             {
-                release_car(places);
+                // Vérifier que 4 secondes se sont écoulées depuis le stationnement
+                double timeSinceParked = GetTime() - parkedTime;
+                if (timeSinceParked > 4.0)
+                {
+                    release_car(places);
+                }
             }
 
             if ((CheckCollisionPointRec(mouse, btnReturn) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))) {

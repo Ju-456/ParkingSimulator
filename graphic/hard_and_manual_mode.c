@@ -333,6 +333,7 @@ void update_car_position(float dt, Parking places[], int n) {
         hasEverParked = true; 
         parkedPlaceIndex = placeIndex;
         parkedCarColorIndex = chosenCar >= 0 ? chosenCar : 0;
+        parkedTime = GetTime();
 
         places[placeIndex].occupied = true;
         places[placeIndex].colorIndex = parkedCarColorIndex;
@@ -365,6 +366,7 @@ void release_car(Parking places[])
 
     carParked = false;
     parkedPlaceIndex = -1;
+    parkedTime = 0.0;
 
     ignoreParkingDetection = true;
     ignoreUntil = GetTime() + 2;
