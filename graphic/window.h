@@ -136,6 +136,11 @@ extern bool randomSimulationStarted;
 extern bool simPendingStart;
 extern bool simRunning;
 
+// Timer state (defined in window.c)
+extern double timerStartTime;
+extern bool timerActive;
+extern double timerDuration;
+
 // menu part
 void panel();
 void init_manual_panel_menu();
@@ -223,6 +228,7 @@ void release_car(Parking places[]);
 
 void draw_rules_button(Font font);
 void draw_parked_message(Font font);
+void draw_game_over_message(Font font);
 
 
 #endif

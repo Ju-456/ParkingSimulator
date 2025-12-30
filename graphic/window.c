@@ -100,8 +100,10 @@ bool simRunning = false;
 static bool hardModeAIInitialized = false;
 
 // Timer state
-static double timerStartTime = -1.0;
-static bool timerActive = false;
+double timerStartTime = -1.0;
+bool timerActive = false;
+double timerDuration = 20.0; // initial countdown duration (seconds)
+bool gameOverTriggered = false;
 
 // Places fixes FLOOR 0
 const int fixed_floor_0[] = {0, 3, 5};
@@ -143,12 +145,25 @@ void draw_timer() {
         return;
     }
 
-    double elapsed = GetTime() - timerStartTime - 2.0; // Subtract 2 sec delay to give the user time to start the game properly
-    if (elapsed < 0.0)
-        elapsed = 0.0; // Don't show negative time
+    double elapsed = GetTime() - timerStartTime;
 
-    int minutes = (int)elapsed / 60;
-    int seconds = (int)elapsed % 60;
+    // apply initial delay before the countdown actually starts
+    double countingElapsed = elapsed - 2.0; // 2 second delay before countdown starts
+    if (countingElapsed < 0.0)
+        countingElapsed = 0.0;
+
+    // Calculate remaining time from current `timerDuration`
+    double remaining = timerDuration - countingElapsed;
+    if (remaining < 0.0)
+        remaining = 0.0; // Don't show negative time
+
+    // Check if time has run out
+    if (remaining <= 0.0 && !gameOverTriggered) {
+        gameOverTriggered = true;
+    }
+
+    int minutes = (int)remaining / 60;
+    int seconds = (int)remaining % 60;
 
     Rectangle timerRect = {10, 575, 100, 30};
     DrawRectangleRec(timerRect, WHITE);
@@ -163,6 +178,8 @@ void draw_timer() {
 void start_timer() {
     timerStartTime = GetTime();
     timerActive = true;
+    timerDuration = 20.0; // reset to default duration (20s) on start
+    gameOverTriggered = false; // reset game over state
 }
 
 void stop_timer() {
@@ -266,6 +283,35 @@ void draw_parked_message(Font font)
         "Press [SPACE] to leave the parking spot",
         (Vector2){panel.x + 40, panel.y + 70},
         18, 1, WHITE
+    );
+}
+
+void draw_game_over_message(Font font)
+{
+    Rectangle panel = {170, 250, 460, 140};
+
+    DrawRectangleRec(panel, Fade(BLACK, 0.6f));
+    DrawRectangleLinesEx(panel, 2, parkingRed);
+
+    DrawTextEx(
+        font,
+        "GAME OVER",
+        (Vector2){panel.x + 150, panel.y + 25},
+        28, 2, parkingRed
+    );
+
+    DrawTextEx(
+        font,
+        "You failed, try again ;(",
+        (Vector2){panel.x + 70, panel.y + 70},
+        18, 1, WHITE
+    );
+
+    DrawTextEx(
+        font,
+        "Press [ENTER] to restart",
+        (Vector2){panel.x + 90, panel.y + 100},
+        15, 1, brightGreen
     );
 }
 void init_window_parking(const char *full_path_json, int num_parking_places, Parking places[]) {
@@ -708,11 +754,21 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
                 start_timer();
             }
 
+            if (gameOverTriggered) {
+                if (IsKeyPressed(KEY_ENTER)) {
+                    currentScreen = SCREEN_MANUAL_PANEL;
+                    reset_parking_state(places, &num_parking_places);
+                    stop_timer();
+                    gameOverTriggered = false;
+                }
+                break;
+            }
+
             if (currentFloor == carFloor) {
                 update_car_position(dt, places, num_parking_places);
                 place_car_at_start_pos();
             }
-            if (IsKeyPressed(KEY_SPACE) && carParked)
+            if ((IsKeyPressed(KEY_SPACE) || IsKeyDown(KEY_SPACE)) && carParked)
             {
                 release_car(places);
             }
@@ -765,6 +821,19 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
                 start_timer();
             }
 
+            if (gameOverTriggered) {
+                if (IsKeyPressed(KEY_ENTER)) {
+                    currentScreen = SCREEN_MANUAL_PANEL;
+                    reset_parking_state(places, &num_parking_places);
+                    cleanup_hard_mode_ai_cars();
+                    hardModeAIInitialized = false;
+                    randomSimulationStarted = false;
+                    stop_timer();
+                    gameOverTriggered = false;
+                }
+                break;
+            }
+
             if (currentFloor == carFloor) {
                 update_car_position(dt, places, num_parking_places);
                 place_car_at_start_pos();
@@ -791,6 +860,10 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
         }
         // Draw timer
         draw_timer();
+        // Draw game over message if triggered
+        if (gameOverTriggered) {
+            draw_game_over_message(font);
+        }
         if (showPayErrorMessage && GetTime() - payErrorMessageStartTime > 5.0)
         {
             showPayErrorMessage = false;

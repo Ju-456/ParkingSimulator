@@ -3,10 +3,19 @@
 static const char *FLOOR_FILES[3] = {"graph_floor_0.json", "graph_floor_1.json", "graph_floor_2.json"};
 
 void request_floor_change(int direction, Parking places[], int *num_parking_places) {
+    int oldFloor = currentFloor;
     int newFloor = currentFloor + direction;
 
     if (newFloor < 0 || newFloor > MAX_FLOOR)
         return;
+
+    // Award 10 seconds only when moving up from 0->1 or 1->2
+    if (direction == 1 && (oldFloor == 0 || oldFloor == 1)) {
+        if (timerActive && timerStartTime >= 0.0) {
+            // Add 10s to remaining time by increasing timerDuration
+            timerDuration += 10.0;
+        }
+    }
 
     currentFloor = newFloor;
     carFloor = newFloor;
