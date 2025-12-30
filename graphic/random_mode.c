@@ -9,6 +9,8 @@ static FILE *replay_fp = NULL;
 static char replay_fullpath[PATH_MAX];
 int replay_active = 0;
 static int lastLoadedCar = -1;
+static int lastReplayFloor = -1;
+static bool lastReplayParkedState = false;
 #define SIMDATA_PATH "graphic/simdata/"
 
 // to create a scenario for a random simu
@@ -97,6 +99,8 @@ static void open_random_sim_file(int chosenSim, int simMode) {
     }
 
     lastLoadedCar = chosenSim;
+    lastReplayFloor = -1;  // Reset floor tracking for new replay
+    lastReplayParkedState = false;  // Reset parking state for new replay
 
     if (simMode == 0) {
         snprintf(replay_fullpath, sizeof(replay_fullpath), "graphic/simdata/rand_mode/simulation_data_%d.txt", chosenSim);
@@ -151,6 +155,13 @@ static int random_sim_read_and_apply() {
     entranceAngle = rentAngle;
     exitState = rexState;
     exitAngle = rexAngle;
+
+    // Check for floor UP change and add 10 seconds to timer (only when going UP, not DOWN)
+    if (lastReplayFloor != -1 && rfloor > lastReplayFloor)
+    {
+        timerDuration += 10.0;
+    }
+    lastReplayFloor = rfloor;
 
     return 1;
 }
