@@ -58,13 +58,6 @@ void init_hard_mode_ai_cars() {
 
     // Assign selected simulations to AI cars
     for (int i = 0; i < NUM_AI_CARS; i++) {
-        aiCars[i].x = 0.0f;
-        aiCars[i].y = 0.0f;
-        aiCars[i].rotation = 0.0f;
-        aiCars[i].floor = 0;
-        aiCars[i].colorIndex = aiCarColors[i];
-        aiCars[i].active = 1;
-
         selectedSimulations[i] = (i < numSims) ? availableSims[i] : 0;
 
         char filepath[PATH_MAX];
@@ -72,9 +65,16 @@ void init_hard_mode_ai_cars() {
         aiSimFiles[i] = fopen(filepath, "r");
 
         if (aiSimFiles[i]) {
+            aiCars[i].x = 0.0f;
+            aiCars[i].y = 0.0f;
+            aiCars[i].rotation = 0.0f;
+            aiCars[i].floor = 0;
+            aiCars[i].colorIndex = aiCarColors[i];
+            aiCars[i].active = 1;
             aiSimActive[i] = 1;
             printf("AI car %d using simulation %d (%s)\n", i, selectedSimulations[i], filepath);
         } else {
+            aiCars[i].active = 0;
             printf("Failed to open AI car %d simulation: %s\n", i, filepath);
             aiSimActive[i] = 0;
         }
