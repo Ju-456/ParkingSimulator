@@ -158,8 +158,8 @@ void draw_timer() {
     if (remaining < 0.0)
         remaining = 0.0; // Don't show negative time
 
-    // Check if time has run out
-    if (remaining <= 0.0 && !gameOverTriggered) {
+    // Check if time has run out (don't trigger game over if the game was already finished)
+    if (remaining <= 0.0 && !gameOverTriggered && !gameFinished) {
         gameOverTriggered = true;
     }
 
