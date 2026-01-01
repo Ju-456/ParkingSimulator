@@ -115,6 +115,20 @@ void update_ai_simulation(float dt, int carIndex) {
                 exitState = rexState;
                 exitAngle = rexAngle;
             }
+
+            // If AI car is on floor 0 and exit is passable, check if it passed the exit end area and deactivate it
+            if (aiCars[carIndex].floor == 0 && exit_is_passable()) {
+                Rectangle carRect = {aiCars[carIndex].x - 20, aiCars[carIndex].y - 20, 40, 40};
+                Rectangle exitEndRect = {730, 455, 40, 80};
+                if (CheckCollisionRecs(carRect, exitEndRect)) {
+                    aiCars[carIndex].active = 0;
+                    aiSimActive[carIndex] = 0;
+                    if (aiSimFiles[carIndex]) {
+                        fclose(aiSimFiles[carIndex]);
+                        aiSimFiles[carIndex] = NULL;
+                    }
+                }
+            }
         }
     } else {
         // End of file reached, rewind or deactivate
