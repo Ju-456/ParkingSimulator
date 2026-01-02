@@ -105,7 +105,7 @@ double timerStartTime = -1.0;
 bool timerActive = false;
 double timerDuration = 20.0; // initial countdown duration (seconds)
 bool gameOverTriggered = false;
-
+// random mode fixed placing
 // Places fixes FLOOR 0
 const int fixed_floor_0[] = {0, 3, 5};
 const int fixed_floor_0_colors[] = {1, 4, 2};
@@ -120,6 +120,44 @@ const int FIXED_FLOOR_1_COUNT = 4;
 const int fixed_floor_2[] = {2, 3, 6};
 const int fixed_floor_2_colors[] = {4, 1, 0};
 const int FIXED_FLOOR_2_COUNT = 3;
+
+
+// hard mode fixed placing
+
+// FLOOR 0
+const int hard_fixed_floor_0[] = {0, 3, 4, 6, 7};
+const int hard_fixed_floor_0_colors[] = {
+    CAR_PINK,   // place 0
+    CAR_BLUE,   // place 3
+    CAR_BLACK,  // place 4
+    CAR_BLACK,  // place 6
+    CAR_BLUE    // place 7
+};
+const int HARD_FIXED_FLOOR_0_COUNT = 5;
+
+// FLOOR 1
+const int hard_fixed_floor_1[] = {0, 3, 4, 6, 7};
+const int hard_fixed_floor_1_colors[] = {
+    CAR_PINK,   // place 0
+    CAR_BLUE,   // place 3
+    CAR_BLACK,  // place 4
+    CAR_BLACK,   // place 6
+    CAR_BLUE   // place 7
+};
+const int HARD_FIXED_FLOOR_1_COUNT = 5;
+
+// FLOOR 2
+const int hard_fixed_floor_2[] = {0, 3, 4, 6, 7};
+const int hard_fixed_floor_2_colors[] = {
+    CAR_PINK,   // place 0
+    CAR_BLUE,   // place 3
+    CAR_BLACK,  // place 4
+    CAR_BLACK,   // place 6
+    CAR_BLUE   // place 7
+};
+const int HARD_FIXED_FLOOR_2_COUNT = 5;
+
+bool hardFixedApplied = false;
 
 Rectangle btnRules;
 static Screen previousScreen;
@@ -284,12 +322,12 @@ void draw_parked_message(Font font)
     if (timeRemaining < 0) timeRemaining = 0;
     
     char timeText[50];
-    snprintf(timeText, sizeof(timeText), "Min parked time: %.1f sec", 4.0);
+    snprintf(timeText, sizeof(timeText), "    Min parked time: %.1f sec", 4.0);
     DrawTextEx(
         font,
         timeText,
         (Vector2){panel.x + 85, panel.y + 50},
-        16, 1, parkingGreen
+        16, 1, parkingRed
     );
 
     DrawTextEx(
@@ -405,17 +443,34 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
         if (controlsUnlocked && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             if (CheckCollisionPointRec(mouse, destPreviewLevel)) {
                 request_floor_change(1, places, &num_parking_places);
+
+                if (currentScreen == SCREEN_HARD_DIRECTION) {
+                    init_hard_fixed_parked_cars_by_floor(currentFloor, places, num_parking_places);
+                }
             } else if (CheckCollisionPointRec(mouse, destNextLevel)) {
                 request_floor_change(-1, places, &num_parking_places);
+
+                if (currentScreen == SCREEN_HARD_DIRECTION) {
+                    init_hard_fixed_parked_cars_by_floor(currentFloor, places, num_parking_places);
+                }
             }
         }
-        if (floorChangeRequestedUp) {
+
+       if (floorChangeRequestedUp) {
             request_floor_change(1, places, &num_parking_places);
             floorChangeRequestedUp = false;
+
+            if (currentScreen == SCREEN_HARD_DIRECTION) {
+                init_hard_fixed_parked_cars_by_floor(currentFloor, places, num_parking_places);
+            }
         }
         if (floorChangeRequestedDown) {
             request_floor_change(-1, places, &num_parking_places);
             floorChangeRequestedDown = false;
+
+            if (currentScreen == SCREEN_HARD_DIRECTION) {
+                init_hard_fixed_parked_cars_by_floor(currentFloor, places, num_parking_places);
+            }
         }
         update_barrier_angles();
         handle_station_buttons_click(mouse, controlsUnlocked);
@@ -820,6 +875,8 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
                 if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, destNextStep)) {
                     // Initialize AI cars before entering driving mode
                     if (!hardModeAIInitialized) {
+                        init_hard_fixed_parked_cars_all_floors(places, &num_parking_places);
+                        init_hard_fixed_parked_cars_by_floor(currentFloor, places, num_parking_places);
                         init_hard_mode_ai_cars();
                         hardModeAIInitialized = true;
                     }

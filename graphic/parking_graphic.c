@@ -135,6 +135,43 @@ void init_fixed_parked_cars_by_floor(int floor, Parking places[], int n)
         }
     }
 }
+void init_hard_fixed_parked_cars_by_floor(int floor, Parking places[], int n)
+{
+    for (int i = 0; i < n; i++)
+        places[i].occupied = false;
+
+    const int *placesIdx = NULL;
+    const int *colors = NULL;
+    int count = 0;
+
+    switch (floor) {
+    case 0:
+        placesIdx = hard_fixed_floor_0;
+        colors = hard_fixed_floor_0_colors;
+        count = HARD_FIXED_FLOOR_0_COUNT;
+        break;
+    case 1:
+        placesIdx = hard_fixed_floor_1;
+        colors = hard_fixed_floor_1_colors;
+        count = HARD_FIXED_FLOOR_1_COUNT;
+        break;
+    case 2:
+        placesIdx = hard_fixed_floor_2;
+        colors = hard_fixed_floor_2_colors;
+        count = HARD_FIXED_FLOOR_2_COUNT;
+        break;
+    default:
+        return;
+    }
+
+    for (int i = 0; i < count; i++) {
+        int idx = placesIdx[i];
+        if (idx < n) {
+            places[idx].occupied = true;
+            places[idx].colorIndex = colors[i];
+        }
+    }
+}
 
 void init_fixed_parked_cars_all_floors(Parking places[], int *num_parking_places)
 {
@@ -150,6 +187,20 @@ void init_fixed_parked_cars_all_floors(Parking places[], int *num_parking_places
 
         reload_floor(floor, places, num_parking_places);
         init_fixed_parked_cars_by_floor(floor, places, *num_parking_places);
+    }
+
+    reload_floor(savedFloor, places, num_parking_places);
+    currentFloor = savedFloor;
+    carFloor = savedCarFloor;
+}
+void init_hard_fixed_parked_cars_all_floors(Parking places[], int *num_parking_places)
+{
+    int savedFloor = currentFloor;
+    int savedCarFloor = carFloor;
+
+    for (int floor = 0; floor < 3; floor++) {
+        reload_floor(floor, places, num_parking_places);
+        init_hard_fixed_parked_cars_by_floor(floor, places, *num_parking_places);
     }
 
     reload_floor(savedFloor, places, num_parking_places);

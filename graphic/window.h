@@ -40,7 +40,7 @@ extern Texture2D floor_indicator[3];
 extern Texture2D PC;
 extern Texture2D car_preview;
 
-
+// random mode fixed placing
 extern const int fixed_floor_0[];
 extern const int fixed_floor_0_colors[];
 extern const int FIXED_FLOOR_0_COUNT;
@@ -52,6 +52,22 @@ extern const int FIXED_FLOOR_1_COUNT;
 extern const int fixed_floor_2[];
 extern const int fixed_floor_2_colors[];
 extern const int FIXED_FLOOR_2_COUNT;
+
+// hard mode fixed placing
+extern const int hard_fixed_floor_0[];
+extern const int hard_fixed_floor_0_colors[];
+extern const int HARD_FIXED_FLOOR_0_COUNT;
+
+extern const int hard_fixed_floor_1[];
+extern const int hard_fixed_floor_1_colors[];
+extern const int HARD_FIXED_FLOOR_1_COUNT;
+
+extern const int hard_fixed_floor_2[];
+extern const int hard_fixed_floor_2_colors[];
+extern const int HARD_FIXED_FLOOR_2_COUNT;
+
+extern bool hardFixedApplied;
+
 
 extern bool showParkedMessage;
 extern double parkedMessageStartTime;
@@ -163,6 +179,8 @@ void reset_parking_state(Parking places[], int *num_parking_places);
 bool check_collision_with_parking(float carX, float carY, Parking places[], int n);
 void init_fixed_parked_cars_by_floor(int floor, Parking places[], int n);
 void init_fixed_parked_cars_all_floors(Parking places[], int *num_parking_places);
+void init_hard_fixed_parked_cars_all_floors(Parking places[], int *num_parking_places);
+void init_hard_fixed_parked_cars_by_floor(int floor, Parking places[], int n);
 
 // floor part
 void request_floor_change(int direction, Parking places[], int *num_parking_places);
