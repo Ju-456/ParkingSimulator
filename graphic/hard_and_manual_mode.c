@@ -72,10 +72,10 @@ void init_hard_mode_ai_cars() {
             aiCars[i].colorIndex = aiCarColors[i];
             aiCars[i].active = 1;
             aiSimActive[i] = 1;
-            printf("AI car %d using simulation %d (%s)\n", i, selectedSimulations[i], filepath);
+            // printf("AI car %d using simulation %d (%s)\n", i, selectedSimulations[i], filepath);
         } else {
             aiCars[i].active = 0;
-            printf("Failed to open AI car %d simulation: %s\n", i, filepath);
+            // printf("Failed to open AI car %d simulation: %s\n", i, filepath);
             aiSimActive[i] = 0;
         }
 

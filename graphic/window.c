@@ -51,7 +51,6 @@ int carFloor = 0;
 bool ignoreParkingDetection = false;
 double ignoreUntil = 0.0;
 
-
 bool carParked = false;
 int parkedPlaceIndex = -1;
 int parkedCarColorIndex = -1;
@@ -106,6 +105,12 @@ bool timerActive = false;
 double timerDuration = 20.0; // initial countdown duration (seconds)
 bool gameOverTriggered = false;
 bool timerStoppedAtEnd = false; // flag to stop timer only once when reaching SCREEN_END
+
+// Rules screen state
+double rulesEnterTime = 0.0;   
+bool rulesOpen = false;        
+double rulesSavedRemaining = 0.0; 
+
 // random mode fixed placing
 // Places fixes FLOOR 0
 const int fixed_floor_0[] = {0, 3, 5};
@@ -197,8 +202,13 @@ void draw_timer() {
     if (remaining < 0.0)
         remaining = 0.0; // Don't show negative time
 
+    // save remaining time if rules are open
+    if (rulesOpen) {
+        remaining = rulesSavedRemaining;
+    }
+
     // Check if time has run out (don't trigger game over if the game was already finished)
-    if (remaining <= 0.0 && !gameOverTriggered && !gameFinished) {
+    if (remaining <= 0.0 && !gameOverTriggered && !gameFinished && !rulesOpen) {
         gameOverTriggered = true;
     }
 
@@ -221,6 +231,9 @@ void start_timer() {
     timerDuration = 20.0; // reset to default duration (20s) on start
     gameOverTriggered = false; // reset game over state
     timerStoppedAtEnd = false; 
+    rulesEnterTime = 0.0;
+    rulesOpen = false;
+    rulesSavedRemaining = 0.0;
 }
 
 void stop_timer() {
@@ -484,6 +497,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             }
             currentScreen = SCREEN_END;
         }
+
         if (currentScreen != SCREEN_RULES)
         {
             draw_rules_button(font);
@@ -491,6 +505,22 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
                 CheckCollisionPointRec(mouse, btnRules))
             {
+                // when opening RULES, save remaining time if timer is active
+                if (timerActive) {
+                    double elapsed = GetTime() - timerStartTime;
+                    double countingElapsed = elapsed - 2.0;
+                    if (countingElapsed < 0.0) countingElapsed = 0.0;
+                    double remaining = timerDuration - countingElapsed;
+                    if (remaining < 0.0) remaining = 0.0;
+                    rulesSavedRemaining = remaining;
+                    rulesEnterTime = GetTime();
+                    rulesOpen = true;
+                } else {
+                    rulesSavedRemaining = 0.0;
+                    rulesEnterTime = 0.0;
+                    rulesOpen = false;
+                }
+
                 previousScreen = currentScreen;
                 currentScreen = SCREEN_RULES;
             }
@@ -501,6 +531,9 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
         case SCREEN_RULES:
             {
                 controlsUnlocked = false;
+
+                // if rules are open, we can't lose the game
+                gameOverTriggered = false;
 
                 DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, Fade(BLACK, 0.85f));
 
@@ -647,10 +680,22 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
 
                 if (IsKeyPressed(KEY_ENTER))
                 {
+                    // we recalculate timer start time to account for time spent on RULES
+                    if (timerActive && rulesOpen) {
+                        timerStartTime = GetTime() - ((timerDuration - rulesSavedRemaining) + 2.0);
+                    }
+                    rulesOpen = false;
+
                     if (previousScreen == SCREEN_RULES)
                         currentScreen = SCREEN_MANUAL_PANEL;
                     else
                         currentScreen = previousScreen;
+
+                    if (timerActive &&
+                        (currentScreen == SCREEN_DIRECTION || currentScreen == SCREEN_HARD_DIRECTION))
+                    {
+                        controlsUnlocked = true;
+                    }
                 }
 
             }
@@ -700,7 +745,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
                 init_fixed_parked_cars_all_floors(places, &num_parking_places);
 
                 randomSimulationStarted = true;
-                printf("randomSimulationStarted = %d, simRequested = %d\n", randomSimulationStarted, chosenSim);
+                // printf("randomSimulationStarted = %d, simRequested = %d\n", randomSimulationStarted, chosenSim);
             }
 
             // Start timer when simulation starts moving
@@ -733,7 +778,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
                 stop_timer();
                 controlsUnlocked = false;
                 currentScreen = SCREEN_END;
-                printf("Randow replay finished direction to 'SCREEN_END'\n");
+                // printf("Randow replay finished direction to 'SCREEN_END'\n");
             }
 
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, btnReturn)) {
@@ -970,8 +1015,12 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
         {
             draw_parked_message(font);
         }
-        // Draw timer
-        draw_timer();
+
+        // Draw timer : chrono isn't shown on RULES screen
+        if (currentScreen != SCREEN_RULES) {
+            draw_timer();
+        }
+
         // Draw game over message if triggered
         if (gameOverTriggered) {
             draw_game_over_message(font);

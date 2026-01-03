@@ -37,14 +37,14 @@ void open_new_sim_file_session() {
     build_path(fullpath, SIMDATA_PATH, simFilename);
     simFile = fopen(fullpath, "a");
 
-    printf("New session file : %s\n", fullpath);
+    // printf("New session file : %s\n", fullpath);
 }
 
 void close_sim_file_session() {
     if (simFile) {
         fclose(simFile);
         simFile = NULL;
-        printf("Session closed ! %s\n", simFilename);
+        // printf("Session closed ! %s\n", simFilename);
     }
 }
 
@@ -67,13 +67,13 @@ void request_simulation_start(int sim) {
     simPendingStart = true;
     simRunning = false;
     entranceTriggerTime = GetTime();
-    printf("request_simulation_start = sim=%d; entranceTriggerTime=%.3f\n", sim, entranceTriggerTime);
+    // printf("request_simulation_start = sim=%d; entranceTriggerTime=%.3f\n", sim, entranceTriggerTime);
 }
 
 void select_random_car() {
     static int lastCar = -1;
     int newCar;
-    int prev = lastCar;
+    // int prev = lastCar;
 
     do {
         newCar = rand() % 6;
@@ -82,10 +82,10 @@ void select_random_car() {
     chosenCar = newCar;
     lastCar = newCar;
 
-    if (prev >= 0)
-        printf("chosenCar = %d (previous was %d)\n", chosenCar, prev);
-    else
-        printf("chosenCar = %d\n", chosenCar);
+    // if (prev >= 0)
+    //     printf("chosenCar = %d (previous was %d)\n", chosenCar, prev);
+    // else
+    //     printf("chosenCar = %d\n", chosenCar);
 }
 
 // to apply created  scenarios for a random simu and also for hard mode
@@ -111,13 +111,13 @@ static void open_random_sim_file(int chosenSim, int simMode) {
     replay_fp = fopen(replay_fullpath, "r");
 
     if (!replay_fp) {
-        printf("ERROOOR, can't open : %s\n", replay_fullpath);
+        // printf("ERROOOR, can't open : %s\n", replay_fullpath);
         replay_active = 0;
         return;
     }
 
     replay_active = 1;
-    printf("Random sim opened : %s\n", replay_fullpath);
+    // printf("Random sim opened : %s\n", replay_fullpath);
 }
 
 static int random_sim_read_and_apply() {
