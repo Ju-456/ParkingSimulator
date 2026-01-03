@@ -105,6 +105,7 @@ double timerStartTime = -1.0;
 bool timerActive = false;
 double timerDuration = 20.0; // initial countdown duration (seconds)
 bool gameOverTriggered = false;
+bool timerStoppedAtEnd = false; // flag to stop timer only once when reaching SCREEN_END
 // random mode fixed placing
 // Places fixes FLOOR 0
 const int fixed_floor_0[] = {0, 3, 5};
@@ -219,6 +220,7 @@ void start_timer() {
     timerActive = true;
     timerDuration = 20.0; // reset to default duration (20s) on start
     gameOverTriggered = false; // reset game over state
+    timerStoppedAtEnd = false; 
 }
 
 void stop_timer() {
@@ -476,6 +478,10 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
         handle_station_buttons_click(mouse, controlsUnlocked);
         handle_automatic_opening();
         if (gameFinished && currentScreen != SCREEN_END) {
+            if (!timerStoppedAtEnd) {
+                stop_timer();
+                timerStoppedAtEnd = true;
+            }
             currentScreen = SCREEN_END;
         }
         if (currentScreen != SCREEN_RULES)
@@ -784,6 +790,8 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             if (IsKeyDown(KEY_ENTER)) {
                 currentScreen = SCREEN_MANUAL_PANEL;
                 reset_parking_state(places, &num_parking_places);
+                gameFinished = false;
+                timerStoppedAtEnd = false;
             }
 
             break;
@@ -829,12 +837,13 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
                     reset_parking_state(places, &num_parking_places);
                     stop_timer();
                     gameOverTriggered = false;
+                    gameFinished = false;
                 }
                 break;
             }
 
             if (currentFloor == carFloor) {
-                // Bloquer les mouvements pendant 4 secondes après le stationnement
+                // Bloquer les mouvements pendant 4 secondes apr�s le stationnement
                 double timeSinceParked = GetTime() - parkedTime;
                 if (!carParked || timeSinceParked > 4.0)
                 {
@@ -844,7 +853,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
             }
             if ((IsKeyPressed(KEY_SPACE) || IsKeyDown(KEY_SPACE)) && carParked)
             {
-                // Vérifier que 4 secondes se sont écoulées depuis le stationnement
+                // V�rifier que 4 secondes se sont �coul�es depuis le stationnement
                 double timeSinceParked = GetTime() - parkedTime;
                 if (timeSinceParked > 4.0)
                 {
@@ -856,6 +865,7 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
                 currentScreen = SCREEN_MANUAL_PANEL;
                 reset_parking_state(places, &num_parking_places);
                 stop_timer();
+                gameFinished = false;
             }
             break;
 
@@ -911,18 +921,37 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
                     randomSimulationStarted = false;
                     stop_timer();
                     gameOverTriggered = false;
+                    gameFinished = false;
                 }
                 break;
             }
 
             if (currentFloor == carFloor) {
-                update_car_position(dt, places, num_parking_places);
+                // Bloquer les mouvements pendant 4 secondes après le stationnement
+                double timeSinceParked = GetTime() - parkedTime;
+                if (!carParked || timeSinceParked > 4.0)
+                {
+                    update_car_position(dt, places, num_parking_places);
+                }
                 place_car_at_start_pos();
             }
 
-            float dt_hard = GetFrameTime();
-            update_hard_mode_ai_cars(dt_hard);
-            draw_hard_mode_ai_cars();
+            // Gestion de l'IA (seulement visuelle / collisions)
+            {
+                float dt_hard = GetFrameTime();
+                update_hard_mode_ai_cars(dt_hard);
+                draw_hard_mode_ai_cars();
+            }
+
+            // Sortir de la place après 4s avec [SPACE]
+            if ((IsKeyPressed(KEY_SPACE) || IsKeyDown(KEY_SPACE)) && carParked)
+            {
+                double timeSinceParked = GetTime() - parkedTime;
+                if (timeSinceParked > 4.0)
+                {
+                    release_car(places);
+                }
+            }
 
             if ((CheckCollisionPointRec(mouse, btnReturn) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))) {
                 currentScreen = SCREEN_MANUAL_PANEL;
@@ -931,8 +960,10 @@ void init_window_parking(const char *full_path_json, int num_parking_places, Par
                 hardModeAIInitialized = false;
                 randomSimulationStarted = false;
                 stop_timer();
+                gameFinished = false;
             }
             break;
+
         }
 
         if (carParked && showParkedMessage)

@@ -110,11 +110,18 @@ void update_ai_simulation(float dt, int carIndex) {
 
             // Apply barrier states if they were read
             if (rentState >= 0) {
-                entranceState = rentState;
-                entranceAngle = rentAngle;
                 exitState = rexState;
                 exitAngle = rexAngle;
             }
+
+            #if AI_CONTROLS_BARRIERS
+            // Apply barrier states if they were read
+            if (rentState >= 0) {
+                entranceState = rentState;
+                entranceAngle = rentAngle;
+            }
+            #endif
+
 
             // If AI car is on floor 0 and exit is passable, check if it passed the exit end area and deactivate it
             if (aiCars[carIndex].floor == 0 && exit_is_passable()) {
